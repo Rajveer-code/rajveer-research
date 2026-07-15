@@ -40,6 +40,12 @@ export interface Figure {
   bars: FigureBar[];
 }
 
+/** A real figure from the paper's repo (src/assets/figures/<slug>/<file>). */
+export interface PaperFigure {
+  file: string;
+  caption: string;
+}
+
 export interface Publication {
   slug: string;
   order: number;
@@ -55,6 +61,7 @@ export interface Publication {
   plain: string; // jargon-free explanation for readers new to the field
   flow: FlowStep[]; // method flowchart steps
   figures: Figure[]; // data figures from verified numbers only
+  paperFigures?: PaperFigure[]; // actual publication figures from the repo
   problem: string;
   approach: string;
   findings: string;
@@ -100,6 +107,28 @@ export const publications: Publication[] = [
       { label: "Matched remediation", note: "recalibrate · reweight · retrain — chosen by diagnosis" },
     ],
     figures: [],
+    paperFigures: [
+      {
+        file: "fig1_taxonomy.png",
+        caption:
+          "The failure taxonomy: each shift type maps to the trustworthiness axis it degrades, across all four domains.",
+      },
+      {
+        file: "fig2_shift_bars.png",
+        caption:
+          "The audit, domain by domain: discrimination, calibration, and subgroup reliability measured under each deployment shift.",
+      },
+      {
+        file: "fig3_headline_scatter.png",
+        caption:
+          "The headline result: deployment damage organised by shift type rather than shift magnitude across the shift points.",
+      },
+      {
+        file: "fig5_remediation.png",
+        caption:
+          "The remediation ladder: label-cheap recalibration repairs calibration everywhere; discrimination requires more.",
+      },
+    ],
     problem:
       "ML systems are audited domain by domain, and deployment failures are usually attributed to how large the distribution shift is. Whether the kind of shift predicts the kind of failure had not been tested across domains under one protocol.",
     approach:
@@ -158,6 +187,18 @@ export const publications: Publication[] = [
         ],
       },
     ],
+    paperFigures: [
+      {
+        file: "01_centralised_roc.png",
+        caption:
+          "ROC curves for the centralized model — the discrimination that external validation then puts to the test.",
+      },
+      {
+        file: "02_centralised_fairness_age.png",
+        caption:
+          "The age-fairness audit: performance split by age group, where the headline number hides the failure.",
+      },
+    ],
     problem:
       "Clinical risk models are usually reported with internal validation only. Do the numbers survive a different population, survey instrument, and label definition?",
     approach:
@@ -214,6 +255,23 @@ export const publications: Publication[] = [
         ],
       },
     ],
+    paperFigures: [
+      {
+        file: "10_external_validation_roc.png",
+        caption:
+          "External validation on 1.28M BRFSS records: federated and centralized models compared where it counts.",
+      },
+      {
+        file: "06_fairness_age_comparison.png",
+        caption:
+          "Elderly–young fairness across training strategies — the axis most clinical papers never report.",
+      },
+      {
+        file: "05_dp_tradeoff.png",
+        caption:
+          "The privacy–utility trade-off: DP-SGD across the ε sweep, including the collapse the paper reports plainly.",
+      },
+    ],
     problem:
       "Federated learning is sold on privacy. But does a federated clinical model also generalise externally, treat age groups fairly, and stay calibrated — simultaneously?",
     approach:
@@ -266,6 +324,23 @@ export const publications: Publication[] = [
           { label: "Reddit", value: 0.196, display: "0.196–0.229" },
           { label: "Twitter", value: 0.499, display: "0.499–0.542", accent: true },
         ],
+      },
+    ],
+    paperFigures: [
+      {
+        file: "figure1_forest_plot.png",
+        caption:
+          "Forest plot of cross-platform AUC with DeLong confidence intervals across models and platforms.",
+      },
+      {
+        file: "figure2_platform_degradation.png",
+        caption:
+          "Degradation by platform: what a near-perfect in-platform model loses on Reddit and Twitter.",
+      },
+      {
+        file: "figure3_calibration_curves.png",
+        caption:
+          "Calibration curves in-domain versus cross-platform — confidence becomes dishonest under shift.",
       },
     ],
     problem:
@@ -375,6 +450,23 @@ export const publications: Publication[] = [
         ],
       },
     ],
+    paperFigures: [
+      {
+        file: "fig2_dml_results.png",
+        caption:
+          "Double-machine-learning estimates of the conditional approval differential across specifications.",
+      },
+      {
+        file: "fig3_cate_distribution.png",
+        caption:
+          "The distribution of individual-level estimated effects: wide heterogeneity, overwhelmingly negative.",
+      },
+      {
+        file: "fig5_shap_attribution.png",
+        caption:
+          "SHAP attribution over the causal-forest estimates: what drives who bears the penalty.",
+      },
+    ],
     problem:
       "Average disparity estimates hide distribution: which applicant profiles carry the largest conditional racial approval penalty, and is the mechanism applicant- or lender-controlled?",
     approach:
@@ -444,6 +536,23 @@ export const publications: Publication[] = [
         ],
       },
     ],
+    paperFigures: [
+      {
+        file: "difficulty_lineplot.png",
+        caption:
+          "Accuracy by item difficulty: where models separate as questions get harder.",
+      },
+      {
+        file: "heatmap.png",
+        caption:
+          "The model × task-type error landscape across regulatory interpretation, numerical, contradiction, and temporal reasoning.",
+      },
+      {
+        file: "inter_task_correlation.png",
+        caption:
+          "Inter-task correlations: strength on one regulatory skill does not guarantee another.",
+      },
+    ],
     problem:
       "Financial NLP benchmarks are Western-heavy. How do frontier LLMs handle SEBI/RBI regulatory text with dense amendment chains, jurisdiction-specific terminology, and numerical thresholds?",
     approach:
@@ -494,6 +603,23 @@ export const publications: Publication[] = [
           { label: "Naive t-test", value: 11.8, display: "11.8%", accent: true },
           { label: "Full ICGDF gate", value: 0, display: "0.0%" },
         ],
+      },
+    ],
+    paperFigures: [
+      {
+        file: "fig03_fold_level_ic.png",
+        caption:
+          "Fold-level information coefficients across all 12 walk-forward folds: the gate never opens.",
+      },
+      {
+        file: "fig06_permutation_ic.png",
+        caption:
+          "The permutation test: the observed IC sits squarely inside the no-skill distribution.",
+      },
+      {
+        file: "fig02_power_analysis.png",
+        caption:
+          "Power analysis: the study could have detected a much smaller real signal than practitioners claim.",
       },
     ],
     problem:

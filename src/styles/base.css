@@ -14,8 +14,10 @@ html {
   -webkit-text-size-adjust: none;
 }
 
+html { background: var(--paper); }
+
 body {
-  background: var(--paper);
+  background: transparent; /* the ambient field sits between html bg and content */
   color: var(--ink);
   font-family: var(--font-serif);
   font-size: var(--text-base);
@@ -110,6 +112,17 @@ html.js [data-hero] {
 
 html.js [data-reveal] {
   transform: translateY(24px);
+}
+
+/* Ambient data field — behind all content, above the page background */
+.site-field {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.6;
 }
 
 /* Ghost section numerals — oversized outlined indices, homepage only */

@@ -64,11 +64,11 @@ export function initMotion(): void {
 }
 
 /**
- * Hero "data field": drifting sample points, hairline links when close,
- * a few ultramarine signals. Runs on gsap.ticker, only while hero is visible.
+ * Site-wide ambient "data field": drifting sample points, hairline links when
+ * close, a few ultramarine signals. Fixed behind all content on every page.
  */
 function heroField(): void {
-  const canvas = document.querySelector<HTMLCanvasElement>("#hero-field");
+  const canvas = document.querySelector<HTMLCanvasElement>("#site-field");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -77,27 +77,25 @@ function heroField(): void {
   let w = 0;
   let h = 0;
   const resize = () => {
-    w = canvas.offsetWidth;
-    h = canvas.offsetHeight;
+    w = window.innerWidth;
+    h = window.innerHeight;
     canvas.width = w * dpr;
     canvas.height = h * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   };
   resize();
 
-  const N = 34;
-  const LINK = 110;
+  const N = 46;
+  const LINK = 120;
   const pts = Array.from({ length: N }, (_, i) => ({
     x: Math.random() * 1,
     y: Math.random() * 1,
-    vx: (Math.random() - 0.5) * 0.00045,
-    vy: (Math.random() - 0.5) * 0.00045,
+    vx: (Math.random() - 0.5) * 0.0013,
+    vy: (Math.random() - 0.5) * 0.0013,
     signal: i % 9 === 0,
   }));
 
-  let active = true;
   const draw = () => {
-    if (!active) return;
     ctx.clearRect(0, 0, w, h);
     ctx.lineWidth = 1;
     for (let i = 0; i < N; i++) {
@@ -132,16 +130,6 @@ function heroField(): void {
   fieldTicker = draw;
   gsap.ticker.add(draw);
   window.addEventListener("resize", resize, { passive: true });
-
-  ScrollTrigger.create({
-    trigger: canvas,
-    start: "top bottom",
-    end: "bottom top",
-    onToggle: (self) => {
-      active = self.isActive;
-    },
-    onLeave: () => ctx.clearRect(0, 0, w, h),
-  });
 }
 
 /** Flagship pipeline stages cascade in one after another. */

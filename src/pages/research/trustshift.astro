@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import MethodFlow from "../../components/MethodFlow.astro";
+import PaperFigures from "../../components/PaperFigures.astro";
 import { publications, THEME_LABELS } from "../../data/research";
 
 /**
@@ -284,6 +285,12 @@ const fmt = (n: number) => n.toFixed(3);
           </p>
         </div>
       </section>
+
+      {
+        pub.paperFigures && pub.paperFigures.length > 0 && (
+          <PaperFigures slug={pub.slug} figures={pub.paperFigures} />
+        )
+      }
 
       <section class="meta container" aria-label="Cross-domain meta-analysis" data-reveal>
         <p class="label-mono section-eyebrow">Cross-domain meta-analysis</p>

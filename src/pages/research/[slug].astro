@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import MethodFlow from "../../components/MethodFlow.astro";
 import FigureBars from "../../components/FigureBars.astro";
+import PaperFigures from "../../components/PaperFigures.astro";
 import { publications, THEME_LABELS } from "../../data/research";
 
 export function getStaticPaths() {
@@ -75,6 +76,12 @@ const fiveMinute = [
           }
         </div>
       </section>
+
+      {
+        pub.paperFigures && pub.paperFigures.length > 0 && (
+          <PaperFigures slug={pub.slug} figures={pub.paperFigures} />
+        )
+      }
 
       <section class="five container" aria-label="The paper in five minutes">
         <p class="label-mono section-eyebrow" data-reveal>In five minutes</p>

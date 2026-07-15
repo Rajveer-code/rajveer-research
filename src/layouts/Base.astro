@@ -61,6 +61,8 @@ const personLd = {
     <ClientRouter />
   </head>
   <body>
+    <canvas class="site-field" id="site-field" aria-hidden="true" transition:persist
+    ></canvas>
     <slot />
     <script>
       import { initMotion, cleanupMotion } from "../scripts/motion";
