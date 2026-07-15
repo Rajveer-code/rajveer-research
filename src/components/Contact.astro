@@ -34,6 +34,9 @@ import { identity } from "../data/research";
           ))
         }
       </ul>
+      <a class="portfolio-btn ui-sans" href="https://rajveer-code-github-io.vercel.app/">
+        Engineering portfolio ↗
+      </a>
     </div>
   </div>
 </section>
@@ -99,6 +102,25 @@ import { identity } from "../data/research";
   .contact-link:hover .label-mono { color: var(--signal); }
 
   .contact-arrow { color: var(--ink-3); }
+
+  .portfolio-btn {
+    display: inline-block;
+    margin-top: var(--space-6);
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-xs);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-2);
+    color: var(--ink-2);
+    text-decoration: none;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .portfolio-btn:hover {
+    color: var(--signal);
+    border-color: var(--signal);
+  }
 
   .footer {
     border-top: var(--rule);

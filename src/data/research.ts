@@ -336,7 +336,7 @@ export const publications: Publication[] = [
       { value: "74.6%", label: "of gap within-lender" },
       { value: "≈126,000", label: "fewer annual approvals at scale" },
     ],
-    links: [],
+    links: [{ label: "SSRN preprint", href: "https://ssrn.com/abstract=6334459" }],
     caveat:
       "HMDA lacks credit scores/assets; estimates framed as upper bounds on conditional differentials.",
   },
@@ -389,6 +389,7 @@ export const publications: Publication[] = [
       { value: "90.7%", label: "of Black applicants with negative effect" },
     ],
     links: [
+      { label: "SSRN preprint", href: "https://ssrn.com/abstract=6984959" },
       {
         label: "Code",
         href: "https://github.com/Rajveer-code",
@@ -509,6 +510,7 @@ export const publications: Publication[] = [
       { value: "11.8% → 0%", label: "false-positive rate, naive test → ICGDF" },
     ],
     links: [
+      { label: "SSRN preprint", href: "https://ssrn.com/abstract=6742700" },
       {
         label: "Code",
         href: "https://github.com/Rajveer-code",
@@ -522,7 +524,7 @@ export const publications: Publication[] = [
       "Overcoming the Transaction Cost Trap: Cross-Sectional Conviction Ranking in Machine Learning Equity Prediction",
     shortTitle: "Conviction Ranking",
     authors: "Rajveer Singh Pall",
-    status: "Working paper",
+    status: "Working paper — SSRN",
     statusKind: "working",
     year: "2026",
     themes: ["finance", "deployment"],
@@ -562,7 +564,7 @@ export const publications: Publication[] = [
       { value: "24.2 bps", label: "break-even cost, 4.8× assumed" },
       { value: "0.0197", label: "mean daily IC (p = 0.034)" },
     ],
-    links: [],
+    links: [{ label: "SSRN preprint", href: "https://ssrn.com/abstract=6985101" }],
     caveat: "Survivor-selected tech universe; regime-dependent. Not investment advice.",
   },
 ];

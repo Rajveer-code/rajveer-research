@@ -72,9 +72,16 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
 
   .pub {
     padding-block: var(--space-12);
+    padding-inline: var(--space-4);
+    margin-inline: calc(-1 * var(--space-4));
     border-top: var(--rule);
     display: grid;
     gap: var(--space-3);
+    transition: background var(--dur-med) var(--ease-out);
+  }
+
+  .pub:hover {
+    background: linear-gradient(90deg, var(--signal-wash), transparent 65%);
   }
 
   .pub:last-child { border-bottom: var(--rule); }
