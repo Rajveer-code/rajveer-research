@@ -1,0 +1,36 @@
+---
+import "@fontsource-variable/newsreader";
+import "@fontsource-variable/newsreader/wght-italic.css";
+import "@fontsource-variable/instrument-sans";
+import "@fontsource/fragment-mono";
+import "../styles/tokens.css";
+import "../styles/base.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = "Rajveer Singh Pall — AI researcher studying trustworthy machine learning under real-world deployment.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <slot />
+    <script>
+      import { initMotion } from "../scripts/motion";
+      initMotion();
+    </script>
+  </body>
+</html>

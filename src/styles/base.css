@@ -1,0 +1,123 @@
+/* ---------------------------------------------------------------------------
+   Base — reset + document defaults. Consumes tokens.css only.
+--------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+}
+
+h1, h2, h3, h4 {
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-2xl); }
+h2 { font-size: var(--text-xl); }
+h3 { font-size: var(--text-lg); }
+h4 { font-size: var(--text-md); }
+
+p { max-width: var(--width-prose); }
+
+a {
+  color: var(--signal);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+a:hover { color: var(--signal-deep); }
+
+img, svg, video, canvas {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+code, pre, kbd {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--paper);
+}
+
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}
+
+/* ---- Shared primitives ---- */
+
+/* Uppercase mono label — section eyebrows, data tags, statuses */
+.label-mono {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* UI sans — nav, buttons, metadata rows */
+.ui-sans {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  letter-spacing: 0.01em;
+}
+
+.container {
+  max-width: var(--width-content);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.container--wide { max-width: var(--width-wide); }
+.container--prose { max-width: calc(var(--width-prose) + 2 * var(--gutter)); }
+
+/* Scroll-reveal default state — motion.ts animates in; reduced-motion shows instantly */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

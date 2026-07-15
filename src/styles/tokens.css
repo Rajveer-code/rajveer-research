@@ -1,0 +1,97 @@
+/* ---------------------------------------------------------------------------
+   Design tokens — "Laboratory Paper"
+   Light, archival-scientific. One accent. Hairline rules. Serif voice.
+   All components consume these variables; no raw hex in components.
+--------------------------------------------------------------------------- */
+
+:root {
+  color-scheme: light;
+
+  /* ---- Color: field ---- */
+  --paper: #fbfaf7;          /* page field — warm archival white */
+  --paper-raised: #ffffff;   /* cards, figures */
+  --paper-recessed: #f3f1ea; /* wells, code blocks, table stripes */
+
+  /* ---- Color: ink ---- */
+  --ink: #17191c;            /* primary text — 15.6:1 on paper */
+  --ink-2: #4a4e55;          /* secondary text — 7.6:1 */
+  --ink-3: #797d84;          /* tertiary, captions — 4.6:1 */
+
+  /* ---- Color: rules ---- */
+  --hairline: #e4e1d8;
+  --hairline-strong: #c8c5ba;
+
+  /* ---- Color: signal (single accent) ---- */
+  --signal: #2742d6;         /* ultramarine — links, active, data emphasis; 8.0:1 */
+  --signal-deep: #1c2f9e;    /* hover / pressed */
+  --signal-wash: #eef0fb;    /* tint background */
+
+  /* ---- Color: verified (reserved: accepted/presented status only) ---- */
+  --verified: #2f6b4f;       /* 6.0:1 on paper */
+  --verified-wash: #ebf2ee;
+
+  /* ---- Typography: families (self-hosted) ---- */
+  --font-serif: "Newsreader Variable", "Newsreader", Georgia, "Times New Roman", serif;
+  --font-sans: "Instrument Sans Variable", "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Fragment Mono", "IBM Plex Mono", "Consolas", monospace;
+
+  /* ---- Typography: fluid scale ---- */
+  --text-xs: 0.75rem;                                   /* 12 — mono labels */
+  --text-sm: 0.875rem;                                  /* 14 — captions, UI */
+  --text-base: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem); /* 17→19 — reading */
+  --text-md: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);   /* 20→24 — lead, h4 */
+  --text-lg: clamp(1.5rem, 1.3rem + 0.9vw, 2.125rem);   /* 24→34 — h3 */
+  --text-xl: clamp(2rem, 1.6rem + 1.8vw, 3.25rem);      /* 32→52 — h2 */
+  --text-2xl: clamp(2.625rem, 2rem + 3vw, 4.75rem);     /* 42→76 — h1 */
+  --text-display: clamp(3rem, 2.1rem + 4.8vw, 6.75rem); /* 48→108 — hero */
+
+  /* ---- Typography: rhythm ---- */
+  --leading-display: 1.02;
+  --leading-tight: 1.14;
+  --leading-snug: 1.35;
+  --leading-body: 1.62;
+  --tracking-display: -0.022em;
+  --tracking-tight: -0.012em;
+  --tracking-label: 0.08em;   /* uppercase mono/sans labels */
+
+  /* ---- Spacing: 4px rhythm ---- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  --space-section: clamp(6rem, 4rem + 8vw, 11rem);
+
+  /* ---- Layout ---- */
+  --width-prose: 42rem;      /* ~70ch reading measure */
+  --width-content: 68rem;
+  --width-wide: 84rem;
+  --gutter: clamp(1.25rem, 4vw, 3rem);
+
+  /* ---- Shape ---- */
+  --radius-1: 2px;
+  --radius-2: 6px;
+  --rule: 1px solid var(--hairline);
+  --rule-strong: 1px solid var(--hairline-strong);
+
+  /* ---- Elevation (used sparingly — figures/cards on hover) ---- */
+  --shadow-1: 0 1px 2px rgb(23 25 28 / 0.05), 0 4px 16px rgb(23 25 28 / 0.05);
+  --shadow-2: 0 2px 4px rgb(23 25 28 / 0.06), 0 12px 32px rgb(23 25 28 / 0.08);
+
+  /* ---- Motion ---- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);      /* expo-out: entrances */
+  --ease-inout: cubic-bezier(0.76, 0, 0.24, 1);   /* quart: state changes */
+  --dur-fast: 180ms;
+  --dur-med: 320ms;
+  --dur-slow: 700ms;
+
+  /* ---- Z-index ---- */
+  --z-nav: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+}
