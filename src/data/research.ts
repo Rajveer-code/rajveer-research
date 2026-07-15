@@ -21,6 +21,25 @@ export interface KeyResult {
   label: string;
 }
 
+export interface FlowStep {
+  label: string;
+  note: string;
+}
+
+export interface FigureBar {
+  label: string;
+  value: number; // bar length (abs), zero-based scale
+  display: string; // printed verbatim — may be a range
+  accent?: boolean; // ultramarine emphasis; others render neutral gray
+}
+
+export interface Figure {
+  title: string;
+  max: number; // scale maximum (bars are value/max wide, zero-based)
+  note?: string;
+  bars: FigureBar[];
+}
+
 export interface Publication {
   slug: string;
   order: number;
@@ -33,6 +52,9 @@ export interface Publication {
   year: string;
   themes: Theme[];
   oneLiner: string;
+  plain: string; // jargon-free explanation for readers new to the field
+  flow: FlowStep[]; // method flowchart steps
+  figures: Figure[]; // data figures from verified numbers only
   problem: string;
   approach: string;
   findings: string;
@@ -68,6 +90,16 @@ export const publications: Publication[] = [
     themes: ["trustworthy-ml", "deployment", "healthcare", "nlp-llm", "fairness"],
     oneLiner:
       "One pre-registered audit across four dissimilar domains: the type of distribution shift — not its magnitude — determines which axis of trustworthiness fails at deployment.",
+    plain:
+      "A machine-learning model is trained on yesterday's data and then released into a world that keeps changing. Everyone knows performance can drop — but not all drops are alike. Sometimes the model still ranks people correctly but its probability estimates become dishonest; sometimes it fails one demographic group; sometimes it collapses entirely. This paper studies four completely different fields at once — medicine, social-media language, mortgage lending, and network attacks — under one identical audit, and finds that the kind of change in the world, not the amount of change, decides what breaks. Better still, the kind is detectable in advance, from unlabeled data, so the right repair can be chosen before anyone is harmed.",
+    flow: [
+      { label: "Deployment shift", note: "one trained model per domain meets a changed population" },
+      { label: "Three label-free probes", note: "prevalence shift · domain-classifier AUC · reweighting residual" },
+      { label: "Shift-type diagnosis", note: "label, covariate, or concept shift — before outcomes arrive" },
+      { label: "Failure taxonomy", note: "which axis breaks: discrimination, calibration, or subgroups" },
+      { label: "Matched remediation", note: "recalibrate · reweight · retrain — chosen by diagnosis" },
+    ],
+    figures: [],
     problem:
       "ML systems are audited domain by domain, and deployment failures are usually attributed to how large the distribution shift is. Whether the kind of shift predicts the kind of failure had not been tested across domains under one protocol.",
     approach:
@@ -92,7 +124,7 @@ export const publications: Publication[] = [
   },
   {
     slug: "diabetes-external-validation",
-    order: 2,
+    order: 6,
     title:
       "Comprehensive Evaluation of Machine Learning for Type 2 Diabetes Risk Prediction: Large-Scale External Validation and Fairness Analysis",
     shortTitle: "Diabetes External Validation",
@@ -104,6 +136,28 @@ export const publications: Publication[] = [
     themes: ["healthcare", "fairness", "deployment"],
     oneLiner:
       "Internally validated diabetes models lose discrimination and fairness when externally validated on 1.28M records — age subgroups suffer most.",
+    plain:
+      "A disease-risk model that shines on its home dataset can still mislead in the real world. We trained a standard diabetes risk model the careful way — strict cross-validation, tuned hyperparameters — and then did what most papers skip: tested it on 1.28 million people from a completely different national survey. Overall accuracy dropped about ten percent. Worse, the drop was not shared equally: for people over 60 the model degrades far more than for the young — a fairness failure that the single headline number completely hides.",
+    flow: [
+      { label: "Develop carefully", note: "NHANES cohort (15,685) · nested cross-validation · Bayesian tuning" },
+      { label: "Explain", note: "SHAP attribution over eight non-laboratory predictors" },
+      { label: "Externally validate", note: "BRFSS, 1,285,783 records — different survey, different population" },
+      { label: "Audit subgroups", note: "age, sex, BMI — with DeLong confidence intervals" },
+      { label: "Report to standard", note: "TRIPOD-AI checklist" },
+    ],
+    figures: [
+      {
+        title: "AUC — where the model quietly fails",
+        max: 1,
+        note: "External validation costs ~10% overall; adults over 60 lose far more (gap 0.135, p < 0.001).",
+        bars: [
+          { label: "Internal (NHANES)", value: 0.794, display: "0.794" },
+          { label: "External (BRFSS)", value: 0.717, display: "0.717" },
+          { label: "External, age 18–39", value: 0.742, display: "0.742" },
+          { label: "External, age ≥60", value: 0.607, display: "0.607", accent: true },
+        ],
+      },
+    ],
     problem:
       "Clinical risk models are usually reported with internal validation only. Do the numbers survive a different population, survey instrument, and label definition?",
     approach:
@@ -128,7 +182,7 @@ export const publications: Publication[] = [
   },
   {
     slug: "federated-diabetes",
-    order: 3,
+    order: 5,
     title:
       "Privacy-Preserving Federated Learning for Diabetes Risk Prediction Across Demographically Heterogeneous Hospital Nodes",
     shortTitle: "Federated Diabetes",
@@ -139,6 +193,27 @@ export const publications: Publication[] = [
     themes: ["healthcare", "privacy", "fairness", "deployment"],
     oneLiner:
       "Federated diabetes screening audited on four deployability axes at once — generalisation, fairness, calibration, and privacy — not just accuracy.",
+    plain:
+      "Hospitals cannot share patient records, so how do they train one model together? Federated learning sends the model to the data instead of the data to a server. This paper checks what federated papers usually don't: whether the jointly trained model still works on a different population of 1.28 million people, whether it treats the elderly fairly, whether its probabilities are honest, and whether formal privacy protection actually holds. Three of the four go surprisingly well — the federated model beats the centralized one externally. The fourth is an honest negative: differential privacy destroys the model at realistic settings, and the paper says so plainly.",
+    flow: [
+      { label: "Split realistically", note: "three demographically unequal simulated hospital nodes" },
+      { label: "Train federated", note: "FedAvg · FedProx · FedNova · SCAFFOLD vs centralized controls" },
+      { label: "Validate externally", note: "1.28M BRFSS records — a population no node ever saw" },
+      { label: "Audit fairness + calibration", note: "elderly–young gap · ECE with recalibration ladder" },
+      { label: "Stress privacy", note: "DP-SGD ε-sweep — where utility survives, and where it collapses" },
+    ],
+    figures: [
+      {
+        title: "External AUC on 1.28M unseen records",
+        max: 1,
+        note: "The federated model generalises better than both centralized controls.",
+        bars: [
+          { label: "FedAvg (federated)", value: 0.757, display: "0.757", accent: true },
+          { label: "Centralized, same architecture", value: 0.749, display: "0.749" },
+          { label: "Centralized XGBoost", value: 0.7, display: "0.700" },
+        ],
+      },
+    ],
     problem:
       "Federated learning is sold on privacy. But does a federated clinical model also generalise externally, treat age groups fairly, and stay calibrated — simultaneously?",
     approach:
@@ -162,7 +237,7 @@ export const publications: Publication[] = [
   },
   {
     slug: "cpfe",
-    order: 4,
+    order: 7,
     title:
       "Cross-Platform Generalisation Failure in Mental Health NLP: A Five-Axis Fairness Audit of Transformer Models on Social Media",
     shortTitle: "CPFE — Mental-Health NLP",
@@ -173,6 +248,26 @@ export const publications: Publication[] = [
     themes: ["nlp-llm", "fairness", "healthcare", "deployment"],
     oneLiner:
       "Mental-health classifiers that look near-perfect in-platform collapse across platforms — on discrimination, calibration, equity, and even their explanations.",
+    plain:
+      "Software that scans social-media posts for signs of depression or anxiety is usually trained and tested on a single platform, where it looks near-perfect. We took such models — AUC above 0.98 — and simply moved them to Reddit and Twitter. Accuracy collapsed by a third. Their confidence scores became badly dishonest. Fairness metrics failed for exactly the classes that matter clinically. And the words the models relied on changed almost completely from platform to platform — the model was never reading what its developers thought it was reading.",
+    flow: [
+      { label: "Train in-platform", note: "transformer classifiers, 35,556 posts, five seeds" },
+      { label: "Audit on five axes", note: "discrimination · calibration · significance · equity · attribution" },
+      { label: "Cross platforms", note: "same models, Reddit and Twitter language" },
+      { label: "Attempt repair", note: "temperature scaling fixes calibration only; fine-tuning recovers more" },
+    ],
+    figures: [
+      {
+        title: "Calibration error (ECE) as the platform changes",
+        max: 0.55,
+        note: "Bars drawn at the lower bound of each reported range — the conservative reading.",
+        bars: [
+          { label: "Home platform", value: 0.056, display: "0.056–0.060" },
+          { label: "Reddit", value: 0.196, display: "0.196–0.229" },
+          { label: "Twitter", value: 0.499, display: "0.499–0.542", accent: true },
+        ],
+      },
+    ],
     problem:
       "Mental-health NLP models report AUCs near 0.99 on one platform. What survives when the same model meets Reddit or Twitter language?",
     approach:
@@ -196,7 +291,7 @@ export const publications: Publication[] = [
   },
   {
     slug: "mortgage-disparities",
-    order: 5,
+    order: 3,
     title:
       "Persistent Racial Disparities in U.S. Mortgage Approval: Evidence from 42 Million Applications, 2020–2024",
     shortTitle: "Mortgage Disparities",
@@ -207,6 +302,27 @@ export const publications: Publication[] = [
     themes: ["fairness", "causal", "deployment"],
     oneLiner:
       "The public-data Black–White mortgage approval gap at national scale: how large, where it lives, and how it responds to institutional boundaries.",
+    plain:
+      "Every U.S. mortgage application leaves a public record. Reading all 42 million of them from 2020–2024, Black applicants are approved about 15 percentage points less often than White applicants. This paper measures that gap carefully: most of it (68%) cannot be explained by anything visible in the public data, and three-quarters of it lives inside individual lenders rather than between them. Two natural experiments — an insurance-driven threshold at 80% loan-to-value, and the Federal Reserve's 2022 tightening — each widen the gap further. The paper never claims to prove intent; it maps the scale and the structure.",
+    flow: [
+      { label: "Assemble", note: "42,323,519 applications, 5,500+ lenders, 2020–2024" },
+      { label: "Reweight", note: "DiNardo–Fortin–Lemieux: compare statistically similar applicants" },
+      { label: "Look within lenders", note: "fixed effects — is it between institutions, or inside them?" },
+      { label: "Natural experiments", note: "RDD at the 80% LTV insurance boundary · DiD around 2022 tightening" },
+      { label: "Bound the unknown", note: "partial identification calibrated to consumer-finance data" },
+    ],
+    figures: [
+      {
+        title: "Black–White approval gap in percentage points",
+        max: 17,
+        note: "74.6% of the national gap sits within individual lenders; scale ≈ 126,000 fewer approvals per year.",
+        bars: [
+          { label: "National raw gap", value: 14.95, display: "14.95 pp", accent: true },
+          { label: "Midwest regional mean", value: 16.1, display: "16.1 pp" },
+          { label: "West regional mean", value: 9.3, display: "9.3 pp" },
+        ],
+      },
+    ],
     problem:
       "How large is the observable racial approval gap in U.S. mortgage lending, how much sits within lenders, and what do quasi-experimental boundaries reveal about its structure?",
     approach:
@@ -226,7 +342,7 @@ export const publications: Publication[] = [
   },
   {
     slug: "cate-hmda",
-    order: 6,
+    order: 2,
     title:
       "Who Bears the Burden? Heterogeneous Racial Approval Differentials in U.S. Mortgage Lending: Causal Forest DML on 42 Million HMDA Applications",
     shortTitle: "CATE — Mortgage Lending",
@@ -237,6 +353,28 @@ export const publications: Publication[] = [
     themes: ["causal", "fairness", "trustworthy-ml"],
     oneLiner:
       "Not whether an average penalty exists, but who bears it — and through which underwriting channel.",
+    plain:
+      "Knowing the average approval gap is not enough — averages hide who actually pays. Using methods from modern causal inference (the same family behind clinical-trial analysis), this paper estimates the approval penalty for each applicant profile across 42 million mortgage applications. The distribution is wide: nine in ten Black applicants face some estimated penalty, and the decisive factor is not the applicant but the process — applications handled by human underwriters carry more than double the penalty of those decided by automated systems. That points the fairness question at something a regulator can act on: how applications are routed.",
+    flow: [
+      { label: "Engineer at scale", note: "42M HMDA applications → 2M/1.5M estimation samples" },
+      { label: "Isolate the differential", note: "double machine learning, LightGBM nuisances, 5-fold cross-fitting" },
+      { label: "Map who bears it", note: "causal forest estimates the penalty per applicant profile" },
+      { label: "Find the mechanism", note: "manual vs automated underwriting · same lender, same year" },
+      { label: "Attack the result", note: "placebo shuffles · Oster bounds · Cinelli–Hazlett sensitivity" },
+    ],
+    figures: [
+      {
+        title: "Conditional approval penalty by underwriting channel",
+        max: 15,
+        note: "Bar length = size of the estimated Black–White differential (all negative). The channel, not the applicant, is decisive.",
+        bars: [
+          { label: "Manual underwriting", value: 14.79, display: "−14.79 pp", accent: true },
+          { label: "Pooled (all channels)", value: 9.39, display: "−9.39 pp" },
+          { label: "Same lender, same year", value: 7.13, display: "−7.13 pp" },
+          { label: "Automated systems", value: 6.17, display: "−6.17 pp" },
+        ],
+      },
+    ],
     problem:
       "Average disparity estimates hide distribution: which applicant profiles carry the largest conditional racial approval penalty, and is the mechanism applicant- or lender-controlled?",
     approach:
@@ -261,7 +399,7 @@ export const publications: Publication[] = [
   },
   {
     slug: "indiafinbench",
-    order: 7,
+    order: 4,
     title:
       "IndiaFinBench: An Evaluation Benchmark for Large Language Model Performance on Indian Financial Regulatory Text",
     shortTitle: "IndiaFinBench",
@@ -272,6 +410,39 @@ export const publications: Publication[] = [
     themes: ["nlp-llm", "trustworthy-ml", "finance"],
     oneLiner:
       "The first expert-annotated benchmark for LLM reasoning over Indian financial regulation — where numerical thresholds and amendment chains break strong models.",
+    plain:
+      "Large language models are increasingly asked legal and financial questions, but nearly all of their testing uses American and European text. This benchmark tests twelve leading models on India's actual financial rulebook — SEBI and RBI regulations spanning 1992 to 2026 — with 406 questions written and verified by hand. The questions require exactly what real compliance work requires: interpreting rules, calculating with legal thresholds, spotting contradictions, and tracking rules that changed over time. The clearest finding: numbers are the hardest. On numerical reasoning alone, model scores spread by 36 points.",
+    flow: [
+      { label: "Curate the corpus", note: "192 SEBI/RBI regulatory documents, 1992–2026" },
+      { label: "Write expert QA", note: "406 items: interpretation · numerical · contradiction · temporal" },
+      { label: "Validate annotations", note: "model-based and human cross-checks, agreement reported" },
+      { label: "Evaluate 12 LLMs", note: "strict scoring plus judge-corrected audit (format vs reasoning)" },
+      { label: "Ship it open", note: "public dataset, leaderboard, and live retrieval-augmented demo" },
+    ],
+    figures: [
+      {
+        title: "What the benchmark asks (items per task type)",
+        max: 174,
+        bars: [
+          { label: "Regulatory interpretation", value: 174, display: "174" },
+          { label: "Numerical reasoning", value: 92, display: "92", accent: true },
+          { label: "Temporal reasoning", value: 78, display: "78" },
+          { label: "Contradiction detection", value: 62, display: "62" },
+        ],
+      },
+      {
+        title: "Strict accuracy, selected models (%)",
+        max: 100,
+        note: "Numerical reasoning alone spreads models by 35.9 points.",
+        bars: [
+          { label: "Gemini 2.5 Flash", value: 89.7, display: "89.7", accent: true },
+          { label: "Qwen3-32B", value: 85.5, display: "85.5" },
+          { label: "LLaMA-3.3-70B", value: 83.7, display: "83.7" },
+          { label: "Llama 4 Scout 17B", value: 83.3, display: "83.3" },
+          { label: "Gemma 4 E4B", value: 70.4, display: "70.4" },
+        ],
+      },
+    ],
     problem:
       "Financial NLP benchmarks are Western-heavy. How do frontier LLMs handle SEBI/RBI regulatory text with dense amendment chains, jurisdiction-specific terminology, and numerical thresholds?",
     approach:
@@ -304,6 +475,26 @@ export const publications: Publication[] = [
     themes: ["finance", "deployment", "trustworthy-ml"],
     oneLiner:
       "A deployment gate for financial ML — and the discipline to report that it stayed closed.",
+    plain:
+      "Most trading-model papers report wins. This one builds the exam a model must pass before it is allowed to trade real money — and then reports that its own model failed that exam twelve times out of twelve. That is the contribution: a statistical gate that separates 'looks profitable in a backtest' from 'provable skill'. A naive statistical test would have green-lit a skill-less model 11.8% of the time; the full gate never did. One more twist: the model's probability estimates were nearly perfect even though it had zero predictive skill — proof that a well-calibrated model is not the same as a deployable one.",
+    flow: [
+      { label: "Build honestly", note: "49 strictly causal features, 30 NASDAQ stocks, no lookahead" },
+      { label: "Walk forward", note: "12 expanding-window folds, 1,512 out-of-sample days, 2-day embargo" },
+      { label: "Measure skill", note: "daily information coefficient → Newey–West HAC t-test" },
+      { label: "Confirm by permutation", note: "both stages must pass — either fails, no deployment" },
+      { label: "Report the null", note: "gate closed 0/12; calibration excellent anyway (ECE < 0.025)" },
+    ],
+    figures: [
+      {
+        title: "False-positive rate on skill-less models (%)",
+        max: 12,
+        note: "Simulated null (no real signal): the naive test deploys anyway; the gate never does.",
+        bars: [
+          { label: "Naive t-test", value: 11.8, display: "11.8%", accent: true },
+          { label: "Full ICGDF gate", value: 0, display: "0.0%" },
+        ],
+      },
+    ],
     problem:
       "Can a financial ML model prove cross-sectional predictive skill before deployment — and what should happen when it cannot?",
     approach:
@@ -337,6 +528,27 @@ export const publications: Publication[] = [
     themes: ["finance", "deployment"],
     oneLiner:
       "When a small signal exists, execution design — not the classifier — decides whether it survives transaction costs.",
+    plain:
+      "A tiny predictive edge usually dies in fees: if you act on every signal, you trade so often that costs eat everything. This paper keeps the same predictive model but changes how it is used — each day, rank all stocks by the model's calibrated confidence and trade only the single top pick. The edge survives realistic costs with wide margin: fees would have to be 4.8 times larger than assumed before profits vanish. The honesty is in the framing: the stock universe is small and survivor-picked, and most of the performance comes from one market regime — both stated in the paper, not hidden.",
+    flow: [
+      { label: "Calibrate", note: "ensemble probabilities made honest via isotonic regression, per fold" },
+      { label: "Rank daily", note: "calibrated confidence as ordinal conviction across the cross-section" },
+      { label: "Trade only the top", note: "Top-K portfolios vs threshold execution of identical signals" },
+      { label: "Charge realistic costs", note: "break-even analysis · Lo HAC Sharpe CIs · permutation tests" },
+      { label: "Split by regime", note: "where the edge lives — and where it disappears" },
+    ],
+    figures: [
+      {
+        title: "Annualized Sharpe ratio, out of sample",
+        max: 1.3,
+        note: "Same signals, different execution: ranking preserves what thresholds destroy.",
+        bars: [
+          { label: "Top-1 conviction ranking", value: 1.183, display: "1.183", accent: true },
+          { label: "Random top-1 baseline", value: 0.162, display: "0.162" },
+          { label: "Threshold execution (P60)", value: 0.071, display: "0.071" },
+        ],
+      },
+    ],
     problem:
       "Threshold execution of ML signals over-trades small edges to death. Can cross-sectional ranking preserve a statistically real signal at realistic costs?",
     approach:

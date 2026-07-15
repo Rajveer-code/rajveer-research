@@ -1,0 +1,114 @@
+---
+import type { Figure } from "../data/research";
+
+/**
+ * Single-measure bar figure. Zero-based scale (no truncated axes).
+ * Accent bar = ultramarine (the finding); others = neutral ink-3 gray
+ * (≥3:1 on paper). Identity is carried by row labels and direct values,
+ * never by color alone.
+ */
+interface Props {
+  figure: Figure;
+}
+
+const { figure } = Astro.props;
+---
+
+<figure class="fig" aria-label={figure.title}>
+  <figcaption class="fig-title">{figure.title}</figcaption>
+  <div class="fig-rows">
+    {
+      figure.bars.map((b) => (
+        <div class="fig-row">
+          <span class="fig-label">{b.label}</span>
+          <div class="fig-track">
+            <div
+              class={`fig-bar${b.accent ? " fig-bar--accent" : ""}`}
+              style={`width:${Math.max((b.value / figure.max) * 100, 0.75)}%`}
+            />
+          </div>
+          <code class="fig-value">{b.display}</code>
+        </div>
+      ))
+    }
+  </div>
+  {figure.note && <p class="fig-note">{figure.note}</p>}
+</figure>
+
+<style>
+  .fig {
+    margin: 0;
+    padding: var(--space-8);
+    background: var(--paper-raised);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+  }
+
+  .fig-title {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: var(--text-base);
+    margin-bottom: var(--space-6);
+  }
+
+  .fig-rows {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .fig-row {
+    display: grid;
+    grid-template-columns: minmax(9rem, 14rem) 1fr auto;
+    gap: var(--space-4);
+    align-items: center;
+  }
+
+  .fig-label {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .fig-track {
+    height: 0.625rem;
+    background: var(--paper-recessed);
+    border-radius: var(--radius-1);
+    overflow: hidden;
+  }
+
+  .fig-bar {
+    height: 100%;
+    border-radius: var(--radius-1);
+    background: var(--ink-3);
+    transition: width var(--dur-slow) var(--ease-inout);
+  }
+
+  .fig-bar--accent { background: var(--signal); }
+
+  .fig-value {
+    font-size: var(--text-sm);
+    color: var(--ink);
+    min-width: 4.5rem;
+    text-align: right;
+  }
+
+  .fig-note {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: var(--rule);
+    font-style: italic;
+    color: var(--ink-2);
+    font-size: var(--text-sm);
+  }
+
+  @media (max-width: 560px) {
+    .fig-row {
+      grid-template-columns: 1fr auto;
+      grid-template-areas: "label value" "track track";
+      row-gap: var(--space-1);
+    }
+    .fig-label { grid-area: label; }
+    .fig-track { grid-area: track; }
+    .fig-value { grid-area: value; }
+  }
+</style>

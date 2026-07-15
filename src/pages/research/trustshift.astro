@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
+import MethodFlow from "../../components/MethodFlow.astro";
 import { publications, THEME_LABELS } from "../../data/research";
 
 /**
@@ -136,6 +137,18 @@ const fmt = (n: number) => n.toFixed(3);
           {pub.links.map((l) => <a class="btn" href={l.href}>{l.label} ↗</a>)}
         </div>
       </header>
+
+      <section class="plain container" aria-label="Plain-language summary" data-reveal>
+        <p class="label-mono section-eyebrow">Starting from zero</p>
+        <p class="plain-text">{pub.plain}</p>
+      </section>
+
+      <section class="method container" aria-label="How the audit works">
+        <p class="label-mono section-eyebrow" data-reveal>How the audit works</p>
+        <div data-reveal>
+          <MethodFlow steps={pub.flow} />
+        </div>
+      </section>
 
       <section class="five container" aria-label="The paper in five minutes">
         <p class="label-mono section-eyebrow" data-reveal>In five minutes</p>
@@ -452,6 +465,21 @@ python run_all.py   # regenerates every table and figure</code></pre>
 
   .section-lead em { font-style: italic; color: var(--signal); }
 
+  .plain { padding-block: var(--space-16); border-bottom: var(--rule); }
+
+  .plain-text {
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    max-width: 62ch;
+    padding: var(--space-6) var(--space-8);
+    background: var(--paper-recessed);
+    border-left: 2px solid var(--signal);
+    border-radius: var(--radius-1);
+    color: var(--ink);
+  }
+
+  .method { padding-block: var(--space-24); border-bottom: var(--rule); }
+
   .five { padding-block: var(--space-24); border-bottom: var(--rule); }
 
   .five-list {
@@ -524,7 +552,7 @@ python run_all.py   # regenerates every table and figure</code></pre>
     transition: width var(--dur-slow) var(--ease-inout);
   }
 
-  .bar--src { background: var(--hairline-strong); }
+  .bar--src { background: var(--ink-3); }
   .bar--tgt { background: var(--signal); }
   .bar--ece { background: var(--signal); }
 

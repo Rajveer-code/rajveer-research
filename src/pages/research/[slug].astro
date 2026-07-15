@@ -1,6 +1,8 @@
 ---
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
+import MethodFlow from "../../components/MethodFlow.astro";
+import FigureBars from "../../components/FigureBars.astro";
 import { publications, THEME_LABELS } from "../../data/research";
 
 export function getStaticPaths() {
@@ -52,6 +54,27 @@ const fiveMinute = [
           )
         }
       </header>
+
+      <section class="plain container" aria-label="Plain-language summary" data-reveal>
+        <p class="label-mono section-eyebrow">Starting from zero</p>
+        <p class="plain-text">{pub.plain}</p>
+      </section>
+
+      <section class="method container" aria-label="How the study works">
+        <p class="label-mono section-eyebrow" data-reveal>How it works</p>
+        <div class="method-grid" data-reveal>
+          <MethodFlow steps={pub.flow} />
+          {
+            pub.figures.length > 0 && (
+              <div class="method-figs">
+                {pub.figures.map((f) => (
+                  <FigureBars figure={f} />
+                ))}
+              </div>
+            )
+          }
+        </div>
+      </section>
 
       <section class="five container" aria-label="The paper in five minutes">
         <p class="label-mono section-eyebrow" data-reveal>In five minutes</p>
@@ -211,6 +234,40 @@ const fiveMinute = [
     color: var(--signal);
     display: block;
     margin-bottom: var(--space-8);
+  }
+
+  .plain {
+    padding-block: var(--space-16);
+    border-bottom: var(--rule);
+  }
+
+  .plain-text {
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    max-width: 62ch;
+    padding: var(--space-6) var(--space-8);
+    background: var(--paper-recessed);
+    border-left: 2px solid var(--signal);
+    border-radius: var(--radius-1);
+    color: var(--ink);
+  }
+
+  .method { padding-block: var(--space-24); border-bottom: var(--rule); }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .method-figs {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  @media (max-width: 860px) {
+    .method-grid { grid-template-columns: 1fr; }
   }
 
   .five { padding-block: var(--space-24); border-bottom: var(--rule); }

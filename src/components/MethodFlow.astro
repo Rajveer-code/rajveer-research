@@ -1,0 +1,91 @@
+---
+import type { FlowStep } from "../data/research";
+
+interface Props {
+  steps: FlowStep[];
+}
+
+const { steps } = Astro.props;
+---
+
+<figure class="flow" aria-label="Method, step by step">
+  <ol class="flow-track">
+    {
+      steps.map((s, i) => (
+        <li class="flow-step">
+          <span class="flow-index label-mono">{String(i + 1).padStart(2, "0")}</span>
+          <div class="flow-body">
+            <span class="flow-label">{s.label}</span>
+            <span class="flow-note">{s.note}</span>
+          </div>
+          {i < steps.length - 1 && (
+            <svg class="flow-arrow" viewBox="0 0 16 28" aria-hidden="true">
+              <line x1="8" y1="0" x2="8" y2="20" />
+              <path d="M3 19 L8 26 L13 19" fill="none" />
+            </svg>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .flow {
+    margin: 0;
+    padding: var(--space-8);
+    background: var(--paper-raised);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+  }
+
+  .flow-track {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 36rem;
+  }
+
+  .flow-step {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    grid-template-areas: "index body" "arrow arrow";
+    column-gap: var(--space-4);
+  }
+
+  .flow-index {
+    grid-area: index;
+    color: var(--signal);
+    padding-top: 0.2em;
+  }
+
+  .flow-body {
+    grid-area: body;
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .flow-label {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: var(--text-base);
+  }
+
+  .flow-note {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--ink-2);
+    font-size: var(--text-sm);
+  }
+
+  .flow-arrow {
+    grid-area: arrow;
+    width: 1rem;
+    height: 1.75rem;
+    margin: var(--space-2) 0 var(--space-2) 0.75rem;
+    stroke: var(--hairline-strong);
+    stroke-width: 1.5;
+  }
+</style>
