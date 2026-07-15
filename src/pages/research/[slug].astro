@@ -4,7 +4,10 @@ import Nav from "../../components/Nav.astro";
 import { publications, THEME_LABELS } from "../../data/research";
 
 export function getStaticPaths() {
-  return publications.map((p) => ({ params: { slug: p.slug }, props: { pub: p } }));
+  // trustshift has a dedicated extended page (trustshift.astro)
+  return publications
+    .filter((p) => p.slug !== "trustshift")
+    .map((p) => ({ params: { slug: p.slug }, props: { pub: p } }));
 }
 
 const { pub } = Astro.props;
