@@ -46,6 +46,26 @@ export interface PaperFigure {
   caption: string;
 }
 
+/** TrustShift-fig1-style verdict diagram, rendered by SummaryDiagram.astro. */
+export type Mark = "check" | "x" | "dash";
+export type Tone = "bad" | "warn" | "info" | "good";
+
+export interface DiagramBranch {
+  title: string;
+  sub?: string;
+  tone: Tone;
+  rows: { label: string; mark: Mark }[];
+  action: string;
+  tag?: string;
+}
+
+export interface SummaryDiagramSpec {
+  premise: string;
+  probe?: string;
+  branches: DiagramBranch[];
+  punchline: string;
+}
+
 export interface Publication {
   slug: string;
   order: number;
@@ -62,6 +82,7 @@ export interface Publication {
   flow: FlowStep[]; // method flowchart steps
   figures: Figure[]; // data figures from verified numbers only
   paperFigures?: PaperFigure[]; // actual publication figures from the repo
+  diagram?: SummaryDiagramSpec; // one-figure summary of the paper's argument
   problem: string;
   approach: string;
   findings: string;
@@ -199,6 +220,53 @@ export const publications: Publication[] = [
           "The age-fairness audit: performance split by age group, where the headline number hides the failure.",
       },
     ],
+    diagram: {
+      premise: "XGBoost, strict nested CV — internal AUC 0.794. Looks deployable.",
+      probe: "External validation — BRFSS, 1,285,783 records, different survey & population",
+      branches: [
+        {
+          title: "Overall",
+          sub: "AUC 0.794 → 0.717",
+          tone: "warn",
+          rows: [
+            { label: "Discrimination −9.7%", mark: "x" },
+            { label: "PPV 43.8% → 22.3%", mark: "x" },
+          ],
+          action: "Never report internal numbers alone",
+        },
+        {
+          title: "Age 18–39",
+          sub: "external AUC 0.742",
+          tone: "good",
+          rows: [
+            { label: "Discrimination holds", mark: "check" },
+            { label: "Usable signal", mark: "check" },
+          ],
+          action: "Screening viable for the young",
+        },
+        {
+          title: "Age ≥ 60",
+          sub: "external AUC 0.607",
+          tone: "bad",
+          rows: [
+            { label: "Gap 0.135, p < 0.001", mark: "x" },
+            { label: "Highest-risk group", mark: "x" },
+          ],
+          action: "Do not deploy for elderly without redress",
+        },
+        {
+          title: "Calibration",
+          sub: "Brier 0.123",
+          tone: "info",
+          rows: [
+            { label: "Overestimates high risk", mark: "x" },
+            { label: "Sex gap n.s. (p = 0.142)", mark: "dash" },
+          ],
+          action: "Recalibrate before any clinical use",
+        },
+      ],
+      punchline: "One aggregate number hid a structured, age-shaped failure.",
+    },
     problem:
       "Clinical risk models are usually reported with internal validation only. Do the numbers survive a different population, survey instrument, and label definition?",
     approach:
@@ -272,6 +340,53 @@ export const publications: Publication[] = [
           "The privacy–utility trade-off: DP-SGD across the ε sweep, including the collapse the paper reports plainly.",
       },
     ],
+    diagram: {
+      premise: "Three unequal hospital nodes, no data ever shared — FedAvg training",
+      probe: "Deployability audit — four axes at once, externally on 1.28M records",
+      branches: [
+        {
+          title: "Generalisation",
+          sub: "AUC 0.757 vs 0.700",
+          tone: "good",
+          rows: [
+            { label: "Beats centralized XGBoost", mark: "check" },
+            { label: "40% smaller external gap", mark: "check" },
+          ],
+          action: "Federated wins where it counts",
+        },
+        {
+          title: "Fairness",
+          sub: "elderly–young gap",
+          tone: "good",
+          rows: [
+            { label: "0.069 → 0.054 (−21.7%)", mark: "check" },
+            { label: "BMI gap 0.066 → 0.016", mark: "check" },
+          ],
+          action: "Heterogeneous nodes help subgroups",
+        },
+        {
+          title: "Calibration",
+          sub: "ECE 0.276 raw",
+          tone: "info",
+          rows: [
+            { label: "Raw probabilities dishonest", mark: "x" },
+            { label: "Isotonic → 0.001", mark: "check" },
+          ],
+          action: "Recalibrate — cheap and sufficient",
+        },
+        {
+          title: "Privacy (DP)",
+          sub: "DP-SGD ε sweep",
+          tone: "bad",
+          rows: [
+            { label: "AUC ≈ 0.50 at ε ≤ 5", mark: "x" },
+            { label: "No formal guarantee at node size", mark: "x" },
+          ],
+          action: "Report the collapse plainly",
+        },
+      ],
+      punchline: "Three of four deployability axes pass. The fourth is reported, not hidden.",
+    },
     problem:
       "Federated learning is sold on privacy. But does a federated clinical model also generalise externally, treat age groups fairly, and stay calibrated — simultaneously?",
     approach:
@@ -343,6 +458,53 @@ export const publications: Publication[] = [
           "Calibration curves in-domain versus cross-platform — confidence becomes dishonest under shift.",
       },
     ],
+    diagram: {
+      premise: "Transformer classifiers in-platform — AUC 0.983–0.987. Near perfect.",
+      probe: "CPFE — five-axis audit under platform shift to Reddit & Twitter",
+      branches: [
+        {
+          title: "Discrimination",
+          sub: "−30 to −40%",
+          tone: "bad",
+          rows: [
+            { label: "Reddit −30.3–35.4%", mark: "x" },
+            { label: "Twitter −37.9–39.5%", mark: "x" },
+          ],
+          action: "Fine-tune on target (+0.216 AUC)",
+        },
+        {
+          title: "Calibration",
+          sub: "ECE up to 0.54",
+          tone: "info",
+          rows: [
+            { label: "Confidence dishonest", mark: "x" },
+            { label: "Temp scaling −88% ECE", mark: "check" },
+          ],
+          action: "Repairable — but fixes nothing else",
+        },
+        {
+          title: "Equity",
+          sub: "clinical proxy classes",
+          tone: "bad",
+          rows: [
+            { label: "DI < 0.17 raw", mark: "x" },
+            { label: "EOD ≈ 0.75–0.83", mark: "x" },
+          ],
+          action: "Fails exactly where it matters",
+        },
+        {
+          title: "Attribution",
+          sub: "top-K token overlap",
+          tone: "warn",
+          rows: [
+            { label: "Jaccard ≈ 0 in 13/16", mark: "x" },
+            { label: "Reads different words", mark: "x" },
+          ],
+          action: "The model is not reading what you think",
+        },
+      ],
+      punchline: "Every trustworthiness axis can fail while the benchmark stays near-perfect.",
+    },
     problem:
       "Mental-health NLP models report AUCs near 0.99 on one platform. What survives when the same model meets Reddit or Twitter language?",
     approach:
@@ -398,6 +560,53 @@ export const publications: Publication[] = [
         ],
       },
     ],
+    diagram: {
+      premise: "42,323,519 applications, 2020–2024 — raw Black–White gap 14.95 pp",
+      probe: "Where does the gap live? Four identification strategies",
+      branches: [
+        {
+          title: "Observables",
+          sub: "DFL reweighting",
+          tone: "bad",
+          rows: [
+            { label: "68% not explained", mark: "x" },
+            { label: "Bounds: ≥ 44–55% remains", mark: "x" },
+          ],
+          action: "Public data cannot explain it away",
+        },
+        {
+          title: "Institutions",
+          sub: "within-lender FE",
+          tone: "warn",
+          rows: [
+            { label: "74.6% within lenders", mark: "x" },
+            { label: "Rising 66.8% → 78.3%", mark: "x" },
+          ],
+          action: "Inside institutions, not between them",
+        },
+        {
+          title: "Boundaries",
+          sub: "RDD · DiD",
+          tone: "info",
+          rows: [
+            { label: "+2.0 pp above 80% LTV", mark: "x" },
+            { label: "+1.5 pp after 2022 tightening", mark: "x" },
+          ],
+          action: "Institutional edges widen it",
+        },
+        {
+          title: "Scale",
+          sub: "annual impact",
+          tone: "bad",
+          rows: [
+            { label: "≈ 126,000 fewer approvals", mark: "x" },
+            { label: "Regional means 9.3–16.1 pp", mark: "dash" },
+          ],
+          action: "Structure documented, intent not claimed",
+        },
+      ],
+      punchline: "The gap lives inside institutions — and widens at their boundaries.",
+    },
     problem:
       "How large is the observable racial approval gap in U.S. mortgage lending, how much sits within lenders, and what do quasi-experimental boundaries reveal about its structure?",
     approach:
@@ -467,6 +676,53 @@ export const publications: Publication[] = [
           "SHAP attribution over the causal-forest estimates: what drives who bears the penalty.",
       },
     ],
+    diagram: {
+      premise: "Average conditional penalty −9.39 pp — but averages hide who pays",
+      probe: "Causal forest DML — the penalty estimated per applicant profile",
+      branches: [
+        {
+          title: "Manual underwriting",
+          sub: "−14.79 pp",
+          tone: "bad",
+          rows: [
+            { label: "More than 2× automated", mark: "x" },
+            { label: "Lender-controlled routing", mark: "x" },
+          ],
+          action: "The channel is the mechanism",
+        },
+        {
+          title: "Automated systems",
+          sub: "−6.17 pp",
+          tone: "info",
+          rows: [
+            { label: "Penalty persists", mark: "x" },
+            { label: "But far smaller", mark: "check" },
+          ],
+          action: "Automation narrows the gap",
+        },
+        {
+          title: "Same lender-year",
+          sub: "−7.13 pp",
+          tone: "warn",
+          rows: [
+            { label: "Survives within institution", mark: "x" },
+            { label: "Not a between-lender artifact", mark: "x" },
+          ],
+          action: "Not explained by lender mix",
+        },
+        {
+          title: "Distribution",
+          sub: "CATE SD 8.47 pp",
+          tone: "bad",
+          rows: [
+            { label: "90.7% face a penalty", mark: "x" },
+            { label: "Placebo signal ratio 17.9×", mark: "check" },
+          ],
+          action: "Wide, real heterogeneity",
+        },
+      ],
+      punchline: "Who bears the burden depends on how the file is processed.",
+    },
     problem:
       "Average disparity estimates hide distribution: which applicant profiles carry the largest conditional racial approval penalty, and is the mechanism applicant- or lender-controlled?",
     approach:
@@ -553,6 +809,53 @@ export const publications: Publication[] = [
           "Inter-task correlations: strength on one regulatory skill does not guarantee another.",
       },
     ],
+    diagram: {
+      premise: "12 frontier LLMs — 406 expert questions on SEBI/RBI regulation",
+      probe: "Four task types — strict scoring plus judge-corrected audit",
+      branches: [
+        {
+          title: "Interpretation",
+          sub: "174 items",
+          tone: "good",
+          rows: [
+            { label: "Strongest task overall", mark: "check" },
+            { label: "Top model 89.7% overall", mark: "check" },
+          ],
+          action: "Vocabulary is not the barrier",
+        },
+        {
+          title: "Numerical",
+          sub: "92 items",
+          tone: "bad",
+          rows: [
+            { label: "35.9 pp model spread", mark: "x" },
+            { label: "Most discriminative axis", mark: "x" },
+          ],
+          action: "Thresholds separate frontier models",
+        },
+        {
+          title: "Temporal · Contradiction",
+          sub: "78 + 62 items",
+          tone: "warn",
+          rows: [
+            { label: "Amendment chains bite", mark: "x" },
+            { label: "Mixed performance", mark: "dash" },
+          ],
+          action: "Regulatory time is hard",
+        },
+        {
+          title: "Strict vs judge",
+          sub: "scoring audit",
+          tone: "info",
+          rows: [
+            { label: "Format ≠ reasoning failure", mark: "check" },
+            { label: "DeepSeek R1 re-ranked", mark: "check" },
+          ],
+          action: "Audit the scorer, not just the model",
+        },
+      ],
+      punchline: "Numerical thresholds — not vocabulary — separate frontier models.",
+    },
     problem:
       "Financial NLP benchmarks are Western-heavy. How do frontier LLMs handle SEBI/RBI regulatory text with dense amendment chains, jurisdiction-specific terminology, and numerical thresholds?",
     approach:
@@ -622,6 +925,53 @@ export const publications: Publication[] = [
           "Power analysis: the study could have detected a much smaller real signal than practitioners claim.",
       },
     ],
+    diagram: {
+      premise: "Ensemble backtest, 30 NASDAQ stocks — looks tradable?",
+      probe: "ICGDF — two-stage statistical gate before any deployment",
+      branches: [
+        {
+          title: "HAC t-test",
+          sub: "daily IC series",
+          tone: "bad",
+          rows: [
+            { label: "Mean IC −0.0005", mark: "x" },
+            { label: "t = −0.09", mark: "x" },
+          ],
+          action: "Stage 1: fail",
+        },
+        {
+          title: "Permutation",
+          sub: "confirmation stage",
+          tone: "bad",
+          rows: [
+            { label: "≈ random selection", mark: "x" },
+            { label: "Gate open 0/12 folds", mark: "x" },
+          ],
+          action: "Stage 2: fail",
+        },
+        {
+          title: "Calibration",
+          sub: "the trap",
+          tone: "info",
+          rows: [
+            { label: "ECE < 0.025 all folds", mark: "check" },
+            { label: "Zero predictive skill", mark: "x" },
+          ],
+          action: "Honest probabilities ≠ deployable model",
+        },
+        {
+          title: "Verdict",
+          sub: "vs naive test",
+          tone: "good",
+          rows: [
+            { label: "Naive FP rate 11.8%", mark: "x" },
+            { label: "ICGDF FP rate 0.0%", mark: "check" },
+          ],
+          action: "Do not deploy — and publish that",
+        },
+      ],
+      punchline: "Calibration quality is not deployment readiness.",
+    },
     problem:
       "Can a financial ML model prove cross-sectional predictive skill before deployment — and what should happen when it cannot?",
     approach:
@@ -677,6 +1027,53 @@ export const publications: Publication[] = [
         ],
       },
     ],
+    diagram: {
+      premise: "A real but tiny signal — mean daily IC 0.0197 (p = 0.034)",
+      probe: "Same signal, three execution designs, realistic costs",
+      branches: [
+        {
+          title: "Threshold P60",
+          sub: "act on every signal",
+          tone: "bad",
+          rows: [
+            { label: "Sharpe 0.071", mark: "x" },
+            { label: "Costs eat the edge", mark: "x" },
+          ],
+          action: "Standard execution destroys it",
+        },
+        {
+          title: "Random top-1",
+          sub: "baseline",
+          tone: "warn",
+          rows: [
+            { label: "Sharpe 0.162", mark: "dash" },
+            { label: "No information used", mark: "dash" },
+          ],
+          action: "The bar to beat",
+        },
+        {
+          title: "Conviction ranking",
+          sub: "trade only top-1",
+          tone: "good",
+          rows: [
+            { label: "Sharpe 1.183", mark: "check" },
+            { label: "Break-even 24.2 bps = 4.8×", mark: "check" },
+          ],
+          action: "Ranking preserves the signal",
+        },
+        {
+          title: "Honesty",
+          sub: "stated limits",
+          tone: "info",
+          rows: [
+            { label: "Survivor-selected universe", mark: "dash" },
+            { label: "Regime-dependent", mark: "dash" },
+          ],
+          action: "Caveats in the paper, not hidden",
+        },
+      ],
+      punchline: "Execution design — not the classifier — decides what survives costs.",
+    },
     problem:
       "Threshold execution of ML signals over-trades small edges to death. Can cross-sectional ranking preserve a statistically real signal at realistic costs?",
     approach:
