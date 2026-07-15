@@ -7,6 +7,8 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 
 let lenis: Lenis | null = null;
 let splits: SplitText[] = [];
+let runId = 0;
+let fieldTicker: ((time: number) => void) | null = null;
 
 const reduced = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -16,6 +18,10 @@ export function cleanupMotion(): void {
   ScrollTrigger.getAll().forEach((t) => t.kill());
   splits.forEach((s) => s.revert());
   splits = [];
+  if (fieldTicker) {
+    gsap.ticker.remove(fieldTicker);
+    fieldTicker = null;
+  }
 }
 
 /**
@@ -26,6 +32,7 @@ export function cleanupMotion(): void {
  */
 export function initMotion(): void {
   if (reduced()) return;
+  cleanupMotion(); // idempotent: direct call + astro:page-load may both fire
 
   if (!lenis) {
     lenis = new Lenis({ autoRaf: false, lerp: 0.12 });
@@ -38,16 +45,137 @@ export function initMotion(): void {
   }
 
   // split only after fonts settle so line boxes are final
+  const id = ++runId;
   document.fonts.ready.then(() => {
+    if (id !== runId) return; // superseded by a newer init
     heroEntrance();
+    heroField();
     titleReveals();
     revealOnScroll();
     timelineSpine();
     mapDraw();
     mapHover();
+    pipelineCascade();
+    impactCounters();
     navBehavior();
     smoothAnchors();
     ScrollTrigger.refresh();
+  });
+}
+
+/**
+ * Hero "data field": drifting sample points, hairline links when close,
+ * a few ultramarine signals. Runs on gsap.ticker, only while hero is visible.
+ */
+function heroField(): void {
+  const canvas = document.querySelector<HTMLCanvasElement>("#hero-field");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let w = 0;
+  let h = 0;
+  const resize = () => {
+    w = canvas.offsetWidth;
+    h = canvas.offsetHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  resize();
+
+  const N = 34;
+  const LINK = 110;
+  const pts = Array.from({ length: N }, (_, i) => ({
+    x: Math.random() * 1,
+    y: Math.random() * 1,
+    vx: (Math.random() - 0.5) * 0.00045,
+    vy: (Math.random() - 0.5) * 0.00045,
+    signal: i % 9 === 0,
+  }));
+
+  let active = true;
+  const draw = () => {
+    if (!active) return;
+    ctx.clearRect(0, 0, w, h);
+    ctx.lineWidth = 1;
+    for (let i = 0; i < N; i++) {
+      const p = pts[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > 1) p.vx *= -1;
+      if (p.y < 0 || p.y > 1) p.vy *= -1;
+    }
+    for (let i = 0; i < N; i++) {
+      for (let j = i + 1; j < N; j++) {
+        const dx = (pts[i].x - pts[j].x) * w;
+        const dy = (pts[i].y - pts[j].y) * h;
+        const d = Math.hypot(dx, dy);
+        if (d < LINK) {
+          ctx.strokeStyle = `rgba(200, 197, 186, ${0.5 * (1 - d / LINK)})`;
+          ctx.beginPath();
+          ctx.moveTo(pts[i].x * w, pts[i].y * h);
+          ctx.lineTo(pts[j].x * w, pts[j].y * h);
+          ctx.stroke();
+        }
+      }
+    }
+    for (const p of pts) {
+      ctx.fillStyle = p.signal ? "#2742D6" : "#63666D";
+      ctx.beginPath();
+      ctx.arc(p.x * w, p.y * h, p.signal ? 2.4 : 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+
+  fieldTicker = draw;
+  gsap.ticker.add(draw);
+  window.addEventListener("resize", resize, { passive: true });
+
+  ScrollTrigger.create({
+    trigger: canvas,
+    start: "top bottom",
+    end: "bottom top",
+    onToggle: (self) => {
+      active = self.isActive;
+    },
+    onLeave: () => ctx.clearRect(0, 0, w, h),
+  });
+}
+
+/** Flagship pipeline stages cascade in one after another. */
+function pipelineCascade(): void {
+  const stages = gsap.utils.toArray<HTMLElement>("[data-stage]");
+  if (!stages.length) return;
+  gsap.from(stages, {
+    opacity: 0,
+    y: 18,
+    duration: 0.7,
+    ease: "power2.out",
+    stagger: 0.16,
+    scrollTrigger: { trigger: stages[0], start: "top 85%", once: true },
+  });
+}
+
+/** Impact numbers count up from zero, suffixes preserved (42M, 1.28M). */
+function impactCounters(): void {
+  document.querySelectorAll<HTMLElement>("[data-counter]").forEach((el) => {
+    const m = el.textContent?.trim().match(/^([\d.]+)(.*)$/);
+    if (!m) return;
+    const target = parseFloat(m[1]);
+    const suffix = m[2] ?? "";
+    const decimals = (m[1].split(".")[1] ?? "").length;
+    const state = { n: 0 };
+    gsap.to(state, {
+      n: target,
+      duration: 1.6,
+      ease: "power2.out",
+      scrollTrigger: { trigger: el, start: "top 88%", once: true },
+      onUpdate: () => {
+        el.textContent = state.n.toFixed(decimals) + suffix;
+      },
+    });
   });
 }
 

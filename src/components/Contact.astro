@@ -42,6 +42,9 @@ import { identity } from "../data/research";
 </section>
 
 <footer class="footer">
+  <div class="container footer-wordmark-wrap" aria-hidden="true">
+    <span class="footer-wordmark">Rajveer Singh&nbsp;Pall</span>
+  </div>
   <div class="container footer-inner">
     <span class="label-mono">© 2026 {identity.name}</span>
     <span class="label-mono footer-thesis">
@@ -125,6 +128,23 @@ import { identity } from "../data/research";
   .footer {
     border-top: var(--rule);
     background: var(--paper-recessed);
+    overflow: hidden;
+  }
+
+  .footer-wordmark-wrap {
+    padding-top: var(--space-16);
+    margin-bottom: calc(-0.18 * clamp(4rem, 13vw, 12rem));
+  }
+
+  .footer-wordmark {
+    display: block;
+    font-family: var(--font-serif);
+    font-size: clamp(4rem, 13vw, 12rem);
+    line-height: 0.95;
+    letter-spacing: var(--tracking-display);
+    white-space: nowrap;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--hairline-strong);
   }
 
   .footer-inner {

@@ -112,6 +112,38 @@ html.js [data-reveal] {
   transform: translateY(24px);
 }
 
+/* Ghost section numerals — oversized outlined indices, homepage only */
+#research, #flagship, #timeline, #map, #publications,
+#open-science, #impact, #future, #contact {
+  position: relative;
+}
+
+#research::before, #flagship::before, #timeline::before, #map::before,
+#publications::before, #open-science::before, #impact::before,
+#future::before, #contact::before {
+  position: absolute;
+  top: var(--space-12);
+  right: var(--gutter);
+  z-index: 0;
+  font-family: var(--font-mono);
+  font-size: clamp(4.5rem, 11vw, 10rem);
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--hairline-strong);
+  pointer-events: none;
+  user-select: none;
+}
+
+#research::before { content: "01"; }
+#flagship::before { content: "02"; }
+#timeline::before { content: "03"; }
+#map::before { content: "04"; }
+#publications::before { content: "05"; }
+#open-science::before { content: "06"; }
+#impact::before { content: "07"; }
+#future::before { content: "08"; }
+#contact::before { content: "09"; }
+
 /* Paper grain — barely-there tactility over the whole field */
 body::after {
   content: "";
