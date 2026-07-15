@@ -1,0 +1,109 @@
+---
+const keywords = [
+  "Trustworthy AI",
+  "Deployment Shift",
+  "Fairness",
+  "Calibration",
+  "External Validity",
+  "Interpretability",
+];
+---
+
+<section class="hero container" id="top">
+  <p class="label-mono hero-eyebrow" data-hero="1">
+    Research program · Trustworthy machine learning
+  </p>
+  <h1 class="hero-headline" data-hero="2">
+    Building trustworthy machine learning for <em>real-world&nbsp;deployment</em>
+  </h1>
+  <p class="hero-lead" data-hero="3">
+    Modern AI systems achieve excellent benchmark performance, yet fail in
+    structured, predictable ways once deployed. I build the audits that expose
+    those failures — across clinical risk, lending, language, and markets — and
+    the evaluation infrastructure that anticipates them.
+  </p>
+  <ul class="hero-keywords" data-hero="4" aria-label="Research keywords">
+    {keywords.map((k) => <li class="label-mono">{k}</li>)}
+  </ul>
+  <div class="hero-actions ui-sans" data-hero="5">
+    <a class="btn btn--primary" href="#research">Read the research</a>
+    <a class="btn" href="https://github.com/Rajveer-code">GitHub ↗</a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: var(--space-section) var(--space-32);
+    border-bottom: var(--rule);
+  }
+
+  .hero-eyebrow { color: var(--signal); }
+
+  .hero-headline {
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    font-weight: 460;
+    margin-block: var(--space-6) var(--space-8);
+    max-width: 15ch;
+  }
+
+  .hero-headline em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .hero-lead {
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--ink-2);
+    max-width: 52ch;
+  }
+
+  .hero-keywords {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    padding: var(--space-6) 0 0;
+    margin: var(--space-8) 0 0;
+    border-top: var(--rule);
+    max-width: var(--width-prose);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: var(--space-4);
+    margin-top: var(--space-12);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: var(--space-3) var(--space-6);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-2);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .btn:hover {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+
+  .btn--primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn--primary:hover {
+    background: var(--signal);
+    border-color: var(--signal);
+    color: var(--paper);
+  }
+</style>

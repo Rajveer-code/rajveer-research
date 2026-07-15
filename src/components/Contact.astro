@@ -1,0 +1,121 @@
+---
+import { identity } from "../data/research";
+---
+
+<section class="contact container" id="contact">
+  <div class="contact-grid">
+    <div data-reveal>
+      <p class="label-mono section-eyebrow">About</p>
+      <p class="about-text">
+        I am <strong>{identity.name}</strong>, an AI researcher studying
+        trustworthy machine learning under real-world deployment.
+        {` ${identity.affiliation}. `} Current work: cross-domain deployment-shift
+        auditing (TrustShift) and runtime audit infrastructure for locally
+        deployed LLMs. I am applying to graduate research programs for Fall 2027.
+      </p>
+    </div>
+    <div data-reveal>
+      <p class="label-mono section-eyebrow">Contact</p>
+      <ul class="contact-links">
+        <li>
+          <a href={`mailto:${identity.email}`} class="contact-link">
+            <span class="label-mono">Email</span>
+            <span class="ui-sans">{identity.email}</span>
+          </a>
+        </li>
+        {
+          identity.links.map((l) => (
+            <li>
+              <a href={l.href} class="contact-link">
+                <span class="label-mono">{l.label}</span>
+                <span class="ui-sans contact-arrow">↗</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <span class="label-mono">© 2026 {identity.name}</span>
+    <span class="label-mono footer-thesis">
+      Accuracy is not enough. Audit the decision.
+    </span>
+  </div>
+</footer>
+
+<style>
+  .contact {
+    padding-block: var(--space-section);
+  }
+
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: var(--space-16);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .about-text {
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--ink-2);
+    max-width: 46ch;
+  }
+
+  .about-text strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .contact-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 2px solid var(--ink);
+  }
+
+  .contact-link {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-bottom: var(--rule);
+    text-decoration: none;
+    color: var(--ink);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .contact-link:hover { color: var(--signal); }
+  .contact-link:hover .label-mono { color: var(--signal); }
+
+  .contact-arrow { color: var(--ink-3); }
+
+  .footer {
+    border-top: var(--rule);
+    background: var(--paper-recessed);
+  }
+
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-8);
+  }
+
+  .footer-thesis { font-style: italic; }
+
+  @media (max-width: 860px) {
+    .contact-grid { grid-template-columns: 1fr; gap: var(--space-12); }
+    .footer-inner { flex-direction: column; gap: var(--space-2); }
+  }
+</style>

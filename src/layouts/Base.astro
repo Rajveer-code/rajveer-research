@@ -13,18 +13,46 @@ interface Props {
 
 const {
   title,
-  description = "Rajveer Singh Pall — AI researcher studying trustworthy machine learning under real-world deployment.",
+  description = "Rajveer Singh Pall — AI researcher studying trustworthy machine learning under real-world deployment: fairness, calibration, external validation, and deployment-shift auditing.",
 } = Astro.props;
+
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: "Rajveer Singh Pall",
+  jobTitle: "AI Researcher",
+  description:
+    "Researcher in trustworthy machine learning under real-world deployment.",
+  email: "mailto:rajveerpall04@gmail.com",
+  sameAs: [
+    "https://github.com/Rajveer-code",
+    "https://huggingface.co/Rajveer-code",
+    "https://orcid.org/0009-0001-6762-6134",
+    "https://scholar.google.com/citations?hl=en&user=47CvVCcAAAAJ",
+    "https://www.linkedin.com/in/rajveer-singh-pall/",
+  ],
+};
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
+    <script is:inline>
+      document.documentElement.classList.add("js");
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="author" content="Rajveer Singh Pall" />
     <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="Rajveer Singh Pall — AI Research" />
+    <meta name="twitter:card" content="summary" />
+    <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
   </head>
   <body>
     <slot />

@@ -1,0 +1,63 @@
+---
+import { impact } from "../data/research";
+---
+
+<section class="impact container" id="impact" data-reveal>
+  <p class="label-mono section-eyebrow">Research output</p>
+  <ul class="impact-grid">
+    {
+      impact.map((i) => (
+        <li>
+          <span class="impact-value" data-counter>{i.value}</span>
+          <span class="impact-label">{i.label}</span>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .impact {
+    padding-block: var(--space-24);
+    border-bottom: var(--rule);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-12);
+  }
+
+  .impact-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-12) var(--space-8);
+  }
+
+  .impact-grid li {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+
+  .impact-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-xl);
+    color: var(--ink);
+    letter-spacing: -0.03em;
+  }
+
+  .impact-label {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    max-width: 24ch;
+  }
+
+  @media (max-width: 720px) {
+    .impact-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

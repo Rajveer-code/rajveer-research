@@ -1,0 +1,95 @@
+---
+const axes = [
+  { term: "External validity", note: "does it survive a new population?" },
+  { term: "Subgroup fairness", note: "who pays for the average?" },
+  { term: "Calibration", note: "are the probabilities honest?" },
+  { term: "Shift diagnosis", note: "which failure, before labels arrive?" },
+  { term: "Deployment discipline", note: "when should the gate stay closed?" },
+];
+---
+
+<section class="vision container" id="research" data-reveal>
+  <p class="label-mono section-eyebrow">Research vision</p>
+  <div class="vision-grid">
+    <p class="vision-statement">
+      A model can be accurate, and the decision it drives can still be <em>unfair, miscalibrated, and invalid</em> for the people it meets in
+      deployment. My research asks the question benchmarks skip: not <span class="q">“is it accurate?”</span> but <span class="q">“does the decision remain fair, calibrated, externally
+      valid, private, and economically deployable — under real constraints?”</span>
+    </p>
+    <ul class="vision-axes">
+      {
+        axes.map((a) => (
+          <li>
+            <span class="axis-term">{a.term}</span>
+            <span class="axis-note">{a.note}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .vision {
+    padding-block: var(--space-section);
+    border-bottom: var(--rule);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    margin-bottom: var(--space-12);
+    display: block;
+  }
+
+  .vision-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    gap: var(--space-16);
+    align-items: start;
+  }
+
+  .vision-statement {
+    font-size: var(--text-lg);
+    line-height: 1.42;
+    letter-spacing: var(--tracking-tight);
+    max-width: none;
+  }
+
+  .vision-statement em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .q { color: var(--ink-2); }
+
+  .vision-axes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 2px solid var(--ink);
+  }
+
+  .vision-axes li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding-block: var(--space-4);
+    border-bottom: var(--rule);
+  }
+
+  .axis-term {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .axis-note {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: var(--ink-3);
+  }
+
+  @media (max-width: 860px) {
+    .vision-grid { grid-template-columns: 1fr; gap: var(--space-12); }
+  }
+</style>

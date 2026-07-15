@@ -1,205 +1,30 @@
 ---
 import Base from "../layouts/Base.astro";
-
-const swatches = [
-  { name: "paper", varName: "--paper", hex: "#FBFAF7" },
-  { name: "paper-recessed", varName: "--paper-recessed", hex: "#F3F1EA" },
-  { name: "ink", varName: "--ink", hex: "#17191C" },
-  { name: "ink-2", varName: "--ink-2", hex: "#4A4E55" },
-  { name: "ink-3", varName: "--ink-3", hex: "#797D84" },
-  { name: "hairline", varName: "--hairline", hex: "#E4E1D8" },
-  { name: "signal", varName: "--signal", hex: "#2742D6" },
-  { name: "signal-deep", varName: "--signal-deep", hex: "#1C2F9E" },
-  { name: "verified", varName: "--verified", hex: "#2F6B4F" },
-];
-
-const typeRamp = [
-  { token: "--text-display", label: "display", sample: "TrustShift" },
-  { token: "--text-2xl", label: "h1", sample: "Trustworthy machine learning" },
-  { token: "--text-xl", label: "h2", sample: "Shift type, not shift magnitude" },
-  { token: "--text-lg", label: "h3", sample: "Deployment determines failure" },
-  { token: "--text-md", label: "h4 / lead", sample: "Calibration is not deployment readiness" },
-];
+import Nav from "../components/Nav.astro";
+import Hero from "../components/Hero.astro";
+import Vision from "../components/Vision.astro";
+import Flagship from "../components/Flagship.astro";
+import Timeline from "../components/Timeline.astro";
+import ResearchMap from "../components/ResearchMap.astro";
+import Publications from "../components/Publications.astro";
+import OpenScience from "../components/OpenScience.astro";
+import Impact from "../components/Impact.astro";
+import FutureVision from "../components/FutureVision.astro";
+import Contact from "../components/Contact.astro";
 ---
 
-<Base title="Design tokens — Rajveer Singh Pall, AI Research">
-  <header class="masthead container--wide container">
-    <span class="label-mono">Laboratory Paper — design system</span>
-    <span class="label-mono">Phase 1 specimen · internal</span>
-  </header>
-
+<Base title="Rajveer Singh Pall — AI Research">
+  <Nav />
   <main>
-    <section class="hero container">
-      <p class="label-mono hero-eyebrow">Rajveer Singh Pall · AI Research</p>
-      <h1 class="hero-headline">
-        Building trustworthy machine learning for <em>real-world&nbsp;deployment</em>
-      </h1>
-      <p class="hero-lead">
-        Modern AI systems achieve excellent benchmark performance yet fail
-        unexpectedly after deployment. This design system carries that research
-        argument: paper field, ink voice, a single ultramarine signal.
-      </p>
-    </section>
-
-    <section class="container section" data-reveal>
-      <h2 class="section-title"><span class="label-mono">01</span> Type ramp</h2>
-      <ul class="ramp">
-        {
-          typeRamp.map((step) => (
-            <li class="ramp-row">
-              <span class="label-mono ramp-label">{step.label} · {step.token}</span>
-              <span class="ramp-sample" style={`font-size: var(${step.token})`}>
-                {step.sample}
-              </span>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="note">
-        Newsreader carries display and body. <span class="ui-sans">Instrument Sans carries UI.</span>
-        <code>Fragment Mono carries data: AUC 0.757 [0.756–0.758]</code>
-      </p>
-    </section>
-
-    <section class="container section" data-reveal>
-      <h2 class="section-title"><span class="label-mono">02</span> Color</h2>
-      <ul class="swatches">
-        {
-          swatches.map((s) => (
-            <li class="swatch">
-              <span class="swatch-chip" style={`background: var(${s.varName})`} />
-              <span class="label-mono">{s.name}</span>
-              <code class="swatch-hex">{s.hex}</code>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="note">
-        <a href="https://orcid.org/0009-0001-6762-6134">Signal carries links and emphasis</a> ·
-        <span class="status status--verified">presented</span>
-        <span class="status status--review">under review</span>
-      </p>
-    </section>
-
-    <section class="container section" data-reveal>
-      <h2 class="section-title"><span class="label-mono">03</span> Motion</h2>
-      <p>
-        This block, and each section above, entered via ScrollTrigger + Lenis —
-        translate + fade only, <code>power3.out</code>, 0.9&nbsp;s, once.
-        With <code>prefers-reduced-motion</code>, everything renders instantly.
-      </p>
-    </section>
+    <Hero />
+    <Vision />
+    <Flagship />
+    <Timeline />
+    <ResearchMap />
+    <Publications />
+    <OpenScience />
+    <Impact />
+    <FutureVision />
+    <Contact />
   </main>
-
-  <footer class="container footer">
-    <span class="label-mono">rajveer-research · scaffold verified 2026-07-15</span>
-  </footer>
 </Base>
-
-<style>
-  .masthead {
-    display: flex;
-    justify-content: space-between;
-    gap: var(--space-4);
-    padding-block: var(--space-6);
-    border-bottom: var(--rule);
-  }
-
-  .hero {
-    padding-block: var(--space-section) var(--space-24);
-  }
-
-  .hero-eyebrow { color: var(--signal); }
-
-  .hero-headline {
-    font-size: var(--text-display);
-    line-height: var(--leading-display);
-    letter-spacing: var(--tracking-display);
-    margin-block: var(--space-6);
-    max-width: 14ch;
-  }
-
-  .hero-headline em {
-    font-style: italic;
-    color: var(--signal);
-  }
-
-  .hero-lead {
-    font-size: var(--text-md);
-    color: var(--ink-2);
-    max-width: 46ch;
-  }
-
-  .section {
-    padding-block: var(--space-16);
-    border-top: var(--rule);
-  }
-
-  .section-title {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-4);
-    margin-bottom: var(--space-12);
-  }
-
-  .ramp { list-style: none; padding: 0; }
-
-  .ramp-row {
-    display: grid;
-    gap: var(--space-2);
-    padding-block: var(--space-4);
-    border-bottom: var(--rule);
-  }
-
-  .ramp-sample {
-    line-height: var(--leading-tight);
-    letter-spacing: var(--tracking-tight);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .swatches {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-    gap: var(--space-6);
-  }
-
-  .swatch { display: grid; gap: var(--space-2); }
-
-  .swatch-chip {
-    height: 4.5rem;
-    border-radius: var(--radius-2);
-    border: var(--rule-strong);
-  }
-
-  .swatch-hex {
-    font-size: var(--text-xs);
-    color: var(--ink-3);
-  }
-
-  .note {
-    margin-top: var(--space-8);
-    color: var(--ink-2);
-  }
-
-  .status {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-1);
-    margin-inline-start: var(--space-2);
-  }
-
-  .status--verified { background: var(--verified-wash); color: var(--verified); }
-  .status--review { background: var(--signal-wash); color: var(--signal-deep); }
-
-  .footer {
-    padding-block: var(--space-12);
-    border-top: var(--rule);
-  }
-</style>

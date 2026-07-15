@@ -1,0 +1,92 @@
+---
+const questions = [
+  {
+    q: "Can deployment failure be diagnosed before deployment?",
+    text: "TrustShift shows shift type is diagnosable from unlabeled data in four domains. The next step is a general theory: which probe families predict which failure axes, with what guarantees, and where the mapping breaks.",
+  },
+  {
+    q: "What does runtime auditing look like for generative systems?",
+    text: "Classifier audits assume fixed outputs. Free-form generation needs live instrumentation — calibration of verbalized confidence, faithfulness, counterfactual equity — cheap enough to run beside every response on consumer hardware.",
+  },
+  {
+    q: "Can evaluation itself become infrastructure?",
+    text: "Fairness, calibration, and external validity are still bolted on paper by paper. The goal is evaluation as a first-class system: pre-registered, subgroup-aware, shift-aware — as standard as a test suite in software.",
+  },
+];
+---
+
+<section class="future container" id="future">
+  <p class="label-mono section-eyebrow" data-reveal>The next five years</p>
+  <h2 class="section-title" data-reveal>
+    Questions that remain <em>open</em>
+  </h2>
+
+  <ol class="future-list">
+    {
+      questions.map((item, i) => (
+        <li class="future-item" data-reveal>
+          <span class="label-mono future-index">Q{i + 1}</span>
+          <div>
+            <h3 class="future-q">{item.q}</h3>
+            <p class="future-text">{item.text}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .future {
+    padding-block: var(--space-section);
+    border-bottom: var(--rule);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .section-title {
+    font-weight: 460;
+    margin-bottom: var(--space-24);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .future-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-12);
+    max-width: 52rem;
+  }
+
+  .future-item {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    gap: var(--space-6);
+    padding-top: var(--space-8);
+    border-top: var(--rule);
+  }
+
+  .future-index { color: var(--signal); padding-top: 0.5em; }
+
+  .future-q {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    font-style: italic;
+    margin-bottom: var(--space-3);
+  }
+
+  .future-text { color: var(--ink-2); }
+
+  @media (max-width: 560px) {
+    .future-item { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+</style>

@@ -1,0 +1,205 @@
+---
+import { publications, THEME_LABELS, type Theme } from "../data/research";
+
+interface Node {
+  theme: Theme | null;
+  label: string;
+  x: number;
+  y: number;
+}
+
+const CX = 450;
+const CY = 260;
+
+const nodes: Node[] = [
+  { theme: "healthcare", label: THEME_LABELS["healthcare"], x: 150, y: 90 },
+  { theme: "fairness", label: THEME_LABELS["fairness"], x: 450, y: 56 },
+  { theme: "nlp-llm", label: THEME_LABELS["nlp-llm"], x: 750, y: 90 },
+  { theme: "causal", label: THEME_LABELS["causal"], x: 108, y: 260 },
+  { theme: "deployment", label: THEME_LABELS["deployment"], x: 792, y: 260 },
+  { theme: "privacy", label: THEME_LABELS["privacy"], x: 150, y: 430 },
+  { theme: "finance", label: THEME_LABELS["finance"], x: 450, y: 464 },
+  { theme: "trustworthy-ml", label: "Audit & Evaluation", x: 750, y: 430 },
+];
+
+const countFor = (theme: Theme) =>
+  publications.filter((p) => p.themes.includes(theme)).length;
+
+const cross: [number, number][] = [
+  [0, 5], // healthcare – privacy
+  [1, 2], // fairness – nlp
+  [3, 1], // causal – fairness
+  [4, 6], // deployment – finance
+  [2, 4], // nlp – deployment
+];
+---
+
+<section class="map-section" id="map">
+  <div class="container">
+    <p class="label-mono section-eyebrow" data-reveal>Research map</p>
+    <h2 class="section-title" data-reveal>
+      One ecosystem, <em>not</em> a list of results
+    </h2>
+
+    <figure class="map-figure" data-reveal>
+      <svg
+        class="map-svg"
+        viewBox="0 0 900 520"
+        role="img"
+        aria-labelledby="map-desc"
+        data-map
+      >
+        <desc id="map-desc">
+          Network map: trustworthy machine learning at the center, connected to
+          healthcare AI, fairness, NLP and LLMs, causal inference, deployment
+          shift, privacy and federated learning, financial ML, and audit tooling.
+        </desc>
+
+        {/* edges: center → nodes */}
+        {
+          nodes.map((n) => (
+            <line
+              class="edge"
+              x1={CX}
+              y1={CY}
+              x2={n.x}
+              y2={n.y}
+              data-edge
+            />
+          ))
+        }
+        {/* cross edges */}
+        {
+          cross.map(([a, b]) => (
+            <line
+              class="edge edge--cross"
+              x1={nodes[a].x}
+              y1={nodes[a].y}
+              x2={nodes[b].x}
+              y2={nodes[b].y}
+              data-edge
+            />
+          ))
+        }
+
+        {/* satellite nodes */}
+        {
+          nodes.map((n) => (
+            <g class="node" data-node>
+              <circle cx={n.x} cy={n.y} r="7" class="node-dot" />
+              <text x={n.x} y={n.y - 18} class="node-label" text-anchor="middle">
+                {n.label}
+              </text>
+              {n.theme && (
+                <text x={n.x} y={n.y + 30} class="node-count" text-anchor="middle">
+                  {countFor(n.theme)} {countFor(n.theme) === 1 ? "work" : "works"}
+                </text>
+              )}
+            </g>
+          ))
+        }
+
+        {/* center */}
+        <g class="center" data-node>
+          <circle cx={CX} cy={CY} r="64" class="center-ring" />
+          <circle cx={CX} cy={CY} r="5" class="center-dot" />
+          <text x={CX} y={CY - 14} class="center-label" text-anchor="middle">
+            Trustworthy
+          </text>
+          <text x={CX} y={CY + 14} class="center-label" text-anchor="middle">
+            Machine Learning
+          </text>
+        </g>
+      </svg>
+      <figcaption class="label-mono map-caption">
+        Themes connect through shared methodology — subgroup analysis, confidence
+        intervals, calibration, external validation — and converge in TrustShift.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .map-section {
+    padding-block: var(--space-section);
+    border-bottom: var(--rule);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .section-title {
+    font-weight: 460;
+    max-width: 22ch;
+    margin-bottom: var(--space-16);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .map-svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .edge {
+    stroke: var(--hairline-strong);
+    stroke-width: 1;
+  }
+
+  .edge--cross {
+    stroke-dasharray: 4 5;
+    stroke: var(--hairline-strong);
+  }
+
+  .node-dot {
+    fill: var(--paper);
+    stroke: var(--signal);
+    stroke-width: 2;
+  }
+
+  .node-label {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    font-weight: 600;
+    fill: var(--ink);
+  }
+
+  .node-count {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    fill: var(--ink-3);
+  }
+
+  .center-ring {
+    fill: var(--signal-wash);
+    stroke: var(--signal);
+    stroke-width: 1.5;
+  }
+
+  .center-dot { fill: var(--signal); }
+
+  .center-label {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: 19px;
+    fill: var(--signal-deep);
+  }
+
+  .map-caption {
+    margin-top: var(--space-8);
+    max-width: 60ch;
+  }
+
+  @media (max-width: 640px) {
+    .node-label { font-size: 19px; }
+    .node-count { font-size: 14px; }
+    .center-label { font-size: 22px; }
+  }
+</style>

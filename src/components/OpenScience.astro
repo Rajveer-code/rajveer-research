@@ -1,0 +1,114 @@
+---
+import { openScience } from "../data/research";
+---
+
+<section class="os container" id="open-science">
+  <p class="label-mono section-eyebrow" data-reveal>Open science</p>
+  <h2 class="section-title" data-reveal>
+    Reproducible. Reusable. <em>Open.</em>
+  </h2>
+  <p class="os-lead" data-reveal>
+    Every manuscript ships with the machinery to regenerate its numbers from
+    result files. Datasets, benchmarks, and audit libraries are public,
+    documented, and built to be used by other people.
+  </p>
+
+  <ul class="os-grid">
+    {
+      openScience.map((item) => (
+        <li class="os-card" data-reveal>
+          <span class="label-mono os-kind">{item.kind}</span>
+          <h3 class="os-name">{item.name}</h3>
+          <p class="os-text">{item.text}</p>
+          <div class="os-links ui-sans">
+            {item.links.map((l) => (
+              <a href={l.href}>{l.label} ↗</a>
+            ))}
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .os {
+    padding-block: var(--space-section);
+    border-bottom: var(--rule);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .section-title {
+    font-weight: 460;
+    margin-bottom: var(--space-6);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .os-lead {
+    color: var(--ink-2);
+    max-width: 56ch;
+    margin-bottom: var(--space-16);
+  }
+
+  .os-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+    gap: var(--space-6);
+  }
+
+  .os-card {
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    padding: var(--space-6);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+    background: var(--paper-raised);
+    transition: box-shadow var(--dur-med) var(--ease-out), border-color var(--dur-med) var(--ease-out);
+  }
+
+  .os-card:hover {
+    box-shadow: var(--shadow-2);
+    border-color: var(--signal);
+  }
+
+  .os-kind { color: var(--signal); }
+
+  .os-name {
+    font-family: var(--font-mono);
+    font-size: var(--text-md);
+    font-weight: 400;
+  }
+
+  .os-text {
+    color: var(--ink-2);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+  }
+
+  .os-links {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-top: var(--space-2);
+  }
+
+  .os-links a {
+    color: var(--signal);
+    text-decoration: none;
+  }
+
+  .os-links a:hover { text-decoration: underline; }
+</style>

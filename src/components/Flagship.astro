@@ -1,0 +1,272 @@
+---
+import { flagship } from "../data/research";
+
+const stages = [
+  { id: "deploy", label: "Deployment", note: "model meets a shifted world" },
+  { id: "probe", label: "Diagnosis", note: "3 label-free shift probes" },
+  { id: "taxonomy", label: "Failure taxonomy", note: "which axis breaks, and why" },
+  { id: "audit", label: "Audit → remediation", note: "recalibrate · reweight · retrain" },
+];
+---
+
+<section class="flagship" id="flagship">
+  <div class="container">
+    <p class="label-mono section-eyebrow" data-reveal>
+      Flagship research · {flagship.status}
+    </p>
+    <h2 class="flagship-title" data-reveal>
+      Trust<em>Shift</em>
+    </h2>
+    <p class="flagship-thesis" data-reveal>
+      {flagship.oneLiner}
+    </p>
+
+    <figure class="pipeline" data-reveal aria-label="TrustShift audit pipeline">
+      <ol class="pipeline-track">
+        {
+          stages.map((s, i) => (
+            <li class="stage" data-stage={i}>
+              <span class="stage-index label-mono">{String(i + 1).padStart(2, "0")}</span>
+              <span class="stage-label">{s.label}</span>
+              <span class="stage-note">{s.note}</span>
+              {i < stages.length - 1 && (
+                <svg class="stage-arrow" viewBox="0 0 48 16" aria-hidden="true">
+                  <line x1="0" y1="8" x2="40" y2="8" />
+                  <path d="M40 3 L47 8 L40 13" fill="none" />
+                </svg>
+              )}
+            </li>
+          ))
+        }
+      </ol>
+      <figcaption class="label-mono pipeline-caption">
+        Four domains — clinical · mental-health NLP · lending · network security —
+        one pre-registered protocol
+      </figcaption>
+    </figure>
+
+    <div class="flagship-grid" data-reveal>
+      <div class="flagship-claim">
+        <h3 class="claim-heading">The claim</h3>
+        <p>{flagship.findings}</p>
+      </div>
+      <ul class="flagship-results" aria-label="Key facts">
+        {
+          flagship.results.map((r) => (
+            <li>
+              <span class="result-value">{r.value}</span>
+              <span class="result-label">{r.label}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <div class="flagship-actions ui-sans" data-reveal>
+      <a class="btn btn--primary" href={`/research/${flagship.slug}/`}>
+        Read in five minutes
+      </a>
+      {
+        flagship.links.map((l) => (
+          <a class="btn" href={l.href}>
+            {l.label} ↗
+          </a>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .flagship {
+    padding-block: var(--space-section);
+    border-bottom: var(--rule);
+    background:
+      linear-gradient(var(--hairline) 1px, transparent 1px) 0 0 / 100% 8rem,
+      var(--paper-recessed);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .flagship-title {
+    font-size: var(--text-display);
+    line-height: var(--leading-display);
+    letter-spacing: var(--tracking-display);
+    font-weight: 460;
+  }
+
+  .flagship-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .flagship-thesis {
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--ink-2);
+    max-width: 56ch;
+    margin-top: var(--space-6);
+  }
+
+  /* ---- pipeline ---- */
+  .pipeline {
+    margin: var(--space-16) 0;
+    padding: var(--space-8);
+    background: var(--paper-raised);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+  }
+
+  .pipeline-track {
+    list-style: none;
+    display: flex;
+    padding: 0;
+    margin: 0;
+    gap: var(--space-4);
+  }
+
+  .stage {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "index arrow"
+      "label arrow"
+      "note arrow";
+    align-content: start;
+    column-gap: var(--space-3);
+  }
+
+  .stage-index {
+    grid-area: index;
+    color: var(--signal);
+    margin-bottom: var(--space-2);
+  }
+
+  .stage-label {
+    grid-area: label;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: var(--text-sm);
+  }
+
+  .stage-note {
+    grid-area: note;
+    font-size: var(--text-sm);
+    font-style: italic;
+    color: var(--ink-3);
+    margin-top: var(--space-1);
+  }
+
+  .stage-arrow {
+    grid-area: arrow;
+    align-self: center;
+    width: 3rem;
+    stroke: var(--hairline-strong);
+    stroke-width: 1.5;
+  }
+
+  .pipeline-caption {
+    margin-top: var(--space-8);
+    padding-top: var(--space-4);
+    border-top: var(--rule);
+  }
+
+  /* ---- claim + results ---- */
+  .flagship-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+    gap: var(--space-16);
+    margin-block: var(--space-12);
+  }
+
+  .claim-heading {
+    font-size: var(--text-md);
+    font-style: italic;
+    color: var(--signal);
+    margin-bottom: var(--space-4);
+  }
+
+  .flagship-results {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+
+  .flagship-results li {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    background: var(--paper-raised);
+    border: var(--rule);
+    border-radius: var(--radius-2);
+  }
+
+  .result-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-lg);
+    color: var(--signal);
+    letter-spacing: -0.02em;
+  }
+
+  .result-label {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+
+  .flagship-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: var(--space-3) var(--space-6);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-2);
+    color: var(--ink);
+    background: var(--paper-raised);
+    text-decoration: none;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .btn:hover {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+
+  .btn--primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn--primary:hover {
+    background: var(--signal);
+    border-color: var(--signal);
+    color: var(--paper);
+  }
+
+  @media (max-width: 900px) {
+    .pipeline-track { flex-direction: column; gap: var(--space-6); }
+    .stage { grid-template-areas: "index" "label" "note"; grid-template-columns: 1fr; }
+    .stage-arrow { display: none; }
+    .flagship-grid { grid-template-columns: 1fr; gap: var(--space-8); }
+  }
+
+  @media (max-width: 520px) {
+    .flagship-results { grid-template-columns: 1fr; }
+  }
+</style>

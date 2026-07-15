@@ -101,14 +101,20 @@ code, pre, kbd {
 .container--wide { max-width: var(--width-wide); }
 .container--prose { max-width: calc(var(--width-prose) + 2 * var(--gutter)); }
 
-/* Scroll-reveal default state — motion.ts animates in; reduced-motion shows instantly */
-[data-reveal] {
+/* Animated-entrance default state — hidden only when JS is present (html.js
+   set inline in <head>); motion.ts animates in; no-JS users see everything. */
+html.js [data-reveal],
+html.js [data-hero] {
   opacity: 0;
+}
+
+html.js [data-reveal] {
   transform: translateY(24px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  [data-reveal] {
+  html.js [data-reveal],
+  html.js [data-hero] {
     opacity: 1;
     transform: none;
   }

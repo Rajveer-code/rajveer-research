@@ -1,0 +1,159 @@
+---
+import { publications, THEME_LABELS } from "../data/research";
+
+const sorted = [...publications].sort((a, b) => a.order - b.order);
+---
+
+<section class="pubs container" id="publications">
+  <p class="label-mono section-eyebrow" data-reveal>Publications & manuscripts</p>
+  <h2 class="section-title" data-reveal>
+    Nine studies, one <em>argument</em>
+  </h2>
+
+  <ol class="pub-list">
+    {
+      sorted.map((p) => (
+        <li class="pub" data-reveal>
+          <div class="pub-meta">
+            <span class={`status status--${p.statusKind}`}>{p.status}</span>
+            <span class="label-mono pub-year">{p.year}</span>
+          </div>
+          <h3 class="pub-title">
+            <a href={`/research/${p.slug}/`}>{p.title}</a>
+          </h3>
+          <p class="pub-authors ui-sans">{p.authors}</p>
+          <p class="pub-oneliner">{p.oneLiner}</p>
+          <div class="pub-foot">
+            <ul class="pub-themes" aria-label="Themes">
+              {p.themes.slice(0, 3).map((t) => (
+                <li class="label-mono">{THEME_LABELS[t]}</li>
+              ))}
+            </ul>
+            <div class="pub-links ui-sans">
+              <a href={`/research/${p.slug}/`}>Read in five minutes</a>
+              {p.links.map((l) => (
+                <a href={l.href}>{l.label} ↗</a>
+              ))}
+            </div>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .pubs {
+    padding-block: var(--space-section);
+    border-bottom: var(--rule);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .section-title {
+    font-weight: 460;
+    margin-bottom: var(--space-24);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .pub-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .pub {
+    padding-block: var(--space-12);
+    border-top: var(--rule);
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .pub:last-child { border-bottom: var(--rule); }
+
+  .pub-meta {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .status {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-1);
+  }
+
+  .status--presented { background: var(--verified-wash); color: var(--verified); }
+  .status--review { background: var(--signal-wash); color: var(--signal-deep); }
+  .status--working { background: var(--paper-recessed); color: var(--ink-2); }
+
+  .pub-year { color: var(--ink-3); }
+
+  .pub-title {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    max-width: 46ch;
+  }
+
+  .pub-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .pub-title a:hover { color: var(--signal); }
+
+  .pub-authors { color: var(--ink-3); }
+
+  .pub-oneliner {
+    color: var(--ink-2);
+    max-width: 62ch;
+  }
+
+  .pub-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+  }
+
+  .pub-themes {
+    list-style: none;
+    display: flex;
+    gap: var(--space-4);
+    padding: 0;
+    margin: 0;
+  }
+
+  .pub-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    justify-content: flex-end;
+  }
+
+  .pub-links a {
+    color: var(--signal);
+    text-decoration: none;
+  }
+
+  .pub-links a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    .pub-foot { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
+    .pub-links { flex-wrap: wrap; gap: var(--space-4); }
+  }
+</style>
