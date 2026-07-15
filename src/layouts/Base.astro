@@ -51,7 +51,11 @@ const personLd = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="Rajveer Singh Pall — AI Research" />
-    <meta name="twitter:card" content="summary" />
+    {/* TODO on deploy: prefix og:image with the production origin — crawlers need an absolute URL */}
+    <meta property="og:image" content="/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
   </head>
   <body>

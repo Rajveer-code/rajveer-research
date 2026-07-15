@@ -15,7 +15,7 @@
   /* ---- Color: ink ---- */
   --ink: #17191c;            /* primary text — 15.6:1 on paper */
   --ink-2: #4a4e55;          /* secondary text — 7.6:1 */
-  --ink-3: #797d84;          /* tertiary, captions — 4.6:1 */
+  --ink-3: #63666d;          /* tertiary, captions — ≥5:1 on paper and recessed */
 
   /* ---- Color: rules ---- */
   --hairline: #e4e1d8;

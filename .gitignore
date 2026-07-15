@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # working plans
 PLAN_*.md
+
+# audit artifacts
+lighthouse*.json
