@@ -4,7 +4,7 @@ import Nav from "../../components/Nav.astro";
 import MethodFlow from "../../components/MethodFlow.astro";
 import FigureBars from "../../components/FigureBars.astro";
 import PaperFigures from "../../components/PaperFigures.astro";
-import SummaryDiagram from "../../components/SummaryDiagram.astro";
+import HeroFigure from "../../components/HeroFigure.astro";
 import { publications, THEME_LABELS } from "../../data/research";
 
 export function getStaticPaths() {
@@ -78,16 +78,12 @@ const fiveMinute = [
         </div>
       </section>
 
-      {
-        pub.diagram && (
-          <section class="onefig container" aria-label="The paper in one figure">
-            <p class="label-mono section-eyebrow" data-reveal>The paper in one figure</p>
-            <div data-reveal>
-              <SummaryDiagram spec={pub.diagram} />
-            </div>
-          </section>
-        )
-      }
+      <section class="onefig container" aria-label="The discovery in one figure">
+        <p class="label-mono section-eyebrow" data-reveal>The discovery in one figure</p>
+        <div data-reveal>
+          <HeroFigure slug={pub.slug} />
+        </div>
+      </section>
 
       {
         pub.paperFigures && pub.paperFigures.length > 0 && (

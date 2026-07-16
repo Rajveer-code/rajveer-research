@@ -95,7 +95,10 @@ function heroField(): void {
     signal: i % 9 === 0,
   }));
 
+  let frame = 0;
   const draw = () => {
+    if (document.hidden) return; // don't paint an off-screen tab
+    if (frame++ % 2 !== 0) return; // ~30fps: ambient motion needs no more
     ctx.clearRect(0, 0, w, h);
     ctx.lineWidth = 1;
     for (let i = 0; i < N; i++) {

@@ -1,0 +1,406 @@
+---
+/**
+ * Discovery-first hero figure — one iconic image per paper, each a distinct
+ * visual grammar. Answers "what did this paper discover?" in one look, not
+ * "what did it measure". All annotated numbers are verified from result files.
+ * On-brand SVG (no raster). Each branch is bespoke — no shared template.
+ */
+interface Props {
+  slug: string;
+}
+const { slug } = Astro.props;
+
+const punchlines: Record<string, string> = {
+  "diabetes-external-validation":
+    "Deployment reveals a hidden, age-shaped failure that internal validation cannot see.",
+  "mortgage-disparities":
+    "The disparity is concentrated inside institutions — and widens at their boundaries.",
+  icgdf:
+    "A perfectly calibrated model with zero skill. The correct scientific decision is not to deploy.",
+  cpfe:
+    "Cross-platform reliability collapses on all five independent axes at once.",
+  indiafinbench:
+    "Frontier LLMs share a measurable blind spot for Indian financial regulation.",
+  "federated-diabetes":
+    "Privacy-preserving federation generalises better than the centralized model it replaces.",
+  "cate-hmda":
+    "The average gap is a lie — the underwriting channel decides who bears the burden.",
+  "conviction-ranking":
+    "Predictive accuracy does not make money. Execution does.",
+};
+
+const punchline = punchlines[slug];
+---
+
+{
+  punchline && (
+    <figure class="hf">
+      {/* ================= DIABETES — external validation as an X-ray ========= */}
+      {slug === "diabetes-external-validation" && (
+        <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="External validation reveals hidden subgroup failure">
+          <text x="24" y="34" class="eyebrow">THE MODEL LOOKS HEALTHY —</text>
+          {/* model + internal pass */}
+          <rect x="24" y="60" width="150" height="70" rx="8" class="fill-raised stroke-ink" />
+          <text x="99" y="90" class="lbl" text-anchor="middle">Diabetes model</text>
+          <text x="99" y="112" class="mono muted" text-anchor="middle">XGBoost</text>
+          <path d="M174 95 H236" class="arrow" marker-end="url(#hf-ar)" />
+          <rect x="236" y="60" width="150" height="70" rx="8" class="fill-vwash stroke-verified" />
+          <text x="311" y="88" class="lbl fill-verified-t" text-anchor="middle">Internal ✓</text>
+          <text x="311" y="112" class="mono fill-verified-t" text-anchor="middle">AUC 0.794</text>
+          {/* lens */}
+          <text x="24" y="188" class="eyebrow fill-signal-t">— UNTIL EXTERNAL VALIDATION LOOKS CLOSER</text>
+          <circle cx="120" cy="270" r="46" class="fill-none stroke-signal" stroke-width="2.5" />
+          <line x1="153" y1="303" x2="176" y2="326" class="stroke-signal" stroke-width="4" stroke-linecap="round" />
+          <text x="120" y="266" class="mini" text-anchor="middle">1.28M</text>
+          <text x="120" y="282" class="mini muted" text-anchor="middle">BRFSS</text>
+          <path d="M186 270 H232" class="arrow" marker-end="url(#hf-ar)" />
+          {/* revealed cracks */}
+          {[
+            { y: 232, label: "Adults ≥ 60", val: "AUC 0.607 · gap 0.135", w: 250, cls: "bad" },
+            { y: 268, label: "Overall", val: "0.717 · −9.7%", w: 165, cls: "warn" },
+            { y: 304, label: "Obese", val: "0.698 · gap 0.037", w: 95, cls: "warnb" },
+            { y: 340, label: "Calibration", val: "Brier 0.123 · overestimates", w: 130, cls: "info" },
+          ].map((r) => (
+            <g>
+              <text x="242" y={r.y - 4} class="mini">{r.label}</text>
+              <rect x="242" y={r.y} width={r.w} height="10" rx="3" class={`sev sev-${r.cls}`} />
+              <text x={242 + r.w + 8} y={r.y + 9} class="mono tiny muted">{r.val}</text>
+            </g>
+          ))}
+        </svg>
+      )}
+
+      {/* ================= MORTGAGE DISPARITIES — inside the institution ====== */}
+      {slug === "mortgage-disparities" && (
+        <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="The disparity is concentrated within institutions">
+          <text x="24" y="34" class="eyebrow">42M APPLICATIONS · RAW GAP 14.95 pp — BUT WHERE DOES IT LIVE?</text>
+          {/* applicant in */}
+          <text x="70" y="150" class="lbl" text-anchor="middle">Applicant</text>
+          <path d="M120 175 H176" class="arrow" marker-end="url(#hf-ar)" />
+          {/* the institution as a container */}
+          <rect x="180" y="70" width="360" height="240" rx="12" class="fill-recessed stroke-ink" stroke-dasharray="2 0" />
+          <text x="360" y="98" class="eyebrow" text-anchor="middle">INSIDE ONE LENDER</text>
+          <rect x="214" y="120" width="292" height="120" rx="8" class="fill-signal" />
+          <text x="360" y="168" class="big-num fill-paper-t" text-anchor="middle">74.6%</text>
+          <text x="360" y="196" class="lbl fill-paper-t" text-anchor="middle">of the gap is within-lender</text>
+          <text x="360" y="222" class="mono tiny fill-paper-t" text-anchor="middle" opacity="0.85">rising 66.8% → 78.3% (2020→2024)</text>
+          <text x="360" y="280" class="small muted" text-anchor="middle">only a minority sits between institutions</text>
+          {/* boundary amplifiers */}
+          <text x="24" y="344" class="eyebrow fill-signal-t">BOUNDARIES WIDEN IT</text>
+          <rect x="220" y="326" width="150" height="30" rx="6" class="fill-raised stroke-hair" />
+          <text x="295" y="345" class="mono tiny" text-anchor="middle">+2.0 pp @ 80% LTV</text>
+          <rect x="384" y="326" width="176" height="30" rx="6" class="fill-raised stroke-hair" />
+          <text x="472" y="345" class="mono tiny" text-anchor="middle">+1.5 pp · 2022 tightening</text>
+          <text x="612" y="180" class="mono tiny muted" text-anchor="middle">68% unexplained</text>
+          <text x="612" y="196" class="mono tiny muted" text-anchor="middle">by observables</text>
+        </svg>
+      )}
+
+      {/* ================= ICGDF — the deployment gate ======================== */}
+      {slug === "icgdf" && (
+        <svg class="hf-svg" viewBox="0 0 720 400" role="img" aria-label="The deployment gate stays closed">
+          <text x="360" y="34" class="eyebrow" text-anchor="middle">CAN THE MODEL PROVE PREDICTIVE SKILL BEFORE IT TRADES?</text>
+          <rect x="120" y="58" width="220" height="52" rx="8" class="fill-raised stroke-bad" />
+          <text x="230" y="80" class="lbl" text-anchor="middle">Stage 1 · HAC t-test</text>
+          <text x="230" y="99" class="mono small fill-bad-t" text-anchor="middle">✗  t = −0.09</text>
+          <rect x="380" y="58" width="220" height="52" rx="8" class="fill-raised stroke-bad" />
+          <text x="490" y="80" class="lbl" text-anchor="middle">Stage 2 · Permutation</text>
+          <text x="490" y="99" class="mono small fill-bad-t" text-anchor="middle">✗  ≈ random</text>
+          <path d="M230 110 V150" class="arrow" marker-end="url(#hf-ar)" />
+          <path d="M490 110 V150" class="arrow" marker-end="url(#hf-ar)" />
+          {/* the closed gate */}
+          <rect x="250" y="152" width="220" height="76" rx="6" class="fill-recessed stroke-ink" stroke-width="2" />
+          {[280, 310, 340, 370, 400, 430].map((x) => (
+            <line x1={x} y1="158" x2={x} y2="222" class="stroke-ink" stroke-width="3" />
+          ))}
+          <text x="360" y="248" class="gate-lbl" text-anchor="middle">GATE CLOSED</text>
+          {/* verdict */}
+          <rect x="234" y="266" width="252" height="42" rx="8" class="fill-ink" />
+          <text x="360" y="293" class="verdict fill-paper-t" text-anchor="middle">DO NOT DEPLOY</text>
+          {/* paradox */}
+          <text x="24" y="340" class="eyebrow fill-signal-t">THE TWIST</text>
+          <text x="24" y="362" class="small">ECE &lt; 0.025 across all 12 folds — perfectly calibrated, and yet</text>
+          <text x="24" y="382" class="small">the gate opened 0 / 12. Calibration is not deployment readiness.</text>
+        </svg>
+      )}
+
+      {/* ================= CPFE — five-axis diagnostic (radar) ================ */}
+      {slug === "cpfe" && (
+        <svg class="hf-svg" viewBox="0 0 720 400" role="img" aria-label="Reliability collapses on all five axes under platform shift">
+          <text x="24" y="30" class="eyebrow">ONE PLATFORM: AUC 0.98. FIVE AXES OF RELIABILITY, ALL SHIFTED AT ONCE.</text>
+          {/* pentagon grid */}
+          <g class="stroke-hair fill-none">
+            <polygon points="360,80 490,170 440,315 280,315 230,170" />
+            <polygon points="360,145 425,190 400,262.5 320,262.5 295,190" />
+          </g>
+          {[
+            [360, 80], [490, 170], [440, 315], [280, 315], [230, 170],
+          ].map((p) => <line x1="360" y1="200" x2={p[0]} y2={p[1]} class="stroke-hair" />)}
+          {/* in-platform polygon (healthy) */}
+          <polygon points="360,84 486,171 438,312 282,312 234,171" class="poly-good" />
+          {/* cross-platform polygon (collapsed) */}
+          <polygon points="360,150 402,182 388,246 332,246 318,182" class="poly-bad" />
+          {/* axis labels */}
+          <text x="360" y="68" class="mini" text-anchor="middle">Discrimination</text>
+          <text x="360" y="330" class="mini tiny muted" text-anchor="middle">−30 to −40% AUC</text>
+          <text x="512" y="168" class="mini" text-anchor="start">Calibration</text>
+          <text x="512" y="184" class="mini tiny muted" text-anchor="start">ECE → 0.54</text>
+          <text x="452" y="336" class="mini" text-anchor="middle">Equity</text>
+          <text x="452" y="352" class="mini tiny muted" text-anchor="middle">DI &lt; 0.17</text>
+          <text x="268" y="336" class="mini" text-anchor="middle">Attribution</text>
+          <text x="268" y="352" class="mini tiny muted" text-anchor="middle">Jaccard ≈ 0</text>
+          <text x="208" y="168" class="mini" text-anchor="end">Significance</text>
+          {/* legend */}
+          <rect x="560" y="120" width="14" height="10" class="poly-good" /><text x="580" y="129" class="mini">in-platform</text>
+          <rect x="560" y="142" width="14" height="10" class="poly-bad" /><text x="580" y="151" class="mini">cross-platform</text>
+        </svg>
+      )}
+
+      {/* ================= INDIAFINBENCH — the blind spot ===================== */}
+      {slug === "indiafinbench" && (
+        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="A measurable blind spot for Indian financial regulation">
+          <text x="24" y="32" class="eyebrow">FINANCIAL-NLP BENCHMARKS ARE WESTERN —</text>
+          {/* western cluster */}
+          <g>
+            <circle cx="90" cy="120" r="30" class="fill-recessed stroke-hair" /><text x="90" y="124" class="mono tiny" text-anchor="middle">US</text>
+            <circle cx="150" cy="90" r="24" class="fill-recessed stroke-hair" /><text x="150" y="94" class="mono tiny" text-anchor="middle">EU</text>
+            <circle cx="150" cy="160" r="22" class="fill-recessed stroke-hair" /><text x="150" y="164" class="mono tiny" text-anchor="middle">UK</text>
+          </g>
+          {/* the void */}
+          <circle cx="330" cy="120" r="66" class="fill-none stroke-signal" stroke-width="2" stroke-dasharray="6 6" />
+          <text x="330" y="112" class="mini fill-signal-t" text-anchor="middle">blind spot</text>
+          <text x="330" y="132" class="mono tiny muted" text-anchor="middle">SEBI / RBI</text>
+          <text x="330" y="147" class="mono tiny muted" text-anchor="middle">1992–2026</text>
+          <path d="M400 120 H452" class="arrow stroke-signal" marker-end="url(#hf-ar-s)" />
+          {/* filled by the benchmark */}
+          <rect x="456" y="76" width="240" height="88" rx="10" class="fill-signal" />
+          <text x="576" y="112" class="big-num fill-paper-t" text-anchor="middle">406</text>
+          <text x="576" y="136" class="lbl fill-paper-t" text-anchor="middle">expert questions</text>
+          <text x="576" y="154" class="mono tiny fill-paper-t" text-anchor="middle" opacity="0.85">192 documents · 12 LLMs</text>
+          {/* four reasoning types */}
+          <text x="24" y="228" class="eyebrow fill-signal-t">FOUR REASONING TYPES — NUMERICAL SEPARATES THE FRONTIER</text>
+          {[
+            { x: 24, label: "Interpretation", n: "174", hot: false },
+            { x: 196, label: "Numerical", n: "92 · spread 35.9 pp", hot: true },
+            { x: 430, label: "Temporal", n: "78", hot: false },
+            { x: 560, label: "Contradiction", n: "62", hot: false },
+          ].map((t) => (
+            <g>
+              <rect x={t.x} y="244" width={t.hot ? 226 : 160} height="46" rx="8" class={t.hot ? "fill-signal" : "fill-raised stroke-hairS"} />
+              <text x={t.x + (t.hot ? 113 : 80)} y="266" class={`lbl ${t.hot ? "fill-paper-t" : ""}`} text-anchor="middle">{t.label}</text>
+              <text x={t.x + (t.hot ? 113 : 80)} y="283" class={`mono tiny ${t.hot ? "fill-paper-t" : "muted"}`} text-anchor="middle">{t.n}</text>
+            </g>
+          ))}
+        </svg>
+      )}
+
+      {/* ================= FEDERATED — privacy that improves deployment ======= */}
+      {slug === "federated-diabetes" && (
+        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="Federated model generalises better than the centralized one">
+          <text x="24" y="30" class="eyebrow">HOSPITALS CAN'T SHARE DATA — SO THE MODEL TRAVELS INSTEAD</text>
+          {[
+            { y: 60, t: "Node A · Young Urban", n: "n = 4,500" },
+            { y: 118, t: "Node B · Elderly Rural", n: "n = 3,406" },
+            { y: 176, t: "Node C · Mixed Metro", n: "n = 4,000" },
+          ].map((nd) => (
+            <g>
+              <rect x="24" y={nd.y} width="176" height="44" rx="8" class="fill-recessed stroke-hairS" />
+              <text x="112" y={nd.y + 20} class="mini" text-anchor="middle">{nd.t}</text>
+              <text x="112" y={nd.y + 36} class="mono tiny muted" text-anchor="middle">{nd.n}</text>
+              <path d={`M200 ${nd.y + 22} C250 ${nd.y + 22} 250 140 300 140`} class="arrow-thin" fill="none" />
+            </g>
+          ))}
+          <text x="250" y="96" class="mono tiny muted" text-anchor="middle">weights,</text>
+          <text x="250" y="109" class="mono tiny muted" text-anchor="middle">not data</text>
+          <rect x="300" y="112" width="130" height="56" rx="8" class="fill-vwash stroke-verified" />
+          <text x="365" y="136" class="lbl fill-verified-t" text-anchor="middle">Federated</text>
+          <text x="365" y="156" class="mono small fill-verified-t" text-anchor="middle">FedAvg</text>
+          <path d="M430 140 H482" class="arrow" marker-end="url(#hf-ar)" />
+          {/* the surprising win */}
+          <rect x="486" y="96" width="210" height="90" rx="10" class="fill-raised stroke-ink" />
+          <text x="591" y="122" class="lbl" text-anchor="middle">External · 1.28M</text>
+          <text x="591" y="150" class="big-num fill-signal-t" text-anchor="middle">0.757</text>
+          <text x="591" y="172" class="mono tiny muted" text-anchor="middle">beats centralized 0.700</text>
+          {/* four axes */}
+          <text x="24" y="248" class="eyebrow fill-signal-t">AUDITED ON FOUR DEPLOYABILITY AXES</text>
+          {[
+            { x: 24, t: "✓ Generalisation", d: "40% smaller gap", good: true },
+            { x: 194, t: "✓ Fairness", d: "elderly gap −21.7%", good: true },
+            { x: 364, t: "✓ Calibration", d: "ECE 0.276 → 0.001", good: true },
+            { x: 534, t: "✗ DP privacy", d: "collapses at ε ≤ 5", good: false },
+          ].map((a) => (
+            <g>
+              <rect x={a.x} y="264" width="162" height="46" rx="8" class={a.good ? "fill-vwash stroke-verified" : "fill-raised stroke-bad"} />
+              <text x={a.x + 81} y="286" class={`mini ${a.good ? "fill-verified-t" : "fill-bad-t"}`} text-anchor="middle">{a.t}</text>
+              <text x={a.x + 81} y="302" class="mono tiny muted" text-anchor="middle">{a.d}</text>
+            </g>
+          ))}
+        </svg>
+      )}
+
+      {/* ================= CATE — the average is a lie ======================== */}
+      {slug === "cate-hmda" && (
+        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="The average gap hides wide heterogeneity explained by the underwriting channel">
+          <text x="24" y="32" class="eyebrow">A HEADLINE REPORTS ONE AVERAGE —</text>
+          <rect x="40" y="120" width="120" height="60" rx="8" class="fill-recessed stroke-ink" />
+          <text x="100" y="148" class="big-num" text-anchor="middle">−9.39</text>
+          <text x="100" y="168" class="mono tiny muted" text-anchor="middle">pp, "the gap"</text>
+          <path d="M164 150 H214" class="arrow" marker-end="url(#hf-ar)" />
+          <text x="168" y="140" class="mono tiny fill-signal-t" text-anchor="start">but it shatters</text>
+          {/* distribution */}
+          <line x1="230" y1="250" x2="690" y2="250" class="stroke-hair" />
+          <path d="M240 250 C360 250 400 96 470 90 C540 84 560 250 680 250 Z" class="dist-fill" />
+          <clipPath id="hf-pen"><rect x="0" y="0" width="486" height="360" /></clipPath>
+          <path d="M240 250 C360 250 400 96 470 90 C540 84 560 250 680 250 Z" class="dist-pen" clip-path="url(#hf-pen)" />
+          <path d="M240 250 C360 250 400 96 470 90 C540 84 560 250 680 250" class="fill-none stroke-signalDeep" stroke-width="2" />
+          <line x1="486" y1="70" x2="486" y2="250" class="stroke-ink" stroke-dasharray="4 3" />
+          <text x="486" y="266" class="mono tiny" text-anchor="middle">0 · no penalty</text>
+          <text x="330" y="180" class="lbl fill-signalDeep-t" text-anchor="middle">90.7% penalised</text>
+          {/* channel split */}
+          <line x1="360" y1="120" x2="360" y2="250" class="stroke-bad" stroke-width="1.6" />
+          <text x="360" y="112" class="mono tiny fill-bad-t" text-anchor="middle">manual −14.79</text>
+          <line x1="540" y1="150" x2="540" y2="250" class="stroke-signal" stroke-width="1.6" />
+          <text x="556" y="150" class="mono tiny fill-signal-t" text-anchor="start">automated −6.17</text>
+          <text x="24" y="326" class="small">The underwriting channel — not the applicant — explains who lands where in this distribution (SD 8.47 pp).</text>
+        </svg>
+      )}
+
+      {/* ================= CONVICTION RANKING — execution destroys alpha ====== */}
+      {slug === "conviction-ranking" && (
+        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="Execution, not prediction, decides whether alpha survives">
+          <text x="24" y="30" class="eyebrow">THE SAME REAL SIGNAL — IC 0.0197 (p = 0.034) — TAKES TWO ROUTES</text>
+          <rect x="24" y="150" width="130" height="60" rx="8" class="fill-vwash stroke-signal" />
+          <text x="89" y="176" class="lbl fill-signalDeep-t" text-anchor="middle">Predictive</text>
+          <text x="89" y="196" class="lbl fill-signalDeep-t" text-anchor="middle">signal</text>
+          {/* upper path — dies */}
+          <path d="M154 165 C230 165 240 96 300 96" class="arrow-thin stroke-bad" fill="none" marker-end="url(#hf-ar-b)" />
+          {["Trade every signal", "High turnover", "Costs compound"].map((s, i) => (
+            <g>
+              <rect x={300 + i * 0} y={72 + i * 0} width="0" height="0" />
+              <rect x={300} y={72} width="118" height="0" />
+            </g>
+          ))}
+          {[
+            { x: 300, t: "Trade all" },
+            { x: 396, t: "↑ turnover" },
+            { x: 492, t: "costs bite" },
+          ].map((s) => (
+            <g>
+              <rect x={s.x} y="76" width="90" height="34" rx="6" class="fill-raised stroke-hairS" />
+              <text x={s.x + 45} y="97" class="mini tiny" text-anchor="middle">{s.t}</text>
+            </g>
+          ))}
+          <path d="M418 93 H432" class="arrow-thin stroke-hairS" fill="none" /><path d="M514 93 H528" class="arrow-thin stroke-hairS" fill="none" />
+          <rect x="596" y="70" width="104" height="46" rx="8" class="fill-raised stroke-bad" />
+          <text x="648" y="90" class="lbl fill-bad-t" text-anchor="middle">Sharpe 0.071</text>
+          <text x="648" y="106" class="mono tiny muted" text-anchor="middle">alpha gone</text>
+          {/* lower path — survives */}
+          <path d="M154 195 C230 195 240 264 300 264" class="arrow-thin stroke-verified" fill="none" marker-end="url(#hf-ar-v)" />
+          {[
+            { x: 300, t: "Rank · top-1" },
+            { x: 396, t: "few trades" },
+            { x: 492, t: "cost stays low" },
+          ].map((s) => (
+            <g>
+              <rect x={s.x} y="247" width="90" height="34" rx="6" class="fill-vwash stroke-verified" />
+              <text x={s.x + 45} y="268" class="mini tiny fill-verified-t" text-anchor="middle">{s.t}</text>
+            </g>
+          ))}
+          <path d="M418 264 H432" class="arrow-thin stroke-verified" fill="none" /><path d="M514 264 H528" class="arrow-thin stroke-verified" fill="none" />
+          <rect x="596" y="241" width="104" height="48" rx="8" class="fill-raised stroke-verified" />
+          <text x="648" y="261" class="lbl fill-verified-t" text-anchor="middle">Sharpe 1.183</text>
+          <text x="648" y="278" class="mono tiny muted" text-anchor="middle">4.8× cost margin</text>
+          <text x="24" y="336" class="small">Identical predictions. Only the execution design changed.</text>
+        </svg>
+      )}
+
+      <defs>
+        <marker id="hf-ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-hairS" /></marker>
+        <marker id="hf-ar-s" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-signal" /></marker>
+        <marker id="hf-ar-b" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-bad" /></marker>
+        <marker id="hf-ar-v" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-verified" /></marker>
+      </defs>
+
+      <figcaption class="hf-cap">{punchline}</figcaption>
+    </figure>
+  )
+}
+
+<style>
+  .hf {
+    margin: 0;
+    padding: var(--space-8);
+    background: var(--paper-raised);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+  }
+  .hf-svg { width: 100%; height: auto; }
+
+  .hf-cap {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: var(--rule);
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-md);
+    line-height: 1.4;
+    color: var(--ink);
+    text-align: center;
+    max-width: 60ch;
+    margin-inline: auto;
+  }
+
+  /* --- SVG text roles --- */
+  .hf :global(text) { font-family: var(--font-sans); }
+  .hf :global(.eyebrow) {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    fill: var(--ink-3);
+  }
+  .hf :global(.lbl) { font-size: 14px; font-weight: 600; fill: var(--ink); }
+  .hf :global(.mini) { font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+  .hf :global(.small) { font-size: 13px; fill: var(--ink-2); }
+  .hf :global(.tiny) { font-size: 10.5px; }
+  .hf :global(.mono) { font-family: var(--font-mono); }
+  .hf :global(.muted) { fill: var(--ink-3); }
+  .hf :global(.big-num) { font-family: var(--font-mono); font-size: 30px; letter-spacing: -0.02em; fill: var(--ink); }
+  .hf :global(.gate-lbl) { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.12em; fill: var(--ink); }
+  .hf :global(.verdict) { font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.1em; font-weight: 700; }
+
+  /* --- fills / strokes bound to tokens --- */
+  .hf :global(.fill-raised) { fill: var(--paper-raised); }
+  .hf :global(.fill-recessed) { fill: var(--paper-recessed); }
+  .hf :global(.fill-signal) { fill: var(--signal); }
+  .hf :global(.fill-vwash) { fill: var(--verified-wash); }
+  .hf :global(.fill-ink) { fill: var(--ink); }
+  .hf :global(.fill-none) { fill: none; }
+  .hf :global(.stroke-ink) { stroke: var(--ink); }
+  .hf :global(.stroke-hair) { stroke: var(--hairline); }
+  .hf :global(.stroke-hairS) { stroke: var(--hairline-strong); }
+  .hf :global(.stroke-signal) { stroke: var(--signal); }
+  .hf :global(.stroke-signalDeep) { stroke: var(--signal-deep); }
+  .hf :global(.stroke-verified) { stroke: var(--verified); }
+  .hf :global(.stroke-bad) { stroke: #b3421c; }
+  .hf :global(.fill-signal-t) { fill: var(--signal); }
+  .hf :global(.fill-signalDeep-t) { fill: var(--signal-deep); }
+  .hf :global(.fill-verified-t) { fill: var(--verified); }
+  .hf :global(.fill-bad-t) { fill: #b3421c; }
+  .hf :global(.fill-paper-t) { fill: var(--paper); }
+  .hf :global(.fill-hairS) { fill: var(--hairline-strong); }
+
+  .hf :global(.arrow) { stroke: var(--hairline-strong); stroke-width: 1.5; fill: none; }
+  .hf :global(.arrow-thin) { stroke-width: 1.5; }
+
+  .hf :global(.sev) { }
+  .hf :global(.sev-bad) { fill: #b3421c; }
+  .hf :global(.sev-warn) { fill: var(--signal); }
+  .hf :global(.sev-warnb) { fill: #a16207; }
+  .hf :global(.sev-info) { fill: var(--hairline-strong); }
+
+  .hf :global(.poly-good) { fill: color-mix(in srgb, var(--ink) 12%, transparent); stroke: var(--ink); stroke-width: 1.5; }
+  .hf :global(.poly-bad) { fill: color-mix(in srgb, #b3421c 22%, transparent); stroke: #b3421c; stroke-width: 2; }
+
+  .hf :global(.dist-fill) { fill: var(--signal-wash); }
+  .hf :global(.dist-pen) { fill: color-mix(in srgb, var(--signal) 26%, transparent); }
+</style>
