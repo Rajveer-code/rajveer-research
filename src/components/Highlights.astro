@@ -1,0 +1,129 @@
+---
+// Discovery-first highlights, immediately after the hero — the reader meets the
+// three claims before any section. Discovery stated; numbers live on the pages.
+const highlights = [
+  {
+    tag: "TrustShift",
+    claim: "Failure depends on the <em>type</em> of deployment shift — not its magnitude.",
+    href: "/research/trustshift/",
+    flag: "Flagship",
+  },
+  {
+    tag: "Clinical AI",
+    claim: "External validation exposes subgroup failures a benchmark hides.",
+    href: "/research/diabetes-external-validation/",
+    flag: "Presented",
+  },
+  {
+    tag: "Markets",
+    claim: "High prediction accuracy does not make a model deployable.",
+    href: "/research/icgdf/",
+    flag: "Null result",
+  },
+];
+---
+
+<section class="highlights" aria-label="Research highlights">
+  <div class="container container--wide">
+    <p class="label-mono hl-eyebrow" data-reveal>Three findings, one program</p>
+    <ul class="hl-grid">
+      {
+        highlights.map((h) => (
+          <li class="hl-card" data-reveal>
+            <a href={h.href} class="hl-link">
+              <div class="hl-top">
+                <span class="label-mono hl-tag">{h.tag}</span>
+                <span class="label-mono hl-flag">{h.flag}</span>
+              </div>
+              <p class="hl-claim" set:html={h.claim} />
+              <span class="hl-more ui-sans">Read the paper →</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .highlights {
+    padding-block: var(--space-16) var(--space-24);
+    border-bottom: var(--rule);
+  }
+
+  .hl-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .hl-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+  }
+
+  .hl-card {
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+    background: var(--paper-raised);
+    transition:
+      box-shadow var(--dur-med) var(--ease-out),
+      border-color var(--dur-med) var(--ease-out),
+      transform var(--dur-med) var(--ease-out);
+  }
+
+  .hl-card:hover {
+    box-shadow: var(--shadow-2);
+    border-color: var(--signal);
+    transform: translateY(-3px);
+  }
+
+  .hl-link {
+    display: grid;
+    gap: var(--space-6);
+    height: 100%;
+    padding: var(--space-6);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .hl-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+  }
+
+  .hl-tag { color: var(--signal); }
+  .hl-flag { color: var(--ink-3); }
+
+  .hl-claim {
+    font-family: var(--font-serif);
+    font-size: var(--text-lg);
+    line-height: var(--leading-snug);
+    letter-spacing: var(--tracking-tight);
+    color: var(--ink);
+    margin: 0;
+    max-width: none;
+  }
+
+  .hl-claim :global(em) {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .hl-more {
+    align-self: end;
+    color: var(--signal);
+    font-size: var(--text-sm);
+  }
+
+  @media (max-width: 820px) {
+    .hl-grid { grid-template-columns: 1fr; }
+    .hl-claim { font-size: var(--text-md); }
+  }
+</style>

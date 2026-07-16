@@ -18,6 +18,7 @@ import { timeline } from "../data/research";
             <span class="label-mono entry-period">{t.period}</span>
             <span class="label-mono entry-theme">{t.theme}</span>
           </div>
+          <p class="entry-question">{t.question}</p>
           <h3 class="entry-title">
             {t.slug ? <a href={`/research/${t.slug}/`}>{t.title}</a> : t.title}
           </h3>
@@ -101,6 +102,15 @@ import { timeline } from "../data/research";
   }
 
   .entry-period { color: var(--signal); }
+
+  .entry-question {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-size: var(--text-md);
+    color: var(--signal);
+    margin-bottom: var(--space-2);
+    max-width: 40ch;
+  }
 
   .entry-title {
     font-size: var(--text-lg);

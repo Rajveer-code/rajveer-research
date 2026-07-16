@@ -700,6 +700,7 @@ export const flagship = publications.find((p) => p.flagship)!;
 export const timeline = [
   {
     period: "Early 2025",
+    question: "Does a model that passes internal validation survive a new population?",
     title: "Clinical ML meets external validation",
     theme: "Healthcare AI",
     text: "Diabetes risk models built on NHANES are stress-tested on 1.28M BRFSS records. External AUC falls 9.7% — and the elderly lose the most. First evidence that the benchmark hides the failure.",
@@ -707,6 +708,7 @@ export const timeline = [
   },
   {
     period: "2025",
+    question: "Can privacy-preserving training also be fair, calibrated, and generalisable?",
     title: "Privacy joins the audit",
     theme: "Federated Learning",
     text: "The same clinical problem, restructured across heterogeneous hospital nodes. Federated training generalises better than centralized — but differential privacy collapses at realistic budgets. Four axes, audited together.",
@@ -714,6 +716,7 @@ export const timeline = [
   },
   {
     period: "2025",
+    question: "Does fairness itself survive when the deployment platform changes?",
     title: "Fairness fails under platform shift",
     theme: "NLP · Fairness",
     text: "Mental-health classifiers at AUC 0.98 collapse on Reddit and Twitter — calibration, equity, and even the models' explanations degrade. The audit grows a fifth axis: attribution stability.",
@@ -721,6 +724,7 @@ export const timeline = [
   },
   {
     period: "2025–2026",
+    question: "Who actually bears an average disparity — and through what mechanism?",
     title: "Causal structure of a 42M-application gap",
     theme: "Causal Inference",
     text: "Mortgage lending at national scale: the racial approval gap is quantified, bounded, and traced to a lender-controlled mechanism — manual underwriting more than doubles the penalty of automated systems.",
@@ -728,6 +732,7 @@ export const timeline = [
   },
   {
     period: "2026",
+    question: "Can frontier LLMs reason over a non-Western regulatory rulebook?",
     title: "LLMs meet an underrepresented jurisdiction",
     theme: "LLM Evaluation",
     text: "IndiaFinBench: 406 expert-annotated questions over SEBI/RBI regulation. Numerical reasoning splits frontier models by 36 points. Evaluation infrastructure becomes a public artifact.",
@@ -735,6 +740,7 @@ export const timeline = [
   },
   {
     period: "2026",
+    question: "Should a model be deployed when it cannot prove predictive skill?",
     title: "The discipline to say no",
     theme: "Deployment Gates",
     text: "A statistical deployment gate for financial ML stays closed across all 12 folds — published as a null result. Its companion shows execution design, not model skill, decides what survives costs.",
@@ -742,6 +748,7 @@ export const timeline = [
   },
   {
     period: "Mid 2026",
+    question: "Is deployment failure predictable before it happens?",
     title: "TrustShift — the program becomes a theory",
     theme: "Capstone",
     text: "One pre-registered protocol across clinical, NLP, lending, and security domains: shift type, not shift magnitude, determines which trustworthiness axis fails — and cheap label-free probes can diagnose it in advance.",
@@ -749,6 +756,7 @@ export const timeline = [
   },
   {
     period: "Next",
+    question: "Can evaluation itself become deployment infrastructure?",
     title: "Audit infrastructure as a field",
     theme: "Future",
     text: "Shift-type diagnosis before deployment, runtime audit for generative systems, and evaluation that treats fairness, calibration, and validity as one object — not three papers.",

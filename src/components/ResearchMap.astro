@@ -32,6 +32,17 @@ const cross: [number, number][] = [
   [4, 6], // deployment – finance
   [2, 4], // nlp – deployment
 ];
+
+// Papers per theme — drives the interactive detail panel.
+const themeKeys = Object.keys(THEME_LABELS) as Theme[];
+const papersByTheme = Object.fromEntries(
+  themeKeys.map((t) => [
+    t,
+    publications
+      .filter((p) => p.themes.includes(t))
+      .sort((a, b) => a.order - b.order),
+  ]),
+) as Record<Theme, typeof publications>;
 ---
 
 <section class="map-section" id="map">
@@ -41,7 +52,10 @@ const cross: [number, number][] = [
       One ecosystem, <em>not</em> a list of results
     </h2>
 
-    <figure class="map-figure" data-reveal>
+    <p class="map-hint label-mono" data-reveal>
+      Hover or tap a theme — TrustShift binds them all
+    </p>
+    <figure class="map-figure" data-reveal data-map-root>
       <svg
         class="map-svg"
         viewBox="0 0 900 520"
@@ -83,10 +97,19 @@ const cross: [number, number][] = [
           ))
         }
 
-        {/* satellite nodes */}
+        {/* satellite nodes — interactive */}
         {
           nodes.map((n, i) => (
-            <g class="node" data-node data-node-idx={i}>
+            <g
+              class="node"
+              data-node
+              data-node-idx={i}
+              data-theme={n.theme}
+              tabindex="0"
+              role="button"
+              aria-label={`${n.label} — ${n.theme ? countFor(n.theme) : 0} works`}
+            >
+              <circle cx={n.x} cy={n.y} r="16" class="node-hit" />
               <circle cx={n.x} cy={n.y} r="7" class="node-dot" />
               <text x={n.x} y={n.y - 18} class="node-label" text-anchor="middle">
                 {n.label}
@@ -100,26 +123,97 @@ const cross: [number, number][] = [
           ))
         }
 
-        {/* center */}
-        <g class="center" data-node>
+        {/* center — the thesis; links to the flagship */}
+        <a class="center" data-node href="/research/trustshift/" aria-label="TrustShift — the binding thesis">
           <circle cx={CX} cy={CY} r="64" class="center-pulse" />
           <circle cx={CX} cy={CY} r="64" class="center-ring" />
           <circle cx={CX} cy={CY} r="5" class="center-dot" />
-          <text x={CX} y={CY - 14} class="center-label" text-anchor="middle">
-            Trustworthy
+          <text x={CX} y={CY - 20} class="center-thesis" text-anchor="middle">
+            Trust
           </text>
-          <text x={CX} y={CY + 14} class="center-label" text-anchor="middle">
-            Machine Learning
+          <text x={CX} y={CY - 20} class="center-thesis center-thesis--em" text-anchor="middle" dx="18">
+            Shift
           </text>
-        </g>
+          <text x={CX} y={CY + 8} class="center-label" text-anchor="middle">
+            binds every
+          </text>
+          <text x={CX} y={CY + 24} class="center-label" text-anchor="middle">
+            theme →
+          </text>
+        </a>
       </svg>
-      <figcaption class="label-mono map-caption">
-        Themes connect through shared methodology — subgroup analysis, confidence
-        intervals, calibration, external validation — and converge in TrustShift.
-      </figcaption>
+
+      <aside class="map-panel" data-map-panel aria-live="polite">
+        <div class="panel-view" data-panel-default>
+          <span class="label-mono panel-eyebrow">The thesis</span>
+          <h3 class="panel-title">TrustShift binds the program</h3>
+          <p class="panel-text">
+            One pre-registered audit shows the <em>type</em> of deployment shift —
+            not its magnitude — decides which axis of trustworthiness fails. Every
+            theme around it is evidence that led here. Hover a node to see its work.
+          </p>
+          <a class="panel-cta ui-sans" href="/research/trustshift/">Open TrustShift →</a>
+        </div>
+        {
+          themeKeys.map((t) => (
+            <div class="panel-view" data-panel-theme={t} hidden>
+              <span class="label-mono panel-eyebrow">{THEME_LABELS[t]}</span>
+              <ul class="panel-list">
+                {papersByTheme[t].map((p) => (
+                  <li>
+                    <a href={`/research/${p.slug}/`} class="panel-paper">
+                      <span class="panel-paper-title">{p.shortTitle}</span>
+                      <span class="ui-sans panel-paper-status">{p.status}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </aside>
     </figure>
   </div>
 </section>
+
+<script>
+  function initResearchMap() {
+    const root = document.querySelector<HTMLElement>("[data-map-root]");
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = "1";
+
+    const views = root.querySelectorAll<HTMLElement>(".panel-view");
+    const nodes = root.querySelectorAll<HTMLElement>("[data-theme]");
+    let locked: string | null = null;
+
+    const show = (theme: string | null) => {
+      views.forEach((v) => {
+        v.hidden = theme
+          ? v.dataset.panelTheme !== theme
+          : !("panelDefault" in v.dataset);
+      });
+    };
+
+    nodes.forEach((node) => {
+      const theme = node.dataset.theme ?? null;
+      node.addEventListener("mouseenter", () => { if (!locked) show(theme); });
+      node.addEventListener("mouseleave", () => { if (!locked) show(null); });
+      node.addEventListener("focus", () => { if (!locked) show(theme); });
+      node.addEventListener("blur", () => { if (!locked) show(null); });
+      node.addEventListener("click", () => {
+        locked = locked === theme ? null : theme;
+        show(locked);
+      });
+      node.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          (node as HTMLElement).click();
+        }
+      });
+    });
+  }
+  document.addEventListener("astro:page-load", initResearchMap);
+</script>
 
 <style>
   .map-section {
@@ -144,9 +238,97 @@ const cross: [number, number][] = [
     color: var(--signal);
   }
 
+  .map-hint {
+    color: var(--ink-3);
+    margin-bottom: var(--space-6);
+  }
+
+  .map-figure {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    gap: var(--space-12);
+    align-items: center;
+    margin: 0;
+  }
+
   .map-svg {
     width: 100%;
     height: auto;
+    overflow: visible;
+  }
+
+  /* --- interactive nodes --- */
+  .node { cursor: pointer; outline: none; }
+  .node-hit { fill: transparent; }
+  .node:focus-visible .node-dot,
+  .node:hover .node-dot {
+    fill: var(--signal);
+  }
+  .node:focus-visible .node-label { fill: var(--signal); }
+  .node:focus-visible .node-hit {
+    stroke: var(--signal);
+    stroke-width: 1.5;
+    stroke-dasharray: 3 3;
+  }
+  .center { cursor: pointer; }
+
+  .center-thesis {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    fill: var(--signal-deep);
+    font-weight: 500;
+  }
+  .center-thesis--em { font-style: italic; }
+
+  /* --- detail panel --- */
+  .map-panel {
+    min-height: 12rem;
+    padding: var(--space-8);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+    background: var(--paper-raised);
+  }
+
+  .panel-eyebrow { color: var(--signal); display: block; margin-bottom: var(--space-4); }
+
+  .panel-title {
+    font-size: var(--text-lg);
+    font-weight: 500;
+    margin-bottom: var(--space-4);
+  }
+
+  .panel-text { color: var(--ink-2); }
+  .panel-text em { font-style: italic; color: var(--signal); }
+
+  .panel-cta {
+    display: inline-block;
+    margin-top: var(--space-6);
+    color: var(--signal);
+    text-decoration: none;
+  }
+  .panel-cta:hover { text-decoration: underline; }
+
+  .panel-list { list-style: none; padding: 0; margin: 0; }
+
+  .panel-paper {
+    display: grid;
+    gap: 2px;
+    padding-block: var(--space-3);
+    border-bottom: var(--rule);
+    text-decoration: none;
+    color: var(--ink);
+  }
+  .panel-list li:first-child .panel-paper { border-top: var(--rule); }
+  .panel-paper:hover .panel-paper-title { color: var(--signal); }
+
+  .panel-paper-title {
+    font-size: var(--text-base);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .panel-paper-status { font-size: var(--text-xs); color: var(--ink-3); }
+
+  @media (max-width: 860px) {
+    .map-figure { grid-template-columns: 1fr; gap: var(--space-8); }
   }
 
   .edge {
