@@ -139,12 +139,23 @@ const fmt = (n: number) => n.toFixed(3);
         </div>
       </header>
 
-      <section class="plain container" aria-label="Plain-language summary" data-reveal>
+      <nav class="paper-jump" aria-label="On this page" data-paper-jump>
+        <div class="container paper-jump-inner ui-sans">
+          <a href="#overview">Overview</a>
+          <a href="#method">Method</a>
+          <a href="#domains">Evidence</a>
+          <a href="#remediation">Remediation</a>
+          <a href="#meta">Meta-analysis</a>
+          <a href="#repro">Reproduce</a>
+        </div>
+      </nav>
+
+      <section class="plain container" id="overview" aria-label="Plain-language summary" data-reveal>
         <p class="label-mono section-eyebrow">Starting from zero</p>
         <p class="plain-text">{pub.plain}</p>
       </section>
 
-      <section class="method container" aria-label="How the audit works">
+      <section class="method container" id="method" aria-label="How the audit works">
         <p class="label-mono section-eyebrow" data-reveal>How the audit works</p>
         <div data-reveal>
           <MethodFlow steps={pub.flow} />
@@ -166,7 +177,7 @@ const fmt = (n: number) => n.toFixed(3);
         </ol>
       </section>
 
-      <section class="domains container" aria-label="Evidence by domain">
+      <section class="domains container" id="domains" aria-label="Evidence by domain">
         <p class="label-mono section-eyebrow" data-reveal>The evidence, domain by domain</p>
         <p class="section-lead" data-reveal>
           Same protocol, four worlds. If magnitude determined damage, the biggest
@@ -217,7 +228,7 @@ const fmt = (n: number) => n.toFixed(3);
         </p>
       </section>
 
-      <section class="remediation container" aria-label="Remediation experiment">
+      <section class="remediation container" id="remediation" aria-label="Remediation experiment">
         <p class="label-mono section-eyebrow" data-reveal>What a label-cheap fix can — and cannot — repair</p>
         <p class="section-lead" data-reveal>
           Isotonic recalibration on a small calibration split. Toggle it: calibration
@@ -292,7 +303,7 @@ const fmt = (n: number) => n.toFixed(3);
         )
       }
 
-      <section class="meta container" aria-label="Cross-domain meta-analysis" data-reveal>
+      <section class="meta container" id="meta" aria-label="Cross-domain meta-analysis" data-reveal>
         <p class="label-mono section-eyebrow">Cross-domain meta-analysis</p>
         <p class="section-lead">
           Sixteen shift points across the four domains. Each regression relates the
@@ -313,7 +324,7 @@ const fmt = (n: number) => n.toFixed(3);
         </ul>
       </section>
 
-      <section class="repro container" aria-label="Reproduce this paper" data-reveal>
+      <section class="repro container" id="repro" aria-label="Reproduce this paper" data-reveal>
         <p class="label-mono section-eyebrow">Reproduce it</p>
         <div class="repro-grid">
           <pre class="repro-code"><code>git clone https://github.com/Rajveer-code/trustshift
@@ -374,26 +385,80 @@ python run_all.py   # regenerates every table and figure</code></pre>
 </Base>
 
 <script>
-  document.querySelectorAll<HTMLElement>("[data-remed]").forEach((root) => {
-    const buttons = root.querySelectorAll<HTMLButtonElement>(".remed-btn");
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const state = btn.dataset.set as "before" | "after";
-        root.dataset.state = state;
-        buttons.forEach((b) => b.classList.toggle("is-active", b === btn));
-        root.querySelectorAll<HTMLElement>(".remed-value").forEach((v) => {
-          v.textContent = state === "before" ? v.dataset.before! : v.dataset.after!;
-        });
-        root.querySelectorAll<HTMLElement>(".bar--ece").forEach((bar) => {
-          bar.style.width =
-            state === "before" ? bar.dataset.wbefore! : bar.dataset.wafter!;
+  function initTrustShift() {
+    document.querySelectorAll<HTMLElement>("[data-remed]").forEach((root) => {
+      if (root.dataset.wired) return;
+      root.dataset.wired = "1";
+      const buttons = root.querySelectorAll<HTMLButtonElement>(".remed-btn");
+      buttons.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const state = btn.dataset.set as "before" | "after";
+          root.dataset.state = state;
+          buttons.forEach((b) => b.classList.toggle("is-active", b === btn));
+          root.querySelectorAll<HTMLElement>(".remed-value").forEach((v) => {
+            v.textContent = state === "before" ? v.dataset.before! : v.dataset.after!;
+          });
+          root.querySelectorAll<HTMLElement>(".bar--ece").forEach((bar) => {
+            bar.style.width =
+              state === "before" ? bar.dataset.wbefore! : bar.dataset.wafter!;
+          });
         });
       });
     });
-  });
+
+    const nav = document.querySelector("[data-paper-jump]");
+    if (!nav) return;
+    const links = [...nav.querySelectorAll("a")];
+    const byId = new Map(links.map((a) => [a.getAttribute("href")!.slice(1), a]));
+    const sections = [...byId.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => !!el);
+    if (!sections.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove("is-active"));
+            byId.get((e.target as HTMLElement).id)?.classList.add("is-active");
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px" },
+    );
+    sections.forEach((s) => io.observe(s));
+  }
+  document.addEventListener("astro:page-load", initTrustShift);
 </script>
 
 <style>
+  .paper-jump {
+    position: sticky;
+    top: 0;
+    z-index: 95;
+    background: color-mix(in srgb, var(--paper) 90%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: var(--rule);
+  }
+  .paper-jump-inner {
+    display: flex;
+    gap: var(--space-6);
+    padding-block: var(--space-3);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .paper-jump-inner::-webkit-scrollbar { display: none; }
+  .paper-jump a {
+    color: var(--ink-2);
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: var(--text-sm);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .paper-jump a:hover { color: var(--signal); }
+  .paper-jump a.is-active { color: var(--signal); font-weight: 600; }
+
+  #overview, #method, #domains, #remediation, #meta, #repro { scroll-margin-top: 6rem; }
+
   .paper-head {
     padding-block: var(--space-24) var(--space-16);
     border-bottom: var(--rule);

@@ -58,7 +58,7 @@ const papersByTheme = Object.fromEntries(
     <figure class="map-figure" data-reveal data-map-root>
       <svg
         class="map-svg"
-        viewBox="0 0 900 520"
+        viewBox="20 24 860 472"
         role="img"
         aria-labelledby="map-desc"
         data-map
@@ -125,20 +125,16 @@ const papersByTheme = Object.fromEntries(
 
         {/* center — the thesis; links to the flagship */}
         <a class="center" data-node href="/research/trustshift/" aria-label="TrustShift — the binding thesis">
-          <circle cx={CX} cy={CY} r="64" class="center-pulse" />
-          <circle cx={CX} cy={CY} r="64" class="center-ring" />
-          <circle cx={CX} cy={CY} r="5" class="center-dot" />
-          <text x={CX} y={CY - 20} class="center-thesis" text-anchor="middle">
-            Trust
+          <circle cx={CX} cy={CY} r="72" class="center-pulse" />
+          <circle cx={CX} cy={CY} r="72" class="center-ring" />
+          <text x={CX} y={CY - 12} class="center-thesis" text-anchor="middle">
+            Trust<tspan class="center-thesis--em">Shift</tspan>
           </text>
-          <text x={CX} y={CY - 20} class="center-thesis center-thesis--em" text-anchor="middle" dx="18">
-            Shift
+          <text x={CX} y={CY + 14} class="center-sub" text-anchor="middle">
+            the thesis that
           </text>
-          <text x={CX} y={CY + 8} class="center-label" text-anchor="middle">
-            binds every
-          </text>
-          <text x={CX} y={CY + 24} class="center-label" text-anchor="middle">
-            theme →
+          <text x={CX} y={CY + 32} class="center-sub" text-anchor="middle">
+            binds every theme →
           </text>
         </a>
       </svg>
@@ -244,17 +240,16 @@ const papersByTheme = Object.fromEntries(
   }
 
   .map-figure {
-    display: grid;
-    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
-    gap: var(--space-12);
-    align-items: center;
     margin: 0;
   }
 
   .map-svg {
+    display: block;
     width: 100%;
     height: auto;
     overflow: visible;
+    margin-inline: auto;
+    max-width: 60rem;
   }
 
   /* --- interactive nodes --- */
@@ -274,15 +269,23 @@ const papersByTheme = Object.fromEntries(
 
   .center-thesis {
     font-family: var(--font-serif);
-    font-size: 22px;
+    font-size: 26px;
     fill: var(--signal-deep);
     font-weight: 500;
   }
-  .center-thesis--em { font-style: italic; }
+  .center-thesis--em { font-style: italic; fill: var(--signal); }
 
-  /* --- detail panel --- */
+  .center-sub {
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    fill: var(--signal-deep);
+  }
+  .center:hover .center-ring { fill: color-mix(in srgb, var(--signal) 16%, var(--paper)); }
+
+  /* --- detail panel (full-width strip below the map) --- */
   .map-panel {
-    min-height: 12rem;
+    min-height: 9rem;
+    margin-top: var(--space-8);
     padding: var(--space-8);
     border: var(--rule-strong);
     border-radius: var(--radius-2);
@@ -297,7 +300,7 @@ const papersByTheme = Object.fromEntries(
     margin-bottom: var(--space-4);
   }
 
-  .panel-text { color: var(--ink-2); }
+  .panel-text { color: var(--ink-2); max-width: 70ch; }
   .panel-text em { font-style: italic; color: var(--signal); }
 
   .panel-cta {
@@ -308,7 +311,14 @@ const papersByTheme = Object.fromEntries(
   }
   .panel-cta:hover { text-decoration: underline; }
 
-  .panel-list { list-style: none; padding: 0; margin: 0; }
+  .panel-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: var(--space-2) var(--space-8);
+  }
 
   .panel-paper {
     display: grid;
@@ -318,7 +328,6 @@ const papersByTheme = Object.fromEntries(
     text-decoration: none;
     color: var(--ink);
   }
-  .panel-list li:first-child .panel-paper { border-top: var(--rule); }
   .panel-paper:hover .panel-paper-title { color: var(--signal); }
 
   .panel-paper-title {

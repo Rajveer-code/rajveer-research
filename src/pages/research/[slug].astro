@@ -57,12 +57,22 @@ const fiveMinute = [
         }
       </header>
 
-      <section class="plain container" aria-label="Plain-language summary" data-reveal>
+      <nav class="paper-jump" aria-label="On this page" data-paper-jump>
+        <div class="container paper-jump-inner ui-sans">
+          <a href="#overview">Overview</a>
+          <a href="#method">Method</a>
+          <a href="#figure">Key figure</a>
+          <a href="#summary">In 5 minutes</a>
+          <a href="#results">Results</a>
+        </div>
+      </nav>
+
+      <section class="plain container" id="overview" aria-label="Plain-language summary" data-reveal>
         <p class="label-mono section-eyebrow">Starting from zero</p>
         <p class="plain-text">{pub.plain}</p>
       </section>
 
-      <section class="method container" aria-label="How the study works">
+      <section class="method container" id="method" aria-label="How the study works">
         <p class="label-mono section-eyebrow" data-reveal>How it works</p>
         <div class="method-grid" data-reveal>
           <MethodFlow steps={pub.flow} />
@@ -78,7 +88,7 @@ const fiveMinute = [
         </div>
       </section>
 
-      <section class="onefig container" aria-label="The discovery in one figure">
+      <section class="onefig container" id="figure" aria-label="The discovery in one figure">
         <p class="label-mono section-eyebrow" data-reveal>The discovery in one figure</p>
         <div data-reveal>
           <HeroFigure slug={pub.slug} />
@@ -91,7 +101,7 @@ const fiveMinute = [
         )
       }
 
-      <section class="five container" aria-label="The paper in five minutes">
+      <section class="five container" id="summary" aria-label="The paper in five minutes">
         <p class="label-mono section-eyebrow" data-reveal>In five minutes</p>
         <ol class="five-list">
           {
@@ -106,7 +116,7 @@ const fiveMinute = [
         </ol>
       </section>
 
-      <section class="results container" data-reveal aria-label="Key results">
+      <section class="results container" id="results" data-reveal aria-label="Key results">
         <p class="label-mono section-eyebrow">Key results</p>
         <ul class="results-grid">
           {
@@ -178,7 +188,65 @@ const fiveMinute = [
   </footer>
 </Base>
 
+<script>
+  function initPaperJump() {
+    const nav = document.querySelector("[data-paper-jump]");
+    if (!nav) return;
+    const links = [...nav.querySelectorAll("a")];
+    const byId = new Map(
+      links.map((a) => [a.getAttribute("href")!.slice(1), a]),
+    );
+    const sections = [...byId.keys()]
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => !!el);
+    if (!sections.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            links.forEach((l) => l.classList.remove("is-active"));
+            byId.get((e.target as HTMLElement).id)?.classList.add("is-active");
+          }
+        });
+      },
+      { rootMargin: "-40% 0px -55% 0px" },
+    );
+    sections.forEach((s) => io.observe(s));
+  }
+  document.addEventListener("astro:page-load", initPaperJump);
+</script>
+
 <style>
+  /* sticky in-page jump nav — helps professors skim */
+  .paper-jump {
+    position: sticky;
+    top: 0;
+    z-index: 95;
+    background: color-mix(in srgb, var(--paper) 90%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: var(--rule);
+  }
+  .paper-jump-inner {
+    display: flex;
+    gap: var(--space-6);
+    padding-block: var(--space-3);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .paper-jump-inner::-webkit-scrollbar { display: none; }
+  .paper-jump a {
+    color: var(--ink-2);
+    text-decoration: none;
+    white-space: nowrap;
+    font-size: var(--text-sm);
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+  .paper-jump a:hover { color: var(--signal); }
+  .paper-jump a.is-active { color: var(--signal); font-weight: 600; }
+
+  /* anchor targets clear both sticky bars */
+  #overview, #method, #figure, #summary, #results { scroll-margin-top: 6rem; }
+
   .paper-head {
     padding-block: var(--space-24) var(--space-16);
     border-bottom: var(--rule);
