@@ -1,9 +1,11 @@
 ---
+import { Image } from "astro:assets";
 import Base from "../../layouts/Base.astro";
 import Nav from "../../components/Nav.astro";
 import MethodFlow from "../../components/MethodFlow.astro";
 import PaperFigures from "../../components/PaperFigures.astro";
 import { publications, THEME_LABELS } from "../../data/research";
+import taxonomy from "../../assets/figures/trustshift/fig1_taxonomy.png";
 
 /**
  * Extended flagship page. Every number below is copied verbatim from
@@ -17,13 +19,6 @@ const related = publications
   .filter((p) => p.slug !== pub.slug && p.themes.some((t) => pub.themes.includes(t)))
   .sort((a, b) => a.order - b.order)
   .slice(0, 3);
-
-const fiveMinute = [
-  { label: "Problem", text: pub.problem },
-  { label: "Approach", text: pub.approach },
-  { label: "Findings", text: pub.findings },
-  { label: "Why it matters", text: pub.matters },
-];
 
 // numbers.json → domain evidence
 const domains = [
@@ -141,43 +136,59 @@ const fmt = (n: number) => n.toFixed(3);
 
       <nav class="paper-jump" aria-label="On this page" data-paper-jump>
         <div class="container paper-jump-inner ui-sans">
-          <a href="#overview">Overview</a>
+          <a href="#figure">Discovery</a>
+          <a href="#summary">5 minutes</a>
+          <a href="#question">Question</a>
           <a href="#method">Method</a>
-          <a href="#domains">Evidence</a>
-          <a href="#remediation">Remediation</a>
-          <a href="#meta">Meta-analysis</a>
+          <a href="#results">Evidence</a>
           <a href="#repro">Reproduce</a>
         </div>
       </nav>
 
-      <section class="plain container" id="overview" aria-label="Plain-language summary" data-reveal>
-        <p class="label-mono section-eyebrow">Starting from zero</p>
-        <p class="plain-text">{pub.plain}</p>
+      {/* 2 · Discovery in one image — the failure taxonomy */}
+      <section class="onefig container" id="figure" aria-label="The discovery in one figure">
+        <p class="label-mono section-eyebrow" data-reveal>The discovery in one figure</p>
+        <figure class="taxonomy-fig" data-reveal>
+          <div class="taxonomy-frame">
+            <Image
+              src={taxonomy}
+              alt="Failure taxonomy: each shift type maps to the trustworthiness axis it degrades, across four domains"
+              widths={[720, 1200]}
+              sizes="(max-width: 900px) 92vw, 60rem"
+              format="webp"
+              quality={86}
+            />
+          </div>
+          <figcaption class="taxonomy-cap">
+            Shift <em>type</em> — not magnitude — determines which trustworthiness axis
+            fails. The same protocol across four domains yields one diagnostic taxonomy.
+          </figcaption>
+        </figure>
       </section>
 
+      {/* 3 · Read in five minutes */}
+      <section class="fivemin container" id="summary" aria-label="The paper in five minutes">
+        <p class="label-mono section-eyebrow" data-reveal>The paper in five minutes</p>
+        <p class="lead-text" data-reveal>{pub.plain}</p>
+      </section>
+
+      {/* 4 · Research question */}
+      <section class="question container" id="question" aria-label="The research question">
+        <p class="label-mono section-eyebrow" data-reveal>The research question</p>
+        <p class="lead-text" data-reveal>{pub.problem}</p>
+      </section>
+
+      {/* 5 · How the audit works */}
       <section class="method container" id="method" aria-label="How the audit works">
         <p class="label-mono section-eyebrow" data-reveal>How the audit works</p>
-        <div data-reveal>
+        <div class="method-grid" data-reveal>
+          <p class="body-text method-lead">{pub.approach}</p>
           <MethodFlow steps={pub.flow} />
         </div>
       </section>
 
-      <section class="five container" aria-label="The paper in five minutes">
-        <p class="label-mono section-eyebrow" data-reveal>In five minutes</p>
-        <ol class="five-list">
-          {
-            fiveMinute.map((block, i) => (
-              <li class="five-block" data-reveal>
-                <span class="label-mono five-index">{String(i + 1).padStart(2, "0")}</span>
-                <h2 class="five-label">{block.label}</h2>
-                <p class="five-text">{block.text}</p>
-              </li>
-            ))
-          }
-        </ol>
-      </section>
-
-      <section class="domains container" id="domains" aria-label="Evidence by domain">
+      {/* 6 · Experimental results — evidence begins */}
+      <section class="domains container" id="results" aria-label="Evidence by domain">
         <p class="label-mono section-eyebrow" data-reveal>The evidence, domain by domain</p>
         <p class="section-lead" data-reveal>
           Same protocol, four worlds. If magnitude determined damage, the biggest
@@ -324,6 +335,13 @@ const fmt = (n: number) => n.toFixed(3);
         </ul>
       </section>
 
+      {/* 7 · What this changes */}
+      <section class="takeaways container" id="takeaways" aria-label="What this changes">
+        <p class="label-mono section-eyebrow" data-reveal>What this changes</p>
+        <p class="lead-text" data-reveal>{pub.matters}</p>
+      </section>
+
+      {/* 8 · Resources */}
       <section class="repro container" id="repro" aria-label="Reproduce this paper" data-reveal>
         <p class="label-mono section-eyebrow">Reproduce it</p>
         <div class="repro-grid">
@@ -457,7 +475,62 @@ python run_all.py   # regenerates every table and figure</code></pre>
   .paper-jump a:hover { color: var(--signal); }
   .paper-jump a.is-active { color: var(--signal); font-weight: 600; }
 
-  #overview, #method, #domains, #remediation, #meta, #repro { scroll-margin-top: 6rem; }
+  #figure, #summary, #question, #method, #results, #takeaways, #repro { scroll-margin-top: 6rem; }
+
+  /* shared reading text — laptop-readable at ~1m */
+  .lead-text {
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 60ch;
+  }
+  .body-text {
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--ink);
+    max-width: 62ch;
+  }
+
+  .onefig { padding-block: var(--space-16) var(--space-24); border-bottom: var(--rule); }
+
+  .taxonomy-fig { margin: 0; max-width: 62rem; }
+  .taxonomy-frame {
+    background: var(--paper-raised);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+    padding: var(--space-6);
+  }
+  .taxonomy-frame img { width: 100%; height: auto; border-radius: var(--radius-1); }
+  .taxonomy-cap {
+    margin-top: var(--space-6);
+    font-size: var(--text-base);
+    color: var(--ink-2);
+    max-width: 70ch;
+  }
+  .taxonomy-cap em { font-style: italic; color: var(--signal); }
+
+  .fivemin { padding-block: var(--space-24); border-bottom: var(--rule); }
+  .fivemin .lead-text {
+    padding: var(--space-8) var(--space-8) var(--space-8) var(--space-6);
+    background: var(--paper-recessed);
+    border-left: 3px solid var(--signal);
+    border-radius: var(--radius-1);
+    max-width: 66ch;
+  }
+
+  .question { padding-block: var(--space-24); border-bottom: var(--rule); }
+  .takeaways { padding-block: var(--space-24); border-bottom: var(--rule); }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--space-12);
+    align-items: start;
+  }
+  .method-lead { max-width: none; }
+  @media (max-width: 860px) {
+    .method-grid { grid-template-columns: 1fr; gap: var(--space-8); }
+  }
 
   .paper-head {
     padding-block: var(--space-24) var(--space-16);

@@ -20,13 +20,6 @@ const related = publications
   .filter((p) => p.slug !== pub.slug && p.themes.some((t) => pub.themes.includes(t)))
   .sort((a, b) => a.order - b.order)
   .slice(0, 3);
-
-const fiveMinute = [
-  { label: "Problem", text: pub.problem },
-  { label: "Approach", text: pub.approach },
-  { label: "Findings", text: pub.findings },
-  { label: "Why it matters", text: pub.matters },
-];
 ---
 
 <Base title={`${pub.shortTitle} — Rajveer Singh Pall`} description={pub.oneLiner}>
@@ -59,35 +52,16 @@ const fiveMinute = [
 
       <nav class="paper-jump" aria-label="On this page" data-paper-jump>
         <div class="container paper-jump-inner ui-sans">
-          <a href="#overview">Overview</a>
+          <a href="#figure">Discovery</a>
+          <a href="#summary">5 minutes</a>
+          <a href="#question">Question</a>
           <a href="#method">Method</a>
-          <a href="#figure">Key figure</a>
-          <a href="#summary">In 5 minutes</a>
           <a href="#results">Results</a>
+          <a href="#takeaways">Takeaways</a>
         </div>
       </nav>
 
-      <section class="plain container" id="overview" aria-label="Plain-language summary" data-reveal>
-        <p class="label-mono section-eyebrow">Starting from zero</p>
-        <p class="plain-text">{pub.plain}</p>
-      </section>
-
-      <section class="method container" id="method" aria-label="How the study works">
-        <p class="label-mono section-eyebrow" data-reveal>How it works</p>
-        <div class="method-grid" data-reveal>
-          <MethodFlow steps={pub.flow} />
-          {
-            pub.figures.length > 0 && (
-              <div class="method-figs">
-                {pub.figures.map((f) => (
-                  <FigureBars figure={f} />
-                ))}
-              </div>
-            )
-          }
-        </div>
-      </section>
-
+      {/* 2 · Discovery in one image */}
       <section class="onefig container" id="figure" aria-label="The discovery in one figure">
         <p class="label-mono section-eyebrow" data-reveal>The discovery in one figure</p>
         <div data-reveal>
@@ -95,30 +69,41 @@ const fiveMinute = [
         </div>
       </section>
 
-      {
-        pub.paperFigures && pub.paperFigures.length > 0 && (
-          <PaperFigures slug={pub.slug} figures={pub.paperFigures} />
-        )
-      }
-
-      <section class="five container" id="summary" aria-label="The paper in five minutes">
-        <p class="label-mono section-eyebrow" data-reveal>In five minutes</p>
-        <ol class="five-list">
-          {
-            fiveMinute.map((block, i) => (
-              <li class="five-block" data-reveal>
-                <span class="label-mono five-index">{String(i + 1).padStart(2, "0")}</span>
-                <h2 class="five-label">{block.label}</h2>
-                <p class="five-text">{block.text}</p>
-              </li>
-            ))
-          }
-        </ol>
+      {/* 3 · Read in five minutes */}
+      <section class="fivemin container" id="summary" aria-label="The paper in five minutes">
+        <p class="label-mono section-eyebrow" data-reveal>The paper in five minutes</p>
+        <p class="lead-text" data-reveal>{pub.plain}</p>
       </section>
 
-      <section class="results container" id="results" data-reveal aria-label="Key results">
-        <p class="label-mono section-eyebrow">Key results</p>
-        <ul class="results-grid">
+      {/* 4 · Research question */}
+      <section class="question container" id="question" aria-label="The research question">
+        <p class="label-mono section-eyebrow" data-reveal>The research question</p>
+        <p class="lead-text" data-reveal>{pub.problem}</p>
+      </section>
+
+      {/* 5 · Methodology */}
+      <section class="method container" id="method" aria-label="How it works">
+        <p class="label-mono section-eyebrow" data-reveal>How it works</p>
+        <div class="method-grid" data-reveal>
+          <p class="body-text method-lead">{pub.approach}</p>
+          <MethodFlow steps={pub.flow} />
+        </div>
+      </section>
+
+      {/* 6 · Experimental results (evidence: data + real figures + metrics) */}
+      <section class="results container" id="results" aria-label="Experimental results">
+        <p class="label-mono section-eyebrow" data-reveal>Experimental results</p>
+        <p class="body-text" data-reveal>{pub.findings}</p>
+        {
+          pub.figures.length > 0 && (
+            <div class="result-figs" data-reveal>
+              {pub.figures.map((f) => (
+                <FigureBars figure={f} />
+              ))}
+            </div>
+          )
+        }
+        <ul class="results-grid" data-reveal>
           {
             pub.results.map((r) => (
               <li>
@@ -129,17 +114,41 @@ const fiveMinute = [
           }
         </ul>
         {pub.caveat && (
-          <p class="caveat">
+          <p class="caveat" data-reveal>
             <span class="label-mono caveat-tag">Stated honestly</span>
             {pub.caveat}
           </p>
         )}
       </section>
 
-      <section class="cite container" data-reveal aria-label="Themes and citation">
+      {
+        pub.paperFigures && pub.paperFigures.length > 0 && (
+          <PaperFigures slug={pub.slug} figures={pub.paperFigures} />
+        )
+      }
+
+      {/* 7 · What this changes */}
+      <section class="takeaways container" id="takeaways" aria-label="What this changes">
+        <p class="label-mono section-eyebrow" data-reveal>What this changes</p>
+        <p class="lead-text" data-reveal>{pub.matters}</p>
+      </section>
+
+      {/* 8 · Resources & citation */}
+      <section class="resources container" data-reveal aria-label="Resources and citation">
         <div class="cite-grid">
           <div>
-            <p class="label-mono section-eyebrow">Themes</p>
+            <p class="label-mono section-eyebrow">Resources</p>
+            {
+              pub.links.length > 0 ? (
+                <div class="resource-links ui-sans">
+                  {pub.links.map((l) => (
+                    <a class="btn" href={l.href}>{l.label} ↗</a>
+                  ))}
+                </div>
+              ) : (
+                <p class="cite-note">Code and data available on request.</p>
+              )
+            }
             <ul class="theme-list">
               {pub.themes.map((t) => <li class="label-mono">{THEME_LABELS[t]}</li>)}
             </ul>
@@ -160,10 +169,11 @@ const fiveMinute = [
         </div>
       </section>
 
+      {/* 9 · Related research */}
       {
         related.length > 0 && (
           <section class="related container" data-reveal aria-label="Related research">
-            <p class="label-mono section-eyebrow">Related research</p>
+            <p class="label-mono section-eyebrow">Where this leads next</p>
             <ul class="related-list">
               {related.map((r) => (
                 <li>
@@ -245,7 +255,7 @@ const fiveMinute = [
   .paper-jump a.is-active { color: var(--signal); font-weight: 600; }
 
   /* anchor targets clear both sticky bars */
-  #overview, #method, #figure, #summary, #results { scroll-margin-top: 6rem; }
+  #figure, #summary, #question, #method, #results, #takeaways { scroll-margin-top: 6rem; }
 
   .paper-head {
     padding-block: var(--space-24) var(--space-16);
@@ -319,76 +329,80 @@ const fiveMinute = [
     margin-bottom: var(--space-8);
   }
 
-  .plain {
-    padding-block: var(--space-16);
+  /* shared reading text — sized for a 13–15" laptop at ~1m */
+  .lead-text {
+    font-size: var(--text-md);
+    line-height: 1.5;
+    color: var(--ink);
+    max-width: 60ch;
+  }
+
+  .body-text {
+    font-size: var(--text-base);
+    line-height: var(--leading-body);
+    color: var(--ink);
+    max-width: 62ch;
+  }
+
+  .onefig {
+    padding-block: var(--space-16) var(--space-24);
     border-bottom: var(--rule);
   }
 
-  .plain-text {
-    font-size: var(--text-md);
-    line-height: var(--leading-snug);
-    max-width: 62ch;
-    padding: var(--space-6) var(--space-8);
+  .onefig > div { max-width: 62rem; }
+
+  /* 3 · five minutes — highlighted panel */
+  .fivemin { padding-block: var(--space-24); border-bottom: var(--rule); }
+
+  .fivemin .lead-text {
+    padding: var(--space-8) var(--space-8) var(--space-8) var(--space-6);
     background: var(--paper-recessed);
-    border-left: 2px solid var(--signal);
+    border-left: 3px solid var(--signal);
     border-radius: var(--radius-1);
-    color: var(--ink);
+    max-width: 66ch;
   }
 
+  /* 4 · research question */
+  .question { padding-block: var(--space-24); border-bottom: var(--rule); }
+
+  /* 5 · methodology */
   .method { padding-block: var(--space-24); border-bottom: var(--rule); }
 
   .method-grid {
     display: grid;
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-    gap: var(--space-8);
+    gap: var(--space-12);
     align-items: start;
   }
 
-  .method-figs {
-    display: grid;
-    gap: var(--space-8);
-  }
+  .method-lead { max-width: none; }
 
   @media (max-width: 860px) {
-    .method-grid { grid-template-columns: 1fr; }
+    .method-grid { grid-template-columns: 1fr; gap: var(--space-8); }
   }
 
-  .onefig {
-    padding-block: var(--space-24);
-    border-bottom: var(--rule);
+  /* 7 · takeaways */
+  .takeaways { padding-block: var(--space-24); border-bottom: var(--rule); }
+
+  /* 8 · resources */
+  .resources { padding-block: var(--space-24); border-bottom: var(--rule); }
+
+  .resource-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-bottom: var(--space-8);
   }
-
-  .onefig > div { max-width: 60rem; }
-
-  .five { padding-block: var(--space-24); border-bottom: var(--rule); }
-
-  .five-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-12) var(--space-16);
-  }
-
-  .five-block {
-    display: grid;
-    grid-template-rows: auto auto 1fr;
-    gap: var(--space-3);
-    align-content: start;
-  }
-
-  .five-index { color: var(--signal); }
-
-  .five-label {
-    font-size: var(--text-md);
-    font-style: italic;
-    font-weight: 500;
-  }
-
-  .five-text { color: var(--ink-2); }
 
   .results { padding-block: var(--space-24); border-bottom: var(--rule); }
+
+  .results .body-text { margin-bottom: var(--space-12); }
+
+  .result-figs {
+    display: grid;
+    gap: var(--space-8);
+    margin-bottom: var(--space-12);
+  }
 
   .results-grid {
     list-style: none;

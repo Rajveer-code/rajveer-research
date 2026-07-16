@@ -109,11 +109,6 @@ export const publications: Publication[] = [
     figures: [],
     paperFigures: [
       {
-        file: "fig1_taxonomy.png",
-        caption:
-          "The failure taxonomy: each shift type maps to the trustworthiness axis it degrades, across all four domains.",
-      },
-      {
         file: "fig2_shift_bars.png",
         caption:
           "The audit, domain by domain: discrimination, calibration, and subgroup reliability measured under each deployment shift.",
