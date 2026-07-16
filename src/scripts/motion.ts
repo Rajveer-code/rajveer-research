@@ -145,6 +145,9 @@ function pipelineCascade(): void {
     duration: 0.7,
     ease: "power2.out",
     stagger: 0.16,
+    // immediateRender:false so the from-state (opacity 0) is never left applied
+    // when the trigger is already scrolled past at init — otherwise stages stick hidden.
+    immediateRender: false,
     scrollTrigger: { trigger: stages[0], start: "top 85%", once: true },
   });
 }
@@ -214,6 +217,7 @@ function titleReveals(): void {
         duration: 1,
         ease: "power3.out",
         stagger: 0.08,
+        immediateRender: false, // never leave titles hidden if scrolled past
         scrollTrigger: { trigger: el, start: "top 86%", once: true },
       });
     });
@@ -275,9 +279,22 @@ function mapDraw(): void {
     stagger: 0.05,
   }).from(
     svg.querySelectorAll("[data-node]"),
-    { opacity: 0, duration: 0.6, ease: "power2.out", stagger: 0.04 },
+    // immediateRender:false — nodes are never pre-hidden, so they can never
+    // stick invisible if this timeline is re-created or killed mid-play.
+    { opacity: 0, duration: 0.6, ease: "power2.out", stagger: 0.04, immediateRender: false },
     "-=0.9",
   );
+
+  // Safety net: if the map is already within the viewport but the draw never
+  // ran (trigger missed after a transition), force it fully visible. Only acts
+  // when in view, so it never spoils the scroll-draw for a below-fold map.
+  window.setTimeout(() => {
+    const inView = svg.getBoundingClientRect().top < window.innerHeight * 0.9;
+    if (inView && tl.progress() === 0) {
+      gsap.set(edges, { strokeDashoffset: 0 });
+      gsap.set(svg.querySelectorAll("[data-node]"), { opacity: 1 });
+    }
+  }, 2600);
 }
 
 /** Hovering a theme node spotlights its spoke; everything else recedes. */
