@@ -17,6 +17,12 @@ const {
   description = "Rajveer Singh Pall — AI researcher studying trustworthy machine learning under real-world deployment: fairness, calibration, external validation, and deployment-shift auditing.",
 } = Astro.props;
 
+// Absolute URLs for crawlers/social; fall back to relative if `site` is unset.
+const ogImage = Astro.site ? new URL("/og.png", Astro.site).href : "/og.png";
+const canonical = Astro.site
+  ? new URL(Astro.url.pathname, Astro.site).href
+  : Astro.url.pathname;
+
 const personLd = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -48,15 +54,17 @@ const personLd = {
     <meta name="author" content="Rajveer Singh Pall" />
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="Rajveer Singh Pall — AI Research" />
-    {/* TODO on deploy: prefix og:image with the production origin — crawlers need an absolute URL */}
-    <meta property="og:image" content="/og.png" />
+    <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
     <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
     <ClientRouter />
   </head>
