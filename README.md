@@ -2,7 +2,7 @@
 
 The digital research identity of an AI researcher working on **trustworthy machine
 learning under real-world deployment**. Built as a research-lab homepage, not a
-portfolio: nine publications are framed as one continuous research program, with
+portfolio: eight publications are framed as one continuous research program, with
 TrustShift as the binding thesis.
 
 ## Paper pages — one consistent reading order
@@ -78,10 +78,10 @@ Vercel auto-detects Astro — no config file needed.
 - `src/data/research.ts` — single source of truth: publications (with per-paper
   plain summary, method flow, figures, results, status), timeline, open science,
   impact, identity links. Every number traces to a research result file.
-- `src/pages/research/[slug].astro` — the shared paper-page template (8 papers)
+- `src/pages/research/[slug].astro` — the shared paper-page template (7 papers)
 - `src/pages/research/trustshift.astro` — the extended flagship page (same spine,
   richer evidence: per-domain audit, recalibration toggle, meta-analysis, reproduction)
-- `src/components/HeroFigure.astro` — the eight bespoke discovery figures (one SVG per paper)
+- `src/components/HeroFigure.astro` — the seven bespoke discovery figures (one SVG per paper)
 - `src/components/*` — homepage sections (Hero, Highlights, ResearchMap, Timeline, …)
 - `src/assets/figures/<slug>/` — real publication figures, optimized at build time
 - `src/styles/tokens.css` — design tokens (colour, type scale, spacing, motion)

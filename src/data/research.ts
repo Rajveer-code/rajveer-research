@@ -637,58 +637,7 @@ export const publications: Publication[] = [
         href: "https://github.com/Rajveer-code",
       },
     ],
-  },
-  {
-    slug: "conviction-ranking",
-    order: 9,
-    title:
-      "Overcoming the Transaction Cost Trap: Cross-Sectional Conviction Ranking in Machine Learning Equity Prediction",
-    shortTitle: "Conviction Ranking",
-    authors: "Rajveer Singh Pall",
-    status: "Working paper — SSRN",
-    statusKind: "working",
-    year: "2026",
-    themes: ["finance", "deployment"],
-    oneLiner:
-      "When a small signal exists, execution design — not the classifier — decides whether it survives transaction costs.",
-    plain:
-      "A tiny predictive edge usually dies in fees: if you act on every signal, you trade so often that costs eat everything. This paper keeps the same predictive model but changes how it is used — each day, rank all stocks by the model's calibrated confidence and trade only the single top pick. The edge survives realistic costs with wide margin: fees would have to be 4.8 times larger than assumed before profits vanish. The honesty is in the framing: the stock universe is small and survivor-picked, and most of the performance comes from one market regime — both stated in the paper, not hidden.",
-    flow: [
-      { label: "Calibrate", note: "ensemble probabilities made honest via isotonic regression, per fold" },
-      { label: "Rank daily", note: "calibrated confidence as ordinal conviction across the cross-section" },
-      { label: "Trade only the top", note: "Top-K portfolios vs threshold execution of identical signals" },
-      { label: "Charge realistic costs", note: "break-even analysis · Lo HAC Sharpe CIs · permutation tests" },
-      { label: "Split by regime", note: "where the edge lives — and where it disappears" },
-    ],
-    figures: [
-      {
-        title: "Annualized Sharpe ratio, out of sample",
-        max: 1.3,
-        note: "Same signals, different execution: ranking preserves what thresholds destroy.",
-        bars: [
-          { label: "Top-1 conviction ranking", value: 1.183, display: "1.183", accent: true },
-          { label: "Random top-1 baseline", value: 0.162, display: "0.162" },
-          { label: "Threshold execution (P60)", value: 0.071, display: "0.071" },
-        ],
-      },
-    ],
-    problem:
-      "Threshold execution of ML signals over-trades small edges to death. Can cross-sectional ranking preserve a statistically real signal at realistic costs?",
-    approach:
-      "Calibrated probabilities as ordinal conviction over a seven-stock large-cap tech cross-section; Top-K ranking vs threshold baselines; 12 walk-forward folds; Lo HAC Sharpe CIs, permutation tests, Benjamini–Hochberg FDR; explicit regime analysis.",
-    findings:
-      "Mean daily IC 0.0197 (p = 0.034). Top-1 ranking achieves Sharpe 1.183 with a break-even one-way cost of 24.2 bps — 4.8× the assumed cost — while threshold execution destroys the same signal. Performance is regime-dependent and the universe is survivor-selected; both stated plainly.",
-    matters:
-      "The constructive companion to the null result: deployment translation, costs, and regime honesty as first-class methodology.",
-    results: [
-      { value: "1.183", label: "Top-1 Sharpe (Lo HAC CI [0.382, 1.984])" },
-      { value: "24.2 bps", label: "break-even cost, 4.8× assumed" },
-      { value: "0.0197", label: "mean daily IC (p = 0.034)" },
-    ],
-    links: [{ label: "SSRN preprint", href: "https://ssrn.com/abstract=6985101" }],
-    caveat: "Survivor-selected tech universe; regime-dependent. Not investment advice.",
-  },
-];
+  },];
 
 export const flagship = publications.find((p) => p.flagship)!;
 
@@ -738,7 +687,7 @@ export const timeline = [
     question: "Should a model be deployed when it cannot prove predictive skill?",
     title: "The discipline to say no",
     theme: "Deployment Gates",
-    text: "A statistical deployment gate for financial ML stays closed across all 12 folds — published as a null result. Its companion shows execution design, not model skill, decides what survives costs.",
+    text: "A statistical deployment gate for financial ML stays closed across all 12 folds — published as a null result. The model stays near-perfectly calibrated with zero predictive skill — calibration is not deployment readiness.",
     slug: "icgdf",
   },
   {
@@ -802,7 +751,7 @@ export const openScience = [
 ];
 
 export const impact = [
-  { value: "9", label: "research manuscripts — 1 presented, 8 under review or working" },
+  { value: "8", label: "research manuscripts — 1 presented, 7 under review or working" },
   { value: "4", label: "domains bound by one audit protocol" },
   { value: "42M", label: "mortgage applications analysed" },
   { value: "1.28M", label: "records in external clinical validation" },

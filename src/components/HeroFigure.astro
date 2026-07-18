@@ -25,8 +25,6 @@ const punchlines: Record<string, string> = {
     "Privacy-preserving federation generalises better than the centralized model it replaces.",
   "cate-hmda":
     "The average gap is a lie — the underwriting channel decides who bears the burden.",
-  "conviction-ranking":
-    "Predictive accuracy does not make money. Execution does.",
 };
 
 const punchline = punchlines[slug];
@@ -262,55 +260,6 @@ const punchline = punchlines[slug];
           <line x1="540" y1="150" x2="540" y2="250" class="stroke-signal" stroke-width="1.6" />
           <text x="556" y="150" class="mono tiny fill-signal-t" text-anchor="start">automated −6.17</text>
           <text x="24" y="326" class="small">The underwriting channel — not the applicant — explains who lands where in this distribution (SD 8.47 pp).</text>
-        </svg>
-      )}
-
-      {/* ================= CONVICTION RANKING — execution destroys alpha ====== */}
-      {slug === "conviction-ranking" && (
-        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="Execution, not prediction, decides whether alpha survives">
-          <text x="24" y="30" class="eyebrow">THE SAME REAL SIGNAL — IC 0.0197 (p = 0.034) — TAKES TWO ROUTES</text>
-          <rect x="24" y="150" width="130" height="60" rx="8" class="fill-vwash stroke-signal" />
-          <text x="89" y="176" class="lbl fill-signalDeep-t" text-anchor="middle">Predictive</text>
-          <text x="89" y="196" class="lbl fill-signalDeep-t" text-anchor="middle">signal</text>
-          {/* upper path — dies */}
-          <path d="M154 165 C230 165 240 96 300 96" class="arrow-thin stroke-bad" fill="none" marker-end="url(#hf-ar-b)" />
-          {["Trade every signal", "High turnover", "Costs compound"].map((s, i) => (
-            <g>
-              <rect x={300 + i * 0} y={72 + i * 0} width="0" height="0" />
-              <rect x={300} y={72} width="118" height="0" />
-            </g>
-          ))}
-          {[
-            { x: 300, t: "Trade all" },
-            { x: 396, t: "↑ turnover" },
-            { x: 492, t: "costs bite" },
-          ].map((s) => (
-            <g>
-              <rect x={s.x} y="76" width="90" height="34" rx="6" class="fill-raised stroke-hairS" />
-              <text x={s.x + 45} y="97" class="mini tiny" text-anchor="middle">{s.t}</text>
-            </g>
-          ))}
-          <path d="M418 93 H432" class="arrow-thin stroke-hairS" fill="none" /><path d="M514 93 H528" class="arrow-thin stroke-hairS" fill="none" />
-          <rect x="596" y="70" width="104" height="46" rx="8" class="fill-raised stroke-bad" />
-          <text x="648" y="90" class="lbl fill-bad-t" text-anchor="middle">Sharpe 0.071</text>
-          <text x="648" y="106" class="mono tiny muted" text-anchor="middle">alpha gone</text>
-          {/* lower path — survives */}
-          <path d="M154 195 C230 195 240 264 300 264" class="arrow-thin stroke-verified" fill="none" marker-end="url(#hf-ar-v)" />
-          {[
-            { x: 300, t: "Rank · top-1" },
-            { x: 396, t: "few trades" },
-            { x: 492, t: "cost stays low" },
-          ].map((s) => (
-            <g>
-              <rect x={s.x} y="247" width="90" height="34" rx="6" class="fill-vwash stroke-verified" />
-              <text x={s.x + 45} y="268" class="mini tiny fill-verified-t" text-anchor="middle">{s.t}</text>
-            </g>
-          ))}
-          <path d="M418 264 H432" class="arrow-thin stroke-verified" fill="none" /><path d="M514 264 H528" class="arrow-thin stroke-verified" fill="none" />
-          <rect x="596" y="241" width="104" height="48" rx="8" class="fill-raised stroke-verified" />
-          <text x="648" y="261" class="lbl fill-verified-t" text-anchor="middle">Sharpe 1.183</text>
-          <text x="648" y="278" class="mono tiny muted" text-anchor="middle">4.8× cost margin</text>
-          <text x="24" y="336" class="small">Identical predictions. Only the execution design changed.</text>
         </svg>
       )}
 
