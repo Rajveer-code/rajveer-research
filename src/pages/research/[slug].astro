@@ -20,9 +20,11 @@ const related = publications
   .filter((p) => p.slug !== pub.slug && p.themes.some((t) => pub.themes.includes(t)))
   .sort((a, b) => a.order - b.order)
   .slice(0, 3);
+
+const citationAuthors = pub.authors.split(", ");
 ---
 
-<Base title={`${pub.shortTitle} — Rajveer Singh Pall`} description={pub.oneLiner}>
+<Base title={`${pub.shortTitle} — Rajveer Singh Pall`} description={pub.oneLiner} citationTitle={pub.title} citationAuthors={citationAuthors} citationDate={pub.year}>
   <Nav />
   <main>
     <article>
