@@ -14,6 +14,7 @@ import taxonomy from "../../assets/figures/trustshift/fig1_taxonomy.png";
  */
 
 const pub = publications.find((p) => p.slug === "trustshift")!;
+const citationAuthors = pub.authors.split(", ");
 
 const related = publications
   .filter((p) => p.slug !== pub.slug && p.themes.some((t) => pub.themes.includes(t)))
@@ -114,7 +115,7 @@ const meta = [
 const fmt = (n: number) => n.toFixed(3);
 ---
 
-<Base title={`TrustShift — Rajveer Singh Pall`} description={pub.oneLiner}>
+<Base title={`TrustShift — Rajveer Singh Pall`} description={pub.oneLiner} citationTitle={pub.title} citationAuthors={citationAuthors} citationDate={pub.year}>
   <Nav />
   <main>
     <article>
