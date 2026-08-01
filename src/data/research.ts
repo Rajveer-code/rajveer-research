@@ -295,7 +295,7 @@ export const publications: Publication[] = [
       "Cross-Platform Generalisation Failure in Mental Health NLP: A Five-Axis Fairness Audit of Transformer Models on Social Media",
     shortTitle: "CPFE — Mental-Health NLP",
     authors: "Rajveer Singh Pall, Sameer Yadav",
-    status: "Under journal review",
+    status: "In preparation",
     statusKind: "review",
     year: "2026",
     themes: ["nlp-llm", "fairness", "healthcare", "deployment"],
