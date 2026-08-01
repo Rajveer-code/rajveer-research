@@ -10,10 +10,16 @@ import "../styles/base.css";
 interface Props {
   title: string;
   description?: string;
+  citationTitle?: string;
+  citationAuthors?: string[];
+  citationDate?: string;
 }
 
 const {
   title,
+  citationTitle,
+  citationAuthors,
+  citationDate,
   description = "Rajveer Singh Pall — AI researcher studying trustworthy machine learning under real-world deployment: fairness, calibration, external validation, and deployment-shift auditing.",
 } = Astro.props;
 
@@ -55,6 +61,10 @@ const personLd = {
     <meta name="generator" content={Astro.generator} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonical} />
+    {citationTitle && <meta name="citation_title" content={citationTitle} />}
+    {citationAuthors && citationAuthors.map((a) => <meta name="citation_author" content={a} />)}
+    {citationDate && <meta name="citation_publication_date" content={citationDate} />}
+    {citationTitle && <meta name="citation_abstract_html_url" content={canonical} />}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
