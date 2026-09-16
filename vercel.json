@@ -2,13 +2,25 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "trailingSlash": true,
   "redirects": [
-    { "source": "/research/cate-hmda", "destination": "/research/who-bears-the-burden/", "permanent": true },
-    { "source": "/research/cate-hmda/", "destination": "/research/who-bears-the-burden/", "permanent": true },
-    { "source": "/research/icgdf", "destination": "/research/when-the-gate-stays-closed/", "permanent": true },
-    { "source": "/research/icgdf/", "destination": "/research/when-the-gate-stays-closed/", "permanent": true },
-    { "source": "/research/cpfe", "destination": "/research/text-genre-transfer-failure/", "permanent": true },
-    { "source": "/research/cpfe/", "destination": "/research/text-genre-transfer-failure/", "permanent": true },
-    { "source": "/research/federated-diabetes", "destination": "/research/subgroup-fairness-reversal/", "permanent": true },
-    { "source": "/research/federated-diabetes/", "destination": "/research/subgroup-fairness-reversal/", "permanent": true }
+    {
+      "source": "/research/cate-hmda/",
+      "destination": "/research/who-bears-the-burden/",
+      "permanent": true
+    },
+    {
+      "source": "/research/icgdf/",
+      "destination": "/research/when-the-gate-stays-closed/",
+      "permanent": true
+    },
+    {
+      "source": "/research/cpfe/",
+      "destination": "/research/text-genre-transfer-failure/",
+      "permanent": true
+    },
+    {
+      "source": "/research/federated-diabetes/",
+      "destination": "/research/subgroup-fairness-reversal/",
+      "permanent": true
+    }
   ]
 }
