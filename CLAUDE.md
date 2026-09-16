@@ -11,7 +11,7 @@ button was placed by the owner and stays).
 - `npm run build` — static build to `dist/`
 - `npm run preview` — serve built output (launch config `research-preview`, port 4322)
 - `node scripts/build-leaderboard.mjs` — regenerate `src/data/leaderboard.json` (asserts all 378 public pairs)
-- `node scripts/build-og.mjs` — regenerate `public/og.png` and `public/apple-touch-icon.png`
+- `node scripts/build-og.mjs` — regenerate share images (`public/og.png`, `public/og/<slug>.png`), `apple-touch-icon.png` and `favicon.ico` (needs Node 22.18+ and Edge)
 
 ## Stack
 
@@ -36,6 +36,10 @@ Design system: "Laboratory Paper" (`src/styles/tokens.css`), light only.
    calling a change done. Watch Astro whitespace: a line break between an element and text
    collapses, so write `{" "}` where a space must survive.
 8. Verify UI at desktop and 375 px with a clean console before claiming done.
+9. SEO: every page keeps a unique title (<= 60), description (70 to 160), canonical, one h1 and no heading
+   skips. A renamed or removed paper URL needs a permanent redirect in `vercel.json`. After adding a
+   paper, rerun `node scripts/build-og.mjs` so its share image exists.
+10. No LocalBusiness or other schema that does not describe the page: this is a personal research site.
 
 ## PATHS
 

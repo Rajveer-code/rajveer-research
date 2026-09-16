@@ -21,7 +21,7 @@ counters → open questions → news → about and contact.
 Every paper uses the same template (`src/pages/research/[slug].astro`), and a
 section appears only when the paper has content for it:
 
-1. Header: status, title, authors, one-line discovery, public links
+1. Header: breadcrumbs, status, title, authors, one-line discovery, public links
 2. The discovery in one figure: a bespoke SVG per paper (`HeroFigure.astro`)
 3. The paper in five minutes
 4. The research question
@@ -31,6 +31,7 @@ section appears only when the paper has content for it:
 8. What this changes
 9. Resources and citation, including what is not public yet and why
 10. Related research, ranked by shared themes
+11. Previous and next paper in reading order
 
 ## Content integrity
 
@@ -45,6 +46,19 @@ section appears only when the paper has content for it:
   script asserts that all 378 public pairs reproduce exactly.
 - Scholar citation tags are emitted only for published work and public working
   papers.
+
+## Search and sharing
+
+- Every page has a unique title, a 70 to 160 character description, a self-referencing
+  canonical URL, one h1 and an unbroken heading outline.
+- Structured data (one JSON-LD graph per page): Person and WebSite everywhere,
+  ProfilePage on the home page, ScholarlyArticle and BreadcrumbList on paper pages,
+  CollectionPage on /research/.
+- `sitemap.xml` and `llms.txt` are generated from the paper data at build time;
+  `robots.txt` allows all crawlers and points to the sitemap.
+- Every paper has its own 1200x630 share image (`public/og/<slug>.png`).
+- `vercel.json` sends slashless URLs and retired or renamed paper URLs to the canonical
+  URL with a permanent (308) redirect. Renaming a slug needs a new redirect there.
 
 ## Motion and accessibility
 
@@ -72,11 +86,11 @@ npm run dev                          # http://localhost:4321
 npm run build                        # static build to dist/
 npm run preview                      # serve the built output
 node scripts/build-leaderboard.mjs   # regenerate src/data/leaderboard.json
-node scripts/build-og.mjs            # regenerate public/og.png and apple-touch-icon.png
+node scripts/build-og.mjs            # regenerate share images, apple-touch-icon.png and favicon.ico
 ```
 
 Deploys on Vercel from `main` (framework preset: Astro, output `dist/`). The
-sitemap is generated from the paper data at build time (`src/pages/sitemap.xml.ts`).
+sitemap and llms.txt are generated from the paper data at build time.
 
 ## Structure
 
@@ -87,6 +101,10 @@ sitemap is generated from the paper data at build time (`src/pages/sitemap.xml.t
   ResearchMap, Publications, OpenScience, News, Contact, …) and paper-page parts
   (HeroFigure, FigureBars, MethodFlow, PaperFigures)
 - `src/pages/research/[slug].astro`: the shared paper template (12 papers)
+- `src/pages/research/index.astro`: the publications page with status filters
+- `src/pages/sitemap.xml.ts`, `src/pages/llms.txt.ts`: generated crawl files
+- `src/data/seo.ts`: canonical URLs, descriptions and schema identifiers
+- `vercel.json`: trailing-slash canonicalisation and permanent redirects
 - `src/assets/figures/<slug>/`: real publication figures
 - `src/styles/tokens.css`: design tokens ("Laboratory Paper": colour, type, spacing, motion)
 - `src/scripts/motion.ts`: GSAP and Lenis wiring, reduced-motion safe
