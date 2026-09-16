@@ -120,8 +120,8 @@ export const DISCOVERY: Partial<Record<string, string>> = {
   "scorer-partial-identification":
     "What is not known about the scorer, not sampling error, sets the width of a benchmark comparison.",
   "mortgage-disparities": "The disparity is concentrated inside institutions, and widens at their boundaries.",
-  "cate-hmda": "The average hides the distribution: the underwriting channel decides who bears the penalty.",
-  icgdf: "A well-calibrated model with no measurable skill. The correct decision is not to deploy.",
+  "who-bears-the-burden": "The average hides the distribution: the underwriting channel decides who bears the penalty.",
+  "when-the-gate-stays-closed": "A well-calibrated model with no measurable skill. The correct decision is not to deploy.",
 };
 
 export const publications: Publication[] = [
@@ -610,7 +610,7 @@ export const publications: Publication[] = [
 
   // Source: application dossier §3 P1. Working paper (public SSRN version).
   {
-    slug: "cate-hmda",
+    slug: "who-bears-the-burden",
     order: 10,
     title:
       "Who Bears the Burden? Heterogeneous Racial Approval Differentials in U.S. Mortgage Lending: Causal Forest DML on 42 Million HMDA Applications",
@@ -676,7 +676,7 @@ export const publications: Publication[] = [
 
   // Source: application dossier §3 P3. Working paper (public SSRN version).
   {
-    slug: "icgdf",
+    slug: "when-the-gate-stays-closed",
     order: 11,
     title:
       "When the Gate Stays Closed: Empirical Evidence of Near-Zero Cross-Sectional Predictability in Large-Cap NASDAQ Equities Using an IC-Gated Machine Learning Framework",
@@ -743,7 +743,7 @@ export const publications: Publication[] = [
 
   // Source: mental-health-fairness-nlp/submission/jhir/main.tex title. Topic only, by the author’s decision.
   {
-    slug: "cpfe",
+    slug: "text-genre-transfer-failure",
     order: 12,
     title:
       "Text Genre, Not Platform Identity, Predicts Transfer Failure in Mental Health Natural Language Processing: A Five-Axis Deployment Audit Across Five Corpora",
@@ -783,7 +783,7 @@ export const timeline = [
     title: "Reliability audited on five axes",
     theme: "NLP · Fairness",
     text: "Mental-health text classifiers are followed across platforms and corpora and audited on five axes: discrimination, significance, equity, calibration and attribution.",
-    slug: "cpfe",
+    slug: "text-genre-transfer-failure",
   },
   {
     period: "2025-2026",
@@ -791,7 +791,7 @@ export const timeline = [
     title: "Causal structure of a 42M-application gap",
     theme: "Causal Inference",
     text: "Mortgage lending at national scale: the racial approval gap is quantified, bounded, and traced to a lender-controlled mechanism. Manual underwriting more than doubles the penalty of automated systems.",
-    slug: "cate-hmda",
+    slug: "who-bears-the-burden",
   },
   {
     period: "2026",
@@ -799,7 +799,7 @@ export const timeline = [
     title: "The discipline to say no",
     theme: "Deployment Gates",
     text: "A statistical deployment gate for financial ML stays closed across all 12 folds, reported as a null result. The model stays well calibrated with zero predictive skill: calibration is not deployment readiness.",
-    slug: "icgdf",
+    slug: "when-the-gate-stays-closed",
   },
   {
     period: "Mid 2026",
