@@ -1,0 +1,135 @@
+---
+import Base from "../../layouts/Base.astro";
+import Nav from "../../components/Nav.astro";
+import Publications from "../../components/Publications.astro";
+import { publications, type StatusKind } from "../../data/research";
+import { absolute, paperPath, papersInOrder, WEBSITE_ID } from "../../data/seo";
+
+const title = "Publications · Rajveer Singh Pall";
+const description =
+  "All twelve papers and manuscripts by Rajveer Singh Pall on LLM evaluation, fairness, clinical validation, lending and markets, with exact statuses.";
+
+const count = (kind: StatusKind) => publications.filter((p) => p.statusKind === kind).length;
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const summary = [
+  `${count("published")} published`,
+  `${count("review")} under review`,
+  plural(count("working"), "working paper", "working papers"),
+  plural(count("manuscript"), "manuscript", "manuscripts"),
+  `${count("preparation")} in preparation`,
+];
+const summaryText = `${summary.slice(0, -1).join(", ")} and ${summary[summary.length - 1]}.`;
+
+const collection = {
+  "@type": "CollectionPage",
+  "@id": absolute("/research/#page"),
+  url: absolute("/research/"),
+  name: title,
+  description,
+  inLanguage: "en",
+  isPartOf: { "@id": WEBSITE_ID },
+  mainEntity: {
+    "@type": "ItemList",
+    numberOfItems: papersInOrder.length,
+    itemListElement: papersInOrder.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: absolute(paperPath(p)),
+      name: p.title,
+    })),
+  },
+};
+
+const breadcrumbs = {
+  "@type": "BreadcrumbList",
+  "@id": absolute("/research/#breadcrumbs"),
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: absolute("/") },
+    { "@type": "ListItem", position: 2, name: "Publications", item: absolute("/research/") },
+  ],
+};
+---
+
+<Base title={title} description={description} jsonLd={[collection, breadcrumbs]}>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <header class="page-head container">
+      <nav class="label-mono breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          <li><a href="/">Home</a></li>
+          <li aria-current="page">Publications</li>
+        </ol>
+      </nav>
+      <h1 class="page-title paper-title" data-hero="1">Publications and <em>manuscripts</em></h1>
+      <p class="page-lead">
+        {`Twelve studies on one question: whether machine learning results mean what they claim. ${summaryText} Every status is stated exactly and never upgraded.`}
+      </p>
+    </header>
+    <Publications standalone />
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <a class="label-mono back" href="/">← Home</a>
+      <span class="label-mono">© 2026 Rajveer Singh Pall</span>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  .page-head {
+    padding-block: var(--space-24) var(--space-12);
+  }
+
+  .breadcrumb { display: block; margin-bottom: var(--space-12); }
+  .breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .breadcrumb li + li::before {
+    content: "/";
+    margin-inline: var(--space-2);
+    color: var(--ink-3);
+  }
+  .breadcrumb a { color: var(--ink-3); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--signal); }
+  .breadcrumb [aria-current="page"] { color: var(--ink-2); }
+
+  .page-title {
+    font-size: var(--text-2xl);
+    font-weight: 460;
+    letter-spacing: var(--tracking-display);
+    max-width: 18ch;
+    margin-bottom: var(--space-8);
+  }
+
+  .page-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .page-lead {
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--ink-2);
+    max-width: 56ch;
+  }
+
+  .footer {
+    border-top: var(--rule);
+    background: var(--paper-recessed);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .footer-inner {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-8);
+  }
+
+  .back { color: var(--signal); text-decoration: none; }
+</style>

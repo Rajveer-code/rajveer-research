@@ -1,6 +1,14 @@
 ---
 import { publications, THEME_LABELS, STATUS_LABELS, type StatusKind } from "../data/research";
 
+interface Props {
+  /** Standalone page: the page supplies the h1, so the section heading is omitted and titles become h2. */
+  standalone?: boolean;
+}
+
+const { standalone = false } = Astro.props;
+const TitleTag = standalone ? "h2" : "h3";
+
 const sorted = [...publications].sort((a, b) => a.order - b.order);
 
 const kinds = (Object.keys(STATUS_LABELS) as StatusKind[])
@@ -12,11 +20,17 @@ const kinds = (Object.keys(STATUS_LABELS) as StatusKind[])
   .filter((k) => k.count > 0);
 ---
 
-<section class="pubs container" id="publications">
-  <p class="label-mono section-eyebrow" data-reveal>Publications & manuscripts</p>
-  <h2 class="section-title" data-reveal>
-    Twelve studies, one <em>argument</em>
-  </h2>
+<section class:list={["pubs container", { "pubs--standalone": standalone }]} id={standalone ? "list" : "publications"}>
+  {
+    !standalone && (
+      <>
+        <p class="label-mono section-eyebrow" data-reveal>Publications & manuscripts</p>
+        <h2 class="section-title" data-reveal>
+          Twelve studies, one <em>argument</em>
+        </h2>
+      </>
+    )
+  }
 
   <div class="pub-filter" data-reveal data-pub-filter hidden>
     <div class="filter-buttons ui-sans" role="group" aria-label="Filter by status">
@@ -44,9 +58,9 @@ const kinds = (Object.keys(STATUS_LABELS) as StatusKind[])
             <span class={`status status--${p.statusKind}`}>{p.status}</span>
             <span class="label-mono pub-year">{p.year}</span>
           </div>
-          <h3 class="pub-title">
+          <TitleTag class="pub-title">
             <a href={`/research/${p.slug}/`}>{p.title}</a>
-          </h3>
+          </TitleTag>
           <p class="pub-authors ui-sans">{p.authors}</p>
           <p class="pub-oneliner">{p.oneLiner}</p>
           <div class="pub-foot">
@@ -110,6 +124,11 @@ const kinds = (Object.keys(STATUS_LABELS) as StatusKind[])
   .pubs {
     padding-block: var(--space-section);
     border-bottom: var(--rule);
+  }
+
+  .pubs--standalone {
+    padding-block: 0 var(--space-24);
+    border-bottom: 0;
   }
 
   .section-eyebrow {

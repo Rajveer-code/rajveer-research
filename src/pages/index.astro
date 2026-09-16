@@ -13,9 +13,25 @@ import Impact from "../components/Impact.astro";
 import FutureVision from "../components/FutureVision.astro";
 import News from "../components/News.astro";
 import Contact from "../components/Contact.astro";
+import { absolute, PERSON_ID, WEBSITE_ID } from "../data/seo";
+
+const title = "Rajveer Singh Pall · Trustworthy Machine Learning Research";
+const description =
+  "Rajveer Singh Pall is an AI researcher testing whether machine learning results mean what they claim: LLM benchmarks, fairness and clinical validation.";
+
+const profilePage = {
+  "@type": "ProfilePage",
+  "@id": absolute("/#profile"),
+  url: absolute("/"),
+  name: title,
+  description,
+  inLanguage: "en",
+  mainEntity: { "@id": PERSON_ID },
+  isPartOf: { "@id": WEBSITE_ID },
+};
 ---
 
-<Base title="Rajveer Singh Pall · AI Research">
+<Base title={title} description={description} jsonLd={[profilePage]}>
   <Nav />
   <main id="main" tabindex="-1">
     <Hero />

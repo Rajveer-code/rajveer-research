@@ -87,6 +87,13 @@ code, pre, kbd {
   color: var(--ink-3);
 }
 
+/* A label that is also a section heading keeps the label's look */
+h2.label-mono {
+  font-weight: 400;
+  line-height: var(--leading-body);
+  text-wrap: wrap;
+}
+
 /* UI sans — nav, buttons, metadata rows */
 .ui-sans {
   font-family: var(--font-sans);

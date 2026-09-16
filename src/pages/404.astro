@@ -3,7 +3,11 @@ import Base from "../layouts/Base.astro";
 import Nav from "../components/Nav.astro";
 ---
 
-<Base title="Page not found · Rajveer Singh Pall" noindex>
+<Base
+  title="Page not found · Rajveer Singh Pall"
+  description="This page is not on Rajveer Singh Pall’s research site. Every current paper is listed under Publications."
+  noindex
+>
   <Nav />
   <main id="main" tabindex="-1" class="missing container">
     <p class="label-mono missing-eyebrow">404 · Not on the site</p>
@@ -13,7 +17,7 @@ import Nav from "../components/Nav.astro";
       current paper is listed under Publications.
     </p>
     <div class="missing-actions ui-sans">
-      <a class="btn btn--primary" href="/#publications">All publications</a>
+      <a class="btn btn--primary" href="/research/">All publications</a>
       <a class="btn" href="/">Home</a>
     </div>
   </main>

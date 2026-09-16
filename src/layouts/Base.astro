@@ -6,11 +6,19 @@ import "@fontsource-variable/instrument-sans";
 import "@fontsource/fragment-mono";
 import "../styles/tokens.css";
 import "../styles/base.css";
+import { identity } from "../data/research";
+import { absolute, PERSON_ID, WEBSITE_ID, SITE_NAME } from "../data/seo";
 
 interface Props {
   title: string;
-  description?: string;
+  description: string;
   noindex?: boolean;
+  /** Site-relative path of a 1200x630 PNG. */
+  ogImage?: string;
+  ogImageAlt?: string;
+  ogType?: "website" | "article";
+  /** Page-specific schema.org nodes, merged with Person and WebSite into one @graph. */
+  jsonLd?: Record<string, unknown>[];
   citationTitle?: string;
   citationAuthors?: string[];
   citationDate?: string;
@@ -18,26 +26,28 @@ interface Props {
 
 const {
   title,
+  description,
   noindex = false,
+  ogImage = "/og.png",
+  ogImageAlt = "Rajveer Singh Pall, AI Research: testing whether machine learning results mean what they claim",
+  ogType = "website",
+  jsonLd = [],
   citationTitle,
   citationAuthors,
   citationDate,
-  description = "Rajveer Singh Pall studies whether machine learning results mean what they claim: benchmark identification, scoring rules for LLM evaluation, fairness at the decision threshold, and external validation.",
 } = Astro.props;
 
-// Absolute URLs for crawlers/social; fall back to relative if `site` is unset.
-const ogImage = Astro.site ? new URL("/og.png", Astro.site).href : "/og.png";
-const canonical = Astro.site
-  ? new URL(Astro.url.pathname, Astro.site).href
-  : Astro.url.pathname;
+const canonical = absolute(Astro.url.pathname);
+const ogImageUrl = absolute(ogImage);
 
-const personLd = {
-  "@context": "https://schema.org",
+const person = {
   "@type": "Person",
-  name: "Rajveer Singh Pall",
+  "@id": PERSON_ID,
+  name: identity.name,
+  url: absolute("/"),
   jobTitle: "AI Researcher",
   description:
-    "Researcher in trustworthy machine learning: benchmark evaluation, fairness at the decision threshold, and external validation.",
+    "AI researcher studying whether machine learning results mean what they claim: benchmark evaluation, fairness at the decision threshold, and external validation.",
   affiliation: {
     "@type": "CollegeOrUniversity",
     name: "Gyan Ganga Institute of Technology and Sciences",
@@ -49,15 +59,24 @@ const personLd = {
     "External validation",
     "Distribution shift",
   ],
-  email: "mailto:rajveerpall04@gmail.com",
-  sameAs: [
-    "https://github.com/Rajveer-code",
-    "https://huggingface.co/Rajveer-code",
-    "https://orcid.org/0009-0001-6762-6134",
-    "https://scholar.google.com/citations?hl=en&user=47CvVCcAAAAJ",
-    "https://www.linkedin.com/in/rajveer-singh-pall/",
-  ],
+  email: `mailto:${identity.email}`,
+  sameAs: identity.links.map((l) => l.href),
 };
+
+const website = {
+  "@type": "WebSite",
+  "@id": WEBSITE_ID,
+  url: absolute("/"),
+  name: SITE_NAME,
+  inLanguage: "en",
+  author: { "@id": PERSON_ID },
+};
+
+// `<` is escaped so no string in the data can close the script element.
+const graph = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [person, website, ...jsonLd],
+}).replace(/</g, "\\u003c");
 ---
 
 <!doctype html>
@@ -71,29 +90,35 @@ const personLd = {
     <meta name="google-site-verification" content="rXaFWWr31Bx8XONqpWOKwkLsFHxPo53jyEosuBKAXqQ" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="author" content="Rajveer Singh Pall" />
-    <meta name="generator" content={Astro.generator} />
+    <meta name="author" content={identity.name} />
+    <meta name="robots" content={noindex ? "noindex, follow" : "index, follow, max-image-preview:large"} />
     <meta name="theme-color" content="#fbfaf7" />
-    {noindex && <meta name="robots" content="noindex" />}
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" sizes="32x32" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {citationTitle && <meta name="citation_title" content={citationTitle} />}
     {citationAuthors && citationAuthors.map((a) => <meta name="citation_author" content={a} />)}
     {citationDate && <meta name="citation_publication_date" content={citationDate} />}
     {citationTitle && <meta name="citation_abstract_html_url" content={canonical} />}
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:site_name" content="Rajveer Singh Pall · AI Research" />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+    {ogType === "article" && <meta property="article:author" content={absolute("/")} />}
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content={ogImage} />
-    <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+    <script type="application/ld+json" set:html={graph} />
     <ClientRouter />
   </head>
   <body>
