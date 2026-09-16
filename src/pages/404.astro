@@ -1,0 +1,88 @@
+---
+import Base from "../layouts/Base.astro";
+import Nav from "../components/Nav.astro";
+---
+
+<Base title="Page not found · Rajveer Singh Pall" noindex>
+  <Nav />
+  <main id="main" tabindex="-1" class="missing container">
+    <p class="label-mono missing-eyebrow">404 · Not on the site</p>
+    <h1 class="missing-title">This page is <em>not here</em></h1>
+    <p class="missing-text">
+      The link may point to a paper page that was renamed or consolidated. Every
+      current paper is listed under Publications.
+    </p>
+    <div class="missing-actions ui-sans">
+      <a class="btn btn--primary" href="/#publications">All publications</a>
+      <a class="btn" href="/">Home</a>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .missing {
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: var(--space-6);
+    min-height: 80dvh;
+    padding-block: var(--space-24);
+  }
+
+  .missing-eyebrow { color: var(--signal); }
+
+  .missing-title {
+    font-size: var(--text-2xl);
+    font-weight: 460;
+    letter-spacing: var(--tracking-display);
+  }
+
+  .missing-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .missing-text {
+    font-size: var(--text-md);
+    line-height: var(--leading-snug);
+    color: var(--ink-2);
+    max-width: 48ch;
+  }
+
+  .missing-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: var(--space-3) var(--space-6);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-2);
+    color: var(--ink);
+    text-decoration: none;
+    touch-action: manipulation;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .btn:hover { border-color: var(--signal); color: var(--signal); }
+
+  .btn--primary {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .btn--primary:hover {
+    background: var(--signal);
+    border-color: var(--signal);
+    color: var(--paper);
+  }
+</style>
