@@ -1,16 +1,16 @@
 ---
 const questions = [
   {
-    q: "Can deployment failure be diagnosed before deployment?",
-    text: "TrustShift shows shift type is diagnosable from unlabeled data in four domains. The next step is a general theory: which probe families predict which failure axes, with what guarantees, and where the mapping breaks.",
+    q: "Can every reported benchmark number carry its own identified range?",
+    text: "The benchmark papers show that what is unknown about a scorer can outweigh sampling error. The next step is making that range a default output of evaluation harnesses: a Scorer Card for each task, and audit labels spent where they narrow comparisons most.",
   },
   {
-    q: "What does runtime auditing look like for generative systems?",
-    text: "Classifier audits assume fixed outputs. Free-form generation needs live instrumentation — calibration of verbalized confidence, faithfulness, counterfactual equity — cheap enough to run beside every response on consumer hardware.",
+    q: "Can fairness be audited at the decision instead of the metric?",
+    text: "Subgroup AUC reads within-group ranking, while a screening threshold acts across groups. Audits should report who a deployed threshold actually flags, at the capacities a programme really runs, with intervals on the gap.",
   },
   {
-    q: "Can evaluation itself become infrastructure?",
-    text: "Fairness, calibration, and external validity are still bolted on paper by paper. The goal is evaluation as a first-class system: pre-registered, subgroup-aware, shift-aware — as standard as a test suite in software.",
+    q: "Can deployment failure be diagnosed before labels arrive?",
+    text: "TrustShift shows that shift magnitude alone does not say which axis fails. The open problem is which label-free probes identify the mechanism, with what guarantees, and how an audit should report inconclusive when they cannot.",
   },
 ];
 ---

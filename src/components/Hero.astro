@@ -1,12 +1,17 @@
 ---
+import { identity, news } from "../data/research";
+
 const keywords = [
-  "Trustworthy AI",
-  "Deployment Shift",
+  "Benchmark Evaluation",
+  "Partial Identification",
   "Fairness",
+  "External Validation",
+  "Deployment Shift",
   "Calibration",
-  "External Validity",
-  "Interpretability",
 ];
+
+const latest = news[0];
+const scholar = identity.links.find((l) => l.label === "Google Scholar")!;
 ---
 
 <section class="hero container" id="top">
@@ -14,26 +19,37 @@ const keywords = [
     Research program · Trustworthy machine learning
   </p>
   <h1 class="hero-headline" data-hero="2">
-    Building trustworthy machine learning for <em>real-world&nbsp;deployment</em>
+    Testing whether machine learning results <em>mean what they&nbsp;claim</em>
   </h1>
   <p class="hero-lead" data-hero="3">
-    Modern AI systems achieve excellent benchmark performance, yet fail in
-    structured, predictable ways once deployed. I build the audits that expose
-    those failures — across clinical risk, lending, language, and markets — and
-    the evaluation infrastructure that anticipates them.
+    Models are judged by numbers: benchmark accuracy, subgroup AUC, internal
+    validation. I test whether those numbers support the decisions built on
+    them, and build the audits and open infrastructure that show when they do
+    not, across LLM evaluation, clinical risk, lending and markets.
   </p>
   <ul class="hero-keywords" data-hero="4" aria-label="Research keywords">
     {keywords.map((k) => <li class="label-mono">{k}</li>)}
   </ul>
   <div class="hero-actions ui-sans" data-hero="5">
     <a class="btn btn--primary" href="#research">Read the research</a>
-    <a class="btn" href="https://github.com/Rajveer-code">GitHub ↗</a>
+    <a class="btn" href="#publications">All 12 papers</a>
+    <a class="btn" href={scholar.href}>Google Scholar ↗</a>
   </div>
+  <dl class="hero-facts ui-sans" data-hero="6">
+    <div>
+      <dt class="label-mono">Now</dt>
+      <dd>{identity.goal}</dd>
+    </div>
+    <div>
+      <dt class="label-mono">Latest · {latest.date}</dt>
+      <dd>{latest.text}</dd>
+    </div>
+  </dl>
 </section>
 
 <style>
   .hero {
-    padding-block: var(--space-section) var(--space-32);
+    padding-block: var(--space-section) var(--space-24);
     border-bottom: var(--rule);
   }
 
@@ -57,7 +73,7 @@ const keywords = [
     font-size: var(--text-md);
     line-height: var(--leading-snug);
     color: var(--ink-2);
-    max-width: 52ch;
+    max-width: 54ch;
   }
 
   .hero-keywords {
@@ -73,17 +89,46 @@ const keywords = [
 
   .hero-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-4);
     margin-top: var(--space-12);
   }
 
+  .hero-facts {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--space-6) var(--space-12);
+    margin: var(--space-16) 0 0;
+    padding-top: var(--space-6);
+    border-top: var(--rule);
+    max-width: var(--width-content);
+  }
+
+  .hero-facts div {
+    display: grid;
+    gap: var(--space-2);
+    align-content: start;
+  }
+
+  .hero-facts dt { color: var(--signal); }
+
+  .hero-facts dd {
+    margin: 0;
+    color: var(--ink-2);
+    line-height: 1.5;
+    max-width: 52ch;
+  }
+
   .btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
     padding: var(--space-3) var(--space-6);
     border: 1px solid var(--hairline-strong);
     border-radius: var(--radius-2);
     color: var(--ink);
     text-decoration: none;
+    touch-action: manipulation;
     transition:
       background var(--dur-fast) var(--ease-out),
       color var(--dur-fast) var(--ease-out),
@@ -105,5 +150,13 @@ const keywords = [
     background: var(--signal);
     border-color: var(--signal);
     color: var(--paper);
+  }
+
+  @media (max-width: 720px) {
+    .hero-facts { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 420px) {
+    .hero-actions .btn { padding-inline: var(--space-4); }
   }
 </style>

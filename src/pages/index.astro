@@ -11,12 +11,13 @@ import Publications from "../components/Publications.astro";
 import OpenScience from "../components/OpenScience.astro";
 import Impact from "../components/Impact.astro";
 import FutureVision from "../components/FutureVision.astro";
+import News from "../components/News.astro";
 import Contact from "../components/Contact.astro";
 ---
 
-<Base title="Rajveer Singh Pall — AI Research">
+<Base title="Rajveer Singh Pall · AI Research">
   <Nav />
-  <main>
+  <main id="main" tabindex="-1">
     <Hero />
     <Highlights />
     <Vision />
@@ -27,6 +28,7 @@ import Contact from "../components/Contact.astro";
     <OpenScience />
     <Impact />
     <FutureVision />
+    <News />
     <Contact />
   </main>
 </Base>

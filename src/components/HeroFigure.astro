@@ -1,276 +1,419 @@
 ---
 /**
- * Discovery-first hero figure — one iconic image per paper, each a distinct
- * visual grammar. Answers "what did this paper discover?" in one look, not
- * "what did it measure". All annotated numbers are verified from result files.
- * On-brand SVG (no raster). Each branch is bespoke — no shared template.
+ * Discovery-first figure: one image per paper, each with its own visual
+ * grammar, answering "what did this paper find?" in one look. Every annotated
+ * number is verified against the paper's current source (see research.ts);
+ * where a shape is schematic the figure says so. On-brand SVG, token colours.
  */
+import data from "../data/leaderboard.json";
+
 interface Props {
   slug: string;
+  caption: string;
 }
-const { slug } = Astro.props;
+const { slug, caption } = Astro.props;
 
-const punchlines: Record<string, string> = {
-  "diabetes-external-validation":
-    "Deployment reveals a hidden, age-shaped failure that internal validation cannot see.",
-  "mortgage-disparities":
-    "The disparity is concentrated inside institutions — and widens at their boundaries.",
-  icgdf:
-    "A perfectly calibrated model with zero skill. The correct scientific decision is not to deploy.",
-  cpfe:
-    "Cross-platform reliability collapses on all five independent axes at once.",
-  indiafinbench:
-    "Frontier LLMs share a measurable blind spot for Indian financial regulation.",
-  "federated-diabetes":
-    "Privacy-preserving federation generalises better than the centralized model it replaces.",
-  "cate-hmda":
-    "The average gap is a lie — the underwriting channel decides who bears the burden.",
-};
+const f2 = (x: number) => x.toFixed(1);
 
-const punchline = punchlines[slug];
+/* ---- benchmark-accuracy-not-identified: three top rows + the 378-pair triangle ---- */
+const boardTop = data.models.slice(0, 3);
+const bx = (v: number) => 52 + v * 100 * 3.5; // 0 to 80% across 280px
+const overlapLo = Math.max(...boardTop.map((m) => m.lower));
+const overlapHi = Math.min(...boardTop.map((m) => m.upper));
+const cells: { x: number; y: number; on: boolean }[] = [];
+data.models.forEach((a, i) => {
+  data.models.forEach((b, j) => {
+    if (j <= i) return;
+    cells.push({ x: 404 + (j - 1) * 10, y: 60 + i * 10, on: !a.inseparable.includes(b.order) });
+  });
+});
+const identifiedPairs = cells.filter((c) => c.on).length;
+
+/* ---- confidently-wrong: 240 evaluations, 108 below chance ---- */
+const evals = Array.from({ length: 240 }, (_, k) => ({
+  x: 40 + (k % 60) * 10,
+  y: 250 + Math.floor(k / 60) * 10,
+  bad: k < 108,
+}));
+const ax = (auc: number) => 40 + auc * 640;
 ---
 
 {
-  punchline && (
+  caption && (
     <figure class="hf">
-      {/* ================= DIABETES — external validation as an X-ray ========= */}
-      {slug === "diabetes-external-validation" && (
-        <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="External validation reveals hidden subgroup failure">
-          <text x="24" y="34" class="eyebrow">THE MODEL LOOKS HEALTHY —</text>
-          {/* model + internal pass */}
-          <rect x="24" y="60" width="150" height="70" rx="8" class="fill-raised stroke-ink" />
-          <text x="99" y="90" class="lbl" text-anchor="middle">Diabetes model</text>
-          <text x="99" y="112" class="mono muted" text-anchor="middle">XGBoost</text>
-          <path d="M174 95 H236" class="arrow" marker-end="url(#hf-ar)" />
-          <rect x="236" y="60" width="150" height="70" rx="8" class="fill-vwash stroke-verified" />
-          <text x="311" y="88" class="lbl fill-verified-t" text-anchor="middle">Internal ✓</text>
-          <text x="311" y="112" class="mono fill-verified-t" text-anchor="middle">AUC 0.794</text>
-          {/* lens */}
-          <text x="24" y="188" class="eyebrow fill-signal-t">— UNTIL EXTERNAL VALIDATION LOOKS CLOSER</text>
-          <circle cx="120" cy="270" r="46" class="fill-none stroke-signal" stroke-width="2.5" />
-          <line x1="153" y1="303" x2="176" y2="326" class="stroke-signal" stroke-width="4" stroke-linecap="round" />
-          <text x="120" y="266" class="mini" text-anchor="middle">1.28M</text>
-          <text x="120" y="282" class="mini muted" text-anchor="middle">BRFSS</text>
-          <path d="M186 270 H232" class="arrow" marker-end="url(#hf-ar)" />
-          {/* revealed cracks */}
-          {[
-            { y: 232, label: "Adults ≥ 60", val: "AUC 0.607 · gap 0.135", w: 250, cls: "bad" },
-            { y: 268, label: "Overall", val: "0.717 · −9.7%", w: 165, cls: "warn" },
-            { y: 304, label: "Obese", val: "0.698 · gap 0.037", w: 95, cls: "warnb" },
-            { y: 340, label: "Calibration", val: "Brier 0.123 · overestimates", w: 130, cls: "info" },
-          ].map((r) => (
-            <g>
-              <text x="242" y={r.y - 4} class="mini">{r.label}</text>
-              <rect x="242" y={r.y} width={r.w} height="10" rx="3" class={`sev sev-${r.cls}`} />
-              <text x={242 + r.w + 8} y={r.y + 9} class="mono tiny muted">{r.val}</text>
-            </g>
-          ))}
-        </svg>
-      )}
+      <div class="hf-frame">
+        {/* ============ BENCHMARK ACCURACY: reported ranks vs identified ranges ============ */}
+        {slug === "benchmark-accuracy-not-identified" && (
+          <svg class="hf-svg" viewBox="0 0 720 400" role="img" aria-label={`The top three MATH-Hard models have overlapping identified ranges; ${identifiedPairs} of ${data.counts.pairs} pairwise orderings are identified and ${data.counts.notIdentified} are not.`}>
+            <text x="24" y="34" class="eyebrow">THE TOP THREE, AS PUBLISHED AND AS IDENTIFIED</text>
+            <rect x={bx(overlapLo)} y="56" width={bx(overlapHi) - bx(overlapLo)} height="150" class="fill-swash" />
+            {boardTop.map((m, i) => {
+              const y = 84 + i * 50;
+              return (
+                <g>
+                  <text x="24" y={y} class="mono mini fill-signal-t">#{m.reportedRank}</text>
+                  <text x="52" y={y} class="mini">{m.name}</text>
+                  <text x="332" y={y} class="mono tiny muted" text-anchor="end">{f2(m.score * 100)}%</text>
+                  <line x1={bx(m.lower)} y1={y + 16} x2={bx(m.upper)} y2={y + 16} class="stroke-ink" stroke-width="2" />
+                  <line x1={bx(m.lower)} y1={y + 11} x2={bx(m.lower)} y2={y + 21} class="stroke-ink" stroke-width="1.5" />
+                  <line x1={bx(m.upper)} y1={y + 11} x2={bx(m.upper)} y2={y + 21} class="stroke-ink" stroke-width="1.5" />
+                  <circle cx={bx(m.score)} cy={y + 16} r="4.5" class="fill-signal stroke-raised" stroke-width="2" />
+                </g>
+              );
+            })}
+            <line x1="52" y1="222" x2="332" y2="222" class="stroke-hairS" />
+            {[0, 20, 40, 60, 80].map((t) => (
+              <g>
+                <line x1={52 + t * 3.5} y1="218" x2={52 + t * 3.5} y2="226" class="stroke-hairS" />
+                <text x={52 + t * 3.5} y="240" class="mono tiny muted" text-anchor="middle">{t}%</text>
+              </g>
+            ))}
+            <text x="24" y="266" class="small">Shaded: the accuracy all three ranges share,</text>
+            <text x="24" y="284" class="small">so no ordering of the three is identified.</text>
+            <text x="24" y="330" class="big-num fill-signal-t">{data.counts.notIdentified} / {data.counts.pairs}</text>
+            <text x="24" y="354" class="small">orderings not identified with human-audited margins</text>
+            <text x="24" y="374" class="small muted">{data.counts.notIdentifiedAtZeroError} of {data.counts.pairs} even at zero scorer error</text>
 
-      {/* ================= MORTGAGE DISPARITIES — inside the institution ====== */}
-      {slug === "mortgage-disparities" && (
-        <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="The disparity is concentrated within institutions">
-          <text x="24" y="34" class="eyebrow">42M APPLICATIONS · RAW GAP 14.95 pp — BUT WHERE DOES IT LIVE?</text>
-          {/* applicant in */}
-          <text x="70" y="150" class="lbl" text-anchor="middle">Applicant</text>
-          <path d="M120 175 H176" class="arrow" marker-end="url(#hf-ar)" />
-          {/* the institution as a container */}
-          <rect x="180" y="70" width="360" height="240" rx="12" class="fill-recessed stroke-ink" stroke-dasharray="2 0" />
-          <text x="360" y="98" class="eyebrow" text-anchor="middle">INSIDE ONE LENDER</text>
-          <rect x="214" y="120" width="292" height="120" rx="8" class="fill-signal" />
-          <text x="360" y="168" class="big-num fill-paper-t" text-anchor="middle">74.6%</text>
-          <text x="360" y="196" class="lbl fill-paper-t" text-anchor="middle">of the gap is within-lender</text>
-          <text x="360" y="222" class="mono tiny fill-paper-t" text-anchor="middle" opacity="0.85">rising 66.8% → 78.3% (2020→2024)</text>
-          <text x="360" y="280" class="small muted" text-anchor="middle">only a minority sits between institutions</text>
-          {/* boundary amplifiers */}
-          <text x="24" y="344" class="eyebrow fill-signal-t">BOUNDARIES WIDEN IT</text>
-          <rect x="220" y="326" width="150" height="30" rx="6" class="fill-raised stroke-hair" />
-          <text x="295" y="345" class="mono tiny" text-anchor="middle">+2.0 pp @ 80% LTV</text>
-          <rect x="384" y="326" width="176" height="30" rx="6" class="fill-raised stroke-hair" />
-          <text x="472" y="345" class="mono tiny" text-anchor="middle">+1.5 pp · 2022 tightening</text>
-          <text x="612" y="180" class="mono tiny muted" text-anchor="middle">68% unexplained</text>
-          <text x="612" y="196" class="mono tiny muted" text-anchor="middle">by observables</text>
-        </svg>
-      )}
+            <text x="404" y="34" class="eyebrow">ALL {data.counts.pairs} PAIRWISE ORDERINGS</text>
+            {cells.map((c) => (
+              <rect x={c.x} y={c.y} width="8" height="8" class={c.on ? "cell-on" : "cell"} />
+            ))}
+            <rect x="404" y="346" width="10" height="10" class="cell-on" />
+            <text x="420" y="355" class="mini">{identifiedPairs} identified</text>
+            <rect x="524" y="346" width="10" height="10" class="cell" />
+            <text x="540" y="355" class="mini">{data.counts.notIdentified} not identified</text>
+            <text x="404" y="378" class="tiny muted">Rows and columns: the {data.models.length} models in published rank order.</text>
+          </svg>
+        )}
 
-      {/* ================= ICGDF — the deployment gate ======================== */}
-      {slug === "icgdf" && (
-        <svg class="hf-svg" viewBox="0 0 720 400" role="img" aria-label="The deployment gate stays closed">
-          <text x="360" y="34" class="eyebrow" text-anchor="middle">CAN THE MODEL PROVE PREDICTIVE SKILL BEFORE IT TRADES?</text>
-          <rect x="120" y="58" width="220" height="52" rx="8" class="fill-raised stroke-bad" />
-          <text x="230" y="80" class="lbl" text-anchor="middle">Stage 1 · HAC t-test</text>
-          <text x="230" y="99" class="mono small fill-bad-t" text-anchor="middle">✗  t = −0.09</text>
-          <rect x="380" y="58" width="220" height="52" rx="8" class="fill-raised stroke-bad" />
-          <text x="490" y="80" class="lbl" text-anchor="middle">Stage 2 · Permutation</text>
-          <text x="490" y="99" class="mono small fill-bad-t" text-anchor="middle">✗  ≈ random</text>
-          <path d="M230 110 V150" class="arrow" marker-end="url(#hf-ar)" />
-          <path d="M490 110 V150" class="arrow" marker-end="url(#hf-ar)" />
-          {/* the closed gate */}
-          <rect x="250" y="152" width="220" height="76" rx="6" class="fill-recessed stroke-ink" stroke-width="2" />
-          {[280, 310, 340, 370, 400, 430].map((x) => (
-            <line x1={x} y1="158" x2={x} y2="222" class="stroke-ink" stroke-width="3" />
-          ))}
-          <text x="360" y="248" class="gate-lbl" text-anchor="middle">GATE CLOSED</text>
-          {/* verdict */}
-          <rect x="234" y="266" width="252" height="42" rx="8" class="fill-ink" />
-          <text x="360" y="293" class="verdict fill-paper-t" text-anchor="middle">DO NOT DEPLOY</text>
-          {/* paradox */}
-          <text x="24" y="340" class="eyebrow fill-signal-t">THE TWIST</text>
-          <text x="24" y="362" class="small">ECE &lt; 0.025 across all 12 folds — perfectly calibrated, and yet</text>
-          <text x="24" y="382" class="small">the gate opened 0 / 12. Calibration is not deployment readiness.</text>
-        </svg>
-      )}
+        {/* ============ SUBGROUP FAIRNESS REVERSAL: the audit improves, the decision worsens ============ */}
+        {slug === "subgroup-fairness-reversal" && (
+          <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="The White-Black AUC gap narrows from 0.0075 to 0.0005 under FedAvg, while the sensitivity gap at fixed screening capacity widens from 0.009 to 0.034.">
+            <text x="24" y="34" class="eyebrow">THE AUDIT · WHITE-BLACK AUC GAP</text>
+            <text x="24" y="72" class="mini">Centralised control</text>
+            <rect x="24" y="80" width={0.0075 / 0.01 * 300} height="22" rx="2" class="fill-hairS" />
+            <text x={24 + 0.0075 / 0.01 * 300 + 10} y="96" class="mono mini">0.0075</text>
+            <text x="24" y="132" class="mini">FedAvg</text>
+            <rect x="24" y="140" width={0.0005 / 0.01 * 300} height="22" rx="2" class="fill-verified" />
+            <text x={24 + 0.0005 / 0.01 * 300 + 10} y="156" class="mono mini">0.0005</text>
+            <text x="24" y="196" class="mini fill-verified-t">Gap narrows: the audit looks fairer</text>
 
-      {/* ================= CPFE — five-axis diagnostic (radar) ================ */}
-      {slug === "cpfe" && (
-        <svg class="hf-svg" viewBox="0 0 720 400" role="img" aria-label="Reliability collapses on all five axes under platform shift">
-          <text x="24" y="30" class="eyebrow">ONE PLATFORM: AUC 0.98. FIVE AXES OF RELIABILITY, ALL SHIFTED AT ONCE.</text>
-          {/* pentagon grid */}
-          <g class="stroke-hair fill-none">
-            <polygon points="360,80 490,170 440,315 280,315 230,170" />
-            <polygon points="360,145 425,190 400,262.5 320,262.5 295,190" />
-          </g>
-          {[
-            [360, 80], [490, 170], [440, 315], [280, 315], [230, 170],
-          ].map((p) => <line x1="360" y1="200" x2={p[0]} y2={p[1]} class="stroke-hair" />)}
-          {/* in-platform polygon (healthy) */}
-          <polygon points="360,84 486,171 438,312 282,312 234,171" class="poly-good" />
-          {/* cross-platform polygon (collapsed) */}
-          <polygon points="360,150 402,182 388,246 332,246 318,182" class="poly-bad" />
-          {/* axis labels */}
-          <text x="360" y="68" class="mini" text-anchor="middle">Discrimination</text>
-          <text x="360" y="330" class="mini tiny muted" text-anchor="middle">−30 to −40% AUC</text>
-          <text x="512" y="168" class="mini" text-anchor="start">Calibration</text>
-          <text x="512" y="184" class="mini tiny muted" text-anchor="start">ECE → 0.54</text>
-          <text x="452" y="336" class="mini" text-anchor="middle">Equity</text>
-          <text x="452" y="352" class="mini tiny muted" text-anchor="middle">DI &lt; 0.17</text>
-          <text x="268" y="336" class="mini" text-anchor="middle">Attribution</text>
-          <text x="268" y="352" class="mini tiny muted" text-anchor="middle">Jaccard ≈ 0</text>
-          <text x="208" y="168" class="mini" text-anchor="end">Significance</text>
-          {/* legend */}
-          <rect x="560" y="120" width="14" height="10" class="poly-good" /><text x="580" y="129" class="mini">in-platform</text>
-          <rect x="560" y="142" width="14" height="10" class="poly-bad" /><text x="580" y="151" class="mini">cross-platform</text>
-        </svg>
-      )}
+            <line x1="360" y1="20" x2="360" y2="206" class="stroke-hair" stroke-dasharray="3 4" />
 
-      {/* ================= INDIAFINBENCH — the blind spot ===================== */}
-      {slug === "indiafinbench" && (
-        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="A measurable blind spot for Indian financial regulation">
-          <text x="24" y="32" class="eyebrow">FINANCIAL-NLP BENCHMARKS ARE WESTERN —</text>
-          {/* western cluster */}
-          <g>
-            <circle cx="90" cy="120" r="30" class="fill-recessed stroke-hair" /><text x="90" y="124" class="mono tiny" text-anchor="middle">US</text>
-            <circle cx="150" cy="90" r="24" class="fill-recessed stroke-hair" /><text x="150" y="94" class="mono tiny" text-anchor="middle">EU</text>
-            <circle cx="150" cy="160" r="22" class="fill-recessed stroke-hair" /><text x="150" y="164" class="mono tiny" text-anchor="middle">UK</text>
-          </g>
-          {/* the void */}
-          <circle cx="330" cy="120" r="66" class="fill-none stroke-signal" stroke-width="2" stroke-dasharray="6 6" />
-          <text x="330" y="112" class="mini fill-signal-t" text-anchor="middle">blind spot</text>
-          <text x="330" y="132" class="mono tiny muted" text-anchor="middle">SEBI / RBI</text>
-          <text x="330" y="147" class="mono tiny muted" text-anchor="middle">1992–2026</text>
-          <path d="M400 120 H452" class="arrow stroke-signal" marker-end="url(#hf-ar-s)" />
-          {/* filled by the benchmark */}
-          <rect x="456" y="76" width="240" height="88" rx="10" class="fill-signal" />
-          <text x="576" y="112" class="big-num fill-paper-t" text-anchor="middle">406</text>
-          <text x="576" y="136" class="lbl fill-paper-t" text-anchor="middle">expert questions</text>
-          <text x="576" y="154" class="mono tiny fill-paper-t" text-anchor="middle" opacity="0.85">192 documents · 12 LLMs</text>
-          {/* four reasoning types */}
-          <text x="24" y="228" class="eyebrow fill-signal-t">FOUR REASONING TYPES — NUMERICAL SEPARATES THE FRONTIER</text>
-          {[
-            { x: 24, label: "Interpretation", n: "174", hot: false },
-            { x: 196, label: "Numerical", n: "92 · spread 35.9 pp", hot: true },
-            { x: 430, label: "Temporal", n: "78", hot: false },
-            { x: 560, label: "Contradiction", n: "62", hot: false },
-          ].map((t) => (
-            <g>
-              <rect x={t.x} y="244" width={t.hot ? 226 : 160} height="46" rx="8" class={t.hot ? "fill-signal" : "fill-raised stroke-hairS"} />
-              <text x={t.x + (t.hot ? 113 : 80)} y="266" class={`lbl ${t.hot ? "fill-paper-t" : ""}`} text-anchor="middle">{t.label}</text>
-              <text x={t.x + (t.hot ? 113 : 80)} y="283" class={`mono tiny ${t.hot ? "fill-paper-t" : "muted"}`} text-anchor="middle">{t.n}</text>
-            </g>
-          ))}
-        </svg>
-      )}
+            <text x="384" y="34" class="eyebrow">THE DECISION · SENSITIVITY GAP</text>
+            <text x="384" y="50" class="tiny muted">race-blind screening at fixed capacity</text>
+            <text x="384" y="72" class="mini">Centralised control</text>
+            <rect x="384" y="80" width={0.009 / 0.04 * 300} height="22" rx="2" class="fill-hairS" />
+            <text x={384 + 0.009 / 0.04 * 300 + 10} y="96" class="mono mini">0.009</text>
+            <text x="384" y="132" class="mini">FedAvg</text>
+            <rect x="384" y="140" width={0.034 / 0.04 * 300} height="22" rx="2" class="fill-bad" />
+            <text x={384 + 0.034 / 0.04 * 300 - 8} y="156" class="mono mini fill-paper-t" text-anchor="end">0.034</text>
+            <text x="384" y="196" class="mini fill-bad-t">Gap widens: fewer Black respondents flagged</text>
 
-      {/* ================= FEDERATED — privacy that improves deployment ======= */}
-      {slug === "federated-diabetes" && (
-        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="Federated model generalises better than the centralized one">
-          <text x="24" y="30" class="eyebrow">HOSPITALS CAN'T SHARE DATA — SO THE MODEL TRAVELS INSTEAD</text>
-          {[
-            { y: 60, t: "Node A · Young Urban", n: "n = 4,500" },
-            { y: 118, t: "Node B · Elderly Rural", n: "n = 3,406" },
-            { y: 176, t: "Node C · Mixed Metro", n: "n = 4,000" },
-          ].map((nd) => (
-            <g>
-              <rect x="24" y={nd.y} width="176" height="44" rx="8" class="fill-recessed stroke-hairS" />
-              <text x="112" y={nd.y + 20} class="mini" text-anchor="middle">{nd.t}</text>
-              <text x="112" y={nd.y + 36} class="mono tiny muted" text-anchor="middle">{nd.n}</text>
-              <path d={`M200 ${nd.y + 22} C250 ${nd.y + 22} 250 140 300 140`} class="arrow-thin" fill="none" />
-            </g>
-          ))}
-          <text x="250" y="96" class="mono tiny muted" text-anchor="middle">weights,</text>
-          <text x="250" y="109" class="mono tiny muted" text-anchor="middle">not data</text>
-          <rect x="300" y="112" width="130" height="56" rx="8" class="fill-vwash stroke-verified" />
-          <text x="365" y="136" class="lbl fill-verified-t" text-anchor="middle">Federated</text>
-          <text x="365" y="156" class="mono small fill-verified-t" text-anchor="middle">FedAvg</text>
-          <path d="M430 140 H482" class="arrow" marker-end="url(#hf-ar)" />
-          {/* the surprising win */}
-          <rect x="486" y="96" width="210" height="90" rx="10" class="fill-raised stroke-ink" />
-          <text x="591" y="122" class="lbl" text-anchor="middle">External · 1.28M</text>
-          <text x="591" y="150" class="big-num fill-signal-t" text-anchor="middle">0.757</text>
-          <text x="591" y="172" class="mono tiny muted" text-anchor="middle">beats centralized 0.700</text>
-          {/* four axes */}
-          <text x="24" y="248" class="eyebrow fill-signal-t">AUDITED ON FOUR DEPLOYABILITY AXES</text>
-          {[
-            { x: 24, t: "✓ Generalisation", d: "40% smaller gap", good: true },
-            { x: 194, t: "✓ Fairness", d: "elderly gap −21.7%", good: true },
-            { x: 364, t: "✓ Calibration", d: "ECE 0.276 → 0.001", good: true },
-            { x: 534, t: "✗ DP privacy", d: "collapses at ε ≤ 5", good: false },
-          ].map((a) => (
-            <g>
-              <rect x={a.x} y="264" width="162" height="46" rx="8" class={a.good ? "fill-vwash stroke-verified" : "fill-raised stroke-bad"} />
-              <text x={a.x + 81} y="286" class={`mini ${a.good ? "fill-verified-t" : "fill-bad-t"}`} text-anchor="middle">{a.t}</text>
-              <text x={a.x + 81} y="302" class="mono tiny muted" text-anchor="middle">{a.d}</text>
-            </g>
-          ))}
-        </svg>
-      )}
+            <rect x="24" y="236" width="672" height="120" rx="8" class="fill-recessed" />
+            <text x="48" y="304" class="big-num fill-bad-t">542</text>
+            <text x="126" y="288" class="lbl">fewer reference-positive Black respondents flagged per 100,000</text>
+            <text x="126" y="310" class="small">under FedAvg, against the composition-matched centralised control</text>
+            <text x="48" y="340" class="small">The reversal holds at every screening capacity from 1% to 50%, for all five federated strategies.</text>
+          </svg>
+        )}
 
-      {/* ================= CATE — the average is a lie ======================== */}
-      {slug === "cate-hmda" && (
-        <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="The average gap hides wide heterogeneity explained by the underwriting channel">
-          <text x="24" y="32" class="eyebrow">A HEADLINE REPORTS ONE AVERAGE —</text>
-          <rect x="40" y="120" width="120" height="60" rx="8" class="fill-recessed stroke-ink" />
-          <text x="100" y="148" class="big-num" text-anchor="middle">−9.39</text>
-          <text x="100" y="168" class="mono tiny muted" text-anchor="middle">pp, "the gap"</text>
-          <path d="M164 150 H214" class="arrow" marker-end="url(#hf-ar)" />
-          <text x="168" y="140" class="mono tiny fill-signal-t" text-anchor="start">but it shatters</text>
-          {/* distribution */}
-          <line x1="230" y1="250" x2="690" y2="250" class="stroke-hair" />
-          <path d="M240 250 C360 250 400 96 470 90 C540 84 560 250 680 250 Z" class="dist-fill" />
-          <clipPath id="hf-pen"><rect x="0" y="0" width="486" height="360" /></clipPath>
-          <path d="M240 250 C360 250 400 96 470 90 C540 84 560 250 680 250 Z" class="dist-pen" clip-path="url(#hf-pen)" />
-          <path d="M240 250 C360 250 400 96 470 90 C540 84 560 250 680 250" class="fill-none stroke-signalDeep" stroke-width="2" />
-          <line x1="486" y1="70" x2="486" y2="250" class="stroke-ink" stroke-dasharray="4 3" />
-          <text x="486" y="266" class="mono tiny" text-anchor="middle">0 · no penalty</text>
-          <text x="330" y="180" class="lbl fill-signalDeep-t" text-anchor="middle">90.7% penalised</text>
-          {/* channel split */}
-          <line x1="360" y1="120" x2="360" y2="250" class="stroke-bad" stroke-width="1.6" />
-          <text x="360" y="112" class="mono tiny fill-bad-t" text-anchor="middle">manual −14.79</text>
-          <line x1="540" y1="150" x2="540" y2="250" class="stroke-signal" stroke-width="1.6" />
-          <text x="556" y="150" class="mono tiny fill-signal-t" text-anchor="start">automated −6.17</text>
-          <text x="24" y="326" class="small">The underwriting channel — not the applicant — explains who lands where in this distribution (SD 8.47 pp).</text>
-        </svg>
-      )}
+        {/* ============ COULD IT READ THE ANSWER: one model, two readings ============ */}
+        {slug === "could-it-read-the-answer" && (
+          <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="On the same 400 MMLU responses one model scores 0.013 under a strict pipeline and 0.938 when the answer is read wherever it appears.">
+            <text x="24" y="34" class="eyebrow">ONE FRONTIER MODEL · THE SAME 400 MMLU RESPONSES · TWO WAYS TO READ THEM</text>
+            <text x="24" y="72" class="lbl">The task’s strict pipeline</text>
+            <rect x="24" y="82" width={Math.max(0.013 * 640, 3)} height="26" rx="2" class="fill-bad" />
+            <text x={24 + 0.013 * 640 + 12} y="101" class="mono lbl fill-bad-t">0.013</text>
+            <text x="24" y="142" class="lbl">The answer read wherever it appears</text>
+            <rect x="24" y="152" width={0.938 * 640} height="26" rx="2" class="fill-signal" />
+            <text x={24 + 0.938 * 640 - 10} y="171" class="mono lbl fill-paper-t" text-anchor="end">0.938</text>
+            <line x1="24" y1="194" x2="664" y2="194" class="stroke-hairS" />
+            {[0, 0.25, 0.5, 0.75, 1].map((t) => (
+              <text x={24 + t * 640} y="210" class="mono tiny muted" text-anchor={t === 0 ? "start" : t === 1 ? "end" : "middle"}>{t}</text>
+            ))}
 
-      <defs>
-        <marker id="hf-ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-hairS" /></marker>
-        <marker id="hf-ar-s" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-signal" /></marker>
-        <marker id="hf-ar-b" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-bad" /></marker>
-        <marker id="hf-ar-v" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-verified" /></marker>
-      </defs>
+            <text x="24" y="250" class="eyebrow">ACROSS THE HARNESS AND PUBLISHED GENERATIONS</text>
+            <text x="24" y="276" class="small">Generative tasks that score a format mismatch as wrong</text>
+            <rect x="24" y="286" width="300" height="14" rx="2" class="fill-recessed" />
+            <rect x="24" y="286" width={0.649 * 300} height="14" rx="2" class="fill-signal" />
+            <text x="24" y="322" class="mono mini">2,936 of 4,524 (64.9%)</text>
 
-      <figcaption class="hf-cap">{punchline}</figcaption>
+            <text x="384" y="276" class="small">Hidden parse-failure rate across 28 models</text>
+            <line x1="384" y1="293" x2="684" y2="293" class="stroke-hairS" />
+            <line x1={384 + 0.04 * 300} y1="293" x2={384 + 0.999 * 300} y2="293" class="stroke-bad" stroke-width="6" stroke-linecap="round" />
+            <text x="384" y="322" class="mono mini">4% to 99.9%</text>
+
+            <text x="24" y="360" class="small">A judge that never saw the gold answer confirms 97 of 99 recovered answers.</text>
+          </svg>
+        )}
+
+        {/* ============ INDIAFINBENCH: the scoring rule reorders the board ============ */}
+        {slug === "indiafinbench" && (
+          <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="Strict accuracy spans 75.12 to 89.66 percent and judge-only accuracy 87.19 to 94.83 percent; DeepSeek-R1-Distill-Llama-70B ranks last under strict scoring and ties for first under the composite regime.">
+            <text x="24" y="34" class="eyebrow">SAME 12 MODELS · SAME ANSWERS · TWO SCORING RULES</text>
+            <text x="40" y="80" class="mini">Strict string matching</text>
+            <rect x={40 + 5.12 * 11.333} y="90" width={(89.66 - 75.12) * 11.333} height="24" rx="3" class="fill-hairS" />
+            <text x={40 + 5.12 * 11.333 - 6} y="107" class="mono tiny" text-anchor="end">75.12%</text>
+            <text x={40 + 19.66 * 11.333 + 6} y="107" class="mono tiny">89.66%</text>
+            <circle cx={40 + 5.12 * 11.333} cy="102" r="6" class="fill-bad stroke-raised" stroke-width="2" />
+            <text x="40" y="150" class="mini">Judge from an unrelated model family</text>
+            <rect x={40 + 17.19 * 11.333} y="160" width={(94.83 - 87.19) * 11.333} height="24" rx="3" class="fill-signal" />
+            <text x={40 + 17.19 * 11.333 - 6} y="177" class="mono tiny" text-anchor="end">87.19%</text>
+            <text x={40 + 24.83 * 11.333 + 6} y="177" class="mono tiny">94.83%</text>
+            <line x1="40" y1="206" x2="380" y2="206" class="stroke-hairS" />
+            {[70, 80, 90, 100].map((t) => (
+              <g>
+                <line x1={40 + (t - 70) * 11.333} y1="202" x2={40 + (t - 70) * 11.333} y2="210" class="stroke-hairS" />
+                <text x={40 + (t - 70) * 11.333} y="226" class="mono tiny muted" text-anchor="middle">{t}%</text>
+              </g>
+            ))}
+            <text x="40" y="250" class="tiny muted">Bands: the accuracy range across the twelve models.</text>
+
+            <text x="440" y="34" class="eyebrow">ONE MODEL, TWO RANKINGS</text>
+            <text x="460" y="66" class="mini" text-anchor="middle">Strict</text>
+            <text x="620" y="66" class="mini" text-anchor="middle">Composite</text>
+            <line x1="460" y1="80" x2="460" y2="244" class="stroke-hairS" />
+            <line x1="620" y1="80" x2="620" y2="244" class="stroke-hairS" />
+            {Array.from({ length: 12 }, (_, r) => (
+              <g>
+                <line x1="455" y1={80 + r * 14.909} x2="465" y2={80 + r * 14.909} class="stroke-hair" />
+                <line x1="615" y1={80 + r * 14.909} x2="625" y2={80 + r * 14.909} class="stroke-hair" />
+              </g>
+            ))}
+            <line x1="460" y1="244" x2="620" y2="80" class="stroke-signal" stroke-width="2.5" />
+            <circle cx="460" cy="244" r="6" class="fill-bad" />
+            <circle cx="620" cy="80" r="6" class="fill-signal" />
+            <text x="448" y="248" class="mono mini fill-bad-t" text-anchor="end">12th</text>
+            <text x="632" y="84" class="mono mini fill-signal-t">tied 1st</text>
+            <text x="540" y="272" class="mini" text-anchor="middle">DeepSeek-R1-Distill-Llama-70B</text>
+            <text x="540" y="292" class="small" text-anchor="middle">the judge reclassifies 93.9% of</text>
+            <text x="540" y="310" class="small" text-anchor="middle">its strict errors as correct</text>
+
+            <line x1="24" y1="326" x2="696" y2="326" class="stroke-hair" />
+            <text x="24" y="348" class="small">Rank correlation, strict against judge-only: ρ = −0.273 (p = 0.39).</text>
+            <text x="24" y="368" class="small">148 of 406 items are answered identically by all twelve models, separating no pair.</text>
+          </svg>
+        )}
+
+        {/* ============ DIABETES: external validation as an X-ray ============ */}
+        {slug === "diabetes-external-validation" && (
+          <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="Internal AUC 0.794 falls to 0.717 on external validation; adults over 60 reach only 0.607.">
+            <text x="24" y="34" class="eyebrow">THE MODEL LOOKS HEALTHY</text>
+            <rect x="24" y="60" width="150" height="70" rx="8" class="fill-raised stroke-ink" />
+            <text x="99" y="90" class="lbl" text-anchor="middle">Diabetes model</text>
+            <text x="99" y="112" class="mono small muted" text-anchor="middle">XGBoost</text>
+            <path d="M174 95 H232" class="arrow" marker-end="url(#hf-ar)" />
+            <rect x="236" y="60" width="150" height="70" rx="8" class="fill-vwash stroke-verified" />
+            <text x="311" y="88" class="lbl fill-verified-t" text-anchor="middle">Internal ✓</text>
+            <text x="311" y="112" class="mono lbl fill-verified-t" text-anchor="middle">AUC 0.794</text>
+            <text x="24" y="188" class="eyebrow fill-signal-t">UNTIL EXTERNAL VALIDATION LOOKS CLOSER</text>
+            <circle cx="120" cy="270" r="48" class="fill-none stroke-signal" stroke-width="2.5" />
+            <line x1="154" y1="304" x2="177" y2="327" class="stroke-signal" stroke-width="4" stroke-linecap="round" />
+            <text x="120" y="266" class="mono tiny" text-anchor="middle">1,285,783</text>
+            <text x="120" y="282" class="mini muted" text-anchor="middle">BRFSS</text>
+            <path d="M186 270 H228" class="arrow" marker-end="url(#hf-ar)" />
+            {[
+              { y: 232, label: "Adults 60 and over", val: "AUC 0.607 · gap 0.135", w: 250, cls: "bad" },
+              { y: 268, label: "Overall", val: "0.717 · −9.7%", w: 165, cls: "warn" },
+              { y: 304, label: "Obese", val: "0.698 · gap 0.037", w: 95, cls: "mild" },
+              { y: 340, label: "Calibration", val: "Brier 0.123 · overestimates risk", w: 130, cls: "info" },
+            ].map((r) => (
+              <g>
+                <text x="242" y={r.y - 4} class="mini">{r.label}</text>
+                <rect x="242" y={r.y} width={r.w} height="10" rx="3" class={`sev sev-${r.cls}`} />
+                <text x={242 + r.w + 8} y={r.y + 9} class="mono tiny muted">{r.val}</text>
+              </g>
+            ))}
+          </svg>
+        )}
+
+        {/* ============ TRUSTSHIFT: size of shift is not the diagnosis ============ */}
+        {slug === "trustshift" && (
+          <svg class="hf-svg" viewBox="0 0 720 390" role="img" aria-label="A lending model under measured shift improves in ranking while a mental-health text model at comparable shift loses up to 0.39 AUC; an intrusion detector falls from 0.998 to 0.68 AUC on unseen attack mechanisms; recalibration fixes calibration but not discrimination.">
+            <text x="24" y="34" class="eyebrow">FOUR REAL DEPLOYMENT SHIFTS · ONE AUDIT PROTOCOL</text>
+            <rect x="24" y="52" width="316" height="118" rx="8" class="fill-raised stroke-hairS" />
+            <text x="44" y="80" class="lbl">Mortgage lending</text>
+            <text x="44" y="98" class="mono tiny muted">domain-classifier AUC up to 0.80</text>
+            <text x="44" y="134" class="lbl fill-verified-t">↑ Ranking improves</text>
+            <text x="44" y="156" class="small">operating point within 0.02 (macro)</text>
+            <text x="360" y="116" class="mono tiny muted" text-anchor="middle">vs</text>
+            <rect x="380" y="52" width="316" height="118" rx="8" class="fill-raised stroke-bad" />
+            <text x="400" y="80" class="lbl">Mental-health text</text>
+            <text x="400" y="98" class="mono tiny muted">shift of comparable magnitude</text>
+            <text x="400" y="134" class="lbl fill-bad-t">↓ Loses up to 0.39 AUC</text>
+            <text x="400" y="156" class="small">Kaggle to Reddit and Twitter</text>
+
+            <text x="24" y="206" class="eyebrow">NETWORK INTRUSION · ATTACK MECHANISMS ABSENT FROM TRAINING</text>
+            <text x="24" y="234" class="mini">In-domain</text>
+            <rect x="140" y="223" width={0.998 * 500} height="14" rx="2" class="fill-ink" />
+            <text x={140 + 0.998 * 500 + 8} y="235" class="mono mini">0.998</text>
+            <text x="24" y="262" class="mini">New mechanisms</text>
+            <rect x="140" y="251" width={0.68 * 500} height="14" rx="2" class="fill-bad" />
+            <text x={140 + 0.68 * 500 + 8} y="263" class="mono mini fill-bad-t">0.68</text>
+
+            <rect x="24" y="288" width="672" height="86" rx="8" class="fill-recessed" />
+            <text x="44" y="312" class="eyebrow">POST-HOC RECALIBRATION, EVERY DOMAIN</text>
+            <text x="44" y="338" class="small fill-verified-t">✓ Calibration error falls by one to two orders of magnitude</text>
+            <text x="44" y="360" class="small fill-bad-t">✗ Discrimination and subgroup reliability are not restored</text>
+          </svg>
+        )}
+
+        {/* ============ CONFIDENTLY WRONG: through chance, not towards it ============ */}
+        {slug === "confidently-wrong" && (
+          <svg class="hf-svg" viewBox="0 0 720 390" role="img" aria-label="108 of 240 cross-network evaluations score below ROC-AUC 0.5; the worst is 0.0697, which is 0.9303 if the score is negated; 11 of 12 testbed pairs fail at the ranking.">
+            <text x="24" y="34" class="eyebrow">ROC-AUC OF DETECTORS MOVED TO A NEW NETWORK</text>
+            <text x="360" y="52" class="mono tiny fill-signal-t" text-anchor="middle">negate the score and the same detector ranks well</text>
+            <rect x="40" y="96" width="320" height="54" class="fill-awash" />
+            <path d={`M ${ax(0.0697)} 140 Q 360 22 ${ax(0.9303)} 140`} class="fill-none stroke-signal" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#hf-ar-s)" />
+            <line x1="40" y1="150" x2="680" y2="150" class="stroke-ink" />
+            <line x1="360" y1="90" x2="360" y2="158" class="stroke-ink" stroke-dasharray="3 3" />
+            <circle cx={ax(0.0697)} cy="150" r="6" class="fill-bad" />
+            <circle cx={ax(0.9303)} cy="150" r="6" class="fill-raised stroke-signal" stroke-width="2" />
+            <text x={ax(0.0697)} y="174" class="mono mini fill-bad-t" text-anchor="middle">0.0697</text>
+            <text x={ax(0.9303)} y="174" class="mono mini fill-signal-t" text-anchor="middle">0.9303</text>
+            <text x="360" y="174" class="mono tiny" text-anchor="middle">0.5</text>
+            <text x="44" y="196" class="small fill-bad-t">below chance: attacks ranked under benign traffic</text>
+            <text x="676" y="196" class="small muted" text-anchor="end">above chance</text>
+
+            <text x="40" y="238" class="eyebrow">108 OF 240 RUN-LEVEL EVALUATIONS SCORE BELOW 0.5</text>
+            {evals.map((e) => (
+              <rect x={e.x} y={e.y} width="8" height="8" class={e.bad ? "cell-bad" : "cell"} />
+            ))}
+
+            <text x="40" y="316" class="eyebrow">11 OF 12 TESTBED PAIRS FAIL AT THE RANKING</text>
+            {Array.from({ length: 12 }, (_, k) => (
+              <rect x={40 + k * 24} y="328" width="18" height="18" rx="2" class={k < 11 ? "cell-bad" : "cell cell-open"} />
+            ))}
+            <text x="40" y="370" class="tiny muted">The open square: the one pair where recalibration can help.</text>
+
+            <text x="420" y="316" class="eyebrow">TEN LABELLED TARGET FLOWS</text>
+            <text x="420" y="342" class="small">median macro-F1, no adaptation: <tspan class="mono">0.3919</tspan></text>
+            <text x="420" y="364" class="small">after retraining on them: <tspan class="mono fill-signal-t">0.7253</tspan></text>
+          </svg>
+        )}
+
+        {/* ============ SCORER PARTIAL IDENTIFICATION: audit width vs sampling width ============ */}
+        {slug === "scorer-partial-identification" && (
+          <svg class="hf-svg" viewBox="0 0 720 370" role="img" aria-label="The median identification width is 6.10 times the sampling width across 120 comparable pairs; every ratio is above one, the smallest 2.15.">
+            <text x="24" y="34" class="eyebrow">WHAT SETS THE WIDTH OF A BENCHMARK COMPARISON?</text>
+            <text x="24" y="72" class="lbl">Sampling width</text>
+            <rect x="24" y="82" width="90" height="24" rx="2" class="fill-hairS" />
+            <text x="124" y="100" class="mono lbl">1×</text>
+            <text x="24" y="142" class="lbl">Identification width, from the audited scorer</text>
+            <rect x="24" y="152" width={6.1 * 90} height="24" rx="2" class="fill-signal" />
+            <text x={24 + 6.1 * 90 + 10} y="170" class="mono lbl fill-signal-t">6.10×</text>
+            <text x="24" y="202" class="small">For the median pair among the 120 comparable model pairs on MATH-Hard.</text>
+
+            <text x="24" y="240" class="eyebrow">EVERY ONE OF THE 120 RATIOS IS ABOVE 1×</text>
+            <line x1="24" y1="270" x2="664" y2="270" class="stroke-hairS" />
+            {Array.from({ length: 9 }, (_, k) => (
+              <g>
+                <line x1={24 + k * 80} y1="266" x2={24 + k * 80} y2="274" class="stroke-hairS" />
+                <text x={24 + k * 80} y="294" class="mono tiny muted" text-anchor="middle">{k}×</text>
+              </g>
+            ))}
+            <line x1="104" y1="254" x2="104" y2="280" class="stroke-ink" stroke-dasharray="3 3" />
+            <text x="98" y="258" class="tiny muted" text-anchor="end">equal widths</text>
+            <circle cx={24 + 2.15 * 80} cy="270" r="5" class="fill-raised stroke-signal" stroke-width="2" />
+            <text x={24 + 2.15 * 80} y="256" class="mono tiny" text-anchor="middle">min 2.15×</text>
+            <circle cx={24 + 5.74 * 80} cy="270" r="4" class="fill-raised stroke-signalDeep" stroke-width="2" />
+            <text x={24 + 5.74 * 80} y="312" class="mono tiny" text-anchor="end">5.74× self-consistency check</text>
+            <circle cx={24 + 6.1 * 80} cy="270" r="6" class="fill-signal" />
+            <text x={24 + 6.1 * 80} y="256" class="mono tiny fill-signal-t" text-anchor="middle">median 6.10×</text>
+
+            <rect x="24" y="326" width="672" height="36" rx="6" class="fill-recessed" />
+            <text x="40" y="349" class="small">The harness’s two live scorers disagree on 3.63% of 22,508 responses (95% CI 3.39% to 3.88%).</text>
+          </svg>
+        )}
+
+        {/* ============ MORTGAGE DISPARITIES: inside the institution ============ */}
+        {slug === "mortgage-disparities" && (
+          <svg class="hf-svg" viewBox="0 0 720 380" role="img" aria-label="74.6% of a 14.95 point approval gap sits within lenders; boundaries widen it by 2.0 and 1.5 points.">
+            <text x="24" y="34" class="eyebrow">42M APPLICATIONS · RAW GAP 14.95 PP · WHERE DOES IT LIVE?</text>
+            <text x="70" y="150" class="lbl" text-anchor="middle">Applicant</text>
+            <path d="M120 175 H172" class="arrow" marker-end="url(#hf-ar)" />
+            <rect x="180" y="70" width="360" height="240" rx="12" class="fill-recessed stroke-ink" />
+            <text x="360" y="98" class="eyebrow" text-anchor="middle">INSIDE ONE LENDER</text>
+            <rect x="214" y="120" width="292" height="120" rx="8" class="fill-signal" />
+            <text x="360" y="168" class="big-num fill-paper-t" text-anchor="middle">74.6%</text>
+            <text x="360" y="196" class="lbl fill-paper-t" text-anchor="middle">of the gap is within-lender</text>
+            <text x="360" y="222" class="mono tiny fill-paper-t" text-anchor="middle">rising 66.8% → 78.3% (2020 → 2024)</text>
+            <text x="360" y="280" class="small muted" text-anchor="middle">only a minority sits between institutions</text>
+            <text x="24" y="344" class="eyebrow fill-signal-t">BOUNDARIES WIDEN IT</text>
+            <rect x="220" y="326" width="150" height="30" rx="6" class="fill-raised stroke-hair" />
+            <text x="295" y="345" class="mono tiny" text-anchor="middle">+2.0 pp at 80% LTV</text>
+            <rect x="384" y="326" width="176" height="30" rx="6" class="fill-raised stroke-hair" />
+            <text x="472" y="345" class="mono tiny" text-anchor="middle">+1.5 pp · 2022 tightening</text>
+            <text x="626" y="180" class="mono tiny muted" text-anchor="middle">68% unexplained</text>
+            <text x="626" y="196" class="mono tiny muted" text-anchor="middle">by observables</text>
+          </svg>
+        )}
+
+        {/* ============ CATE: the average hides the distribution ============ */}
+        {slug === "cate-hmda" && (
+          <svg class="hf-svg" viewBox="0 0 720 360" role="img" aria-label="A pooled differential of minus 9.39 points hides a wide distribution: 90.7% of Black applicants face a negative estimated effect, minus 14.79 under manual underwriting against minus 6.17 under automated systems.">
+            <defs>
+              <clipPath id="hf-pen"><rect x="0" y="0" width="560" height="360" /></clipPath>
+            </defs>
+            <text x="24" y="32" class="eyebrow">A HEADLINE REPORTS ONE AVERAGE</text>
+            <rect x="32" y="120" width="130" height="62" rx="8" class="fill-recessed stroke-ink" />
+            <text x="97" y="150" class="big-num" text-anchor="middle">−9.39</text>
+            <text x="97" y="170" class="mono tiny muted" text-anchor="middle">pp, the average</text>
+            <path d="M166 151 H218" class="arrow" marker-end="url(#hf-ar)" />
+            <text x="168" y="174" class="mono tiny fill-signal-t">but it spreads</text>
+            <line x1="230" y1="250" x2="700" y2="250" class="stroke-hair" />
+            <path d="M230 250 C330 250 400 92 457 90 C514 92 600 250 700 250 Z" class="dist-fill" />
+            <path d="M230 250 C330 250 400 92 457 90 C514 92 600 250 700 250 Z" class="dist-pen" clip-path="url(#hf-pen)" />
+            <path d="M230 250 C330 250 400 92 457 90 C514 92 600 250 700 250" class="fill-none stroke-signalDeep" stroke-width="2" />
+            <line x1="560" y1="80" x2="560" y2="250" class="stroke-ink" stroke-dasharray="4 3" />
+            <text x="560" y="268" class="mono tiny" text-anchor="middle">0 · no penalty</text>
+            <text x="236" y="150" class="lbl fill-signalDeep-t">90.7% penalised</text>
+            <line x1="292" y1="158" x2="330" y2="224" class="stroke-signalDeep" stroke-width="1" />
+            <line x1="397" y1="70" x2="397" y2="250" class="stroke-bad" stroke-width="1.6" />
+            <text x="391" y="66" class="mono tiny fill-bad-t" text-anchor="end">manual −14.79</text>
+            <line x1="492" y1="70" x2="492" y2="250" class="stroke-signal" stroke-width="1.6" />
+            <text x="498" y="66" class="mono tiny fill-signal-t">automated −6.17</text>
+            <text x="700" y="286" class="tiny muted" text-anchor="end">shape schematic · values from the paper</text>
+            <text x="24" y="326" class="small">The underwriting channel, not the applicant, explains who lands where (CATE SD 8.47 pp).</text>
+          </svg>
+        )}
+
+        {/* ============ ICGDF: the deployment gate ============ */}
+        {slug === "icgdf" && (
+          <svg class="hf-svg" viewBox="0 0 720 400" role="img" aria-label="Both stages of the deployment gate fail, so the gate stays closed in all 12 folds even though the model is well calibrated.">
+            <text x="360" y="34" class="eyebrow" text-anchor="middle">CAN THE MODEL PROVE PREDICTIVE SKILL BEFORE IT TRADES?</text>
+            <rect x="120" y="58" width="220" height="52" rx="8" class="fill-raised stroke-bad" />
+            <text x="230" y="80" class="lbl" text-anchor="middle">Stage 1 · HAC t-test</text>
+            <text x="230" y="99" class="mono small fill-bad-t" text-anchor="middle">✗  t = −0.09</text>
+            <rect x="380" y="58" width="220" height="52" rx="8" class="fill-raised stroke-bad" />
+            <text x="490" y="80" class="lbl" text-anchor="middle">Stage 2 · Permutation</text>
+            <text x="490" y="99" class="mono small fill-bad-t" text-anchor="middle">✗  inside the null</text>
+            <path d="M230 110 V146" class="arrow" marker-end="url(#hf-ar)" />
+            <path d="M490 110 V146" class="arrow" marker-end="url(#hf-ar)" />
+            <rect x="250" y="152" width="220" height="76" rx="6" class="fill-recessed stroke-ink" stroke-width="2" />
+            {[280, 310, 340, 370, 400, 430].map((x) => (
+              <line x1={x} y1="158" x2={x} y2="222" class="stroke-ink" stroke-width="3" />
+            ))}
+            <text x="360" y="248" class="gate-lbl" text-anchor="middle">GATE CLOSED · 0 OF 12 FOLDS</text>
+            <rect x="234" y="266" width="252" height="42" rx="8" class="fill-ink" />
+            <text x="360" y="293" class="verdict fill-paper-t" text-anchor="middle">DO NOT DEPLOY</text>
+            <text x="24" y="340" class="eyebrow fill-signal-t">THE TWIST</text>
+            <text x="24" y="362" class="small">ECE below 0.025: the model is well calibrated, and still has no measurable skill</text>
+            <text x="24" y="382" class="small">(mean IC −0.0005, p = 0.536). Calibration is not deployment readiness.</text>
+          </svg>
+        )}
+      </div>
+
+      <svg class="hf-defs" width="0" height="0" aria-hidden="true" focusable="false">
+        <defs>
+          <marker id="hf-ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-hairS" /></marker>
+          <marker id="hf-ar-s" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" class="fill-signal" /></marker>
+        </defs>
+      </svg>
+
+      <p class="hf-hint label-mono">Swipe to see the whole figure</p>
+      <figcaption class="hf-cap">{caption}</figcaption>
     </figure>
   )
 }
@@ -283,7 +426,17 @@ const punchline = punchlines[slug];
     border: var(--rule-strong);
     border-radius: var(--radius-2);
   }
+
+  .hf-frame {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+
   .hf-svg { width: 100%; height: auto; }
+
+  .hf-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+  .hf-hint { display: none; margin-top: var(--space-2); }
 
   .hf-cap {
     margin-top: var(--space-6);
@@ -299,6 +452,13 @@ const punchline = punchlines[slug];
     margin-inline: auto;
   }
 
+  @media (max-width: 640px) {
+    .hf { padding: var(--space-4); }
+    .hf-svg { min-width: 600px; }
+    .hf-hint { display: block; }
+    .hf-cap { text-align: left; }
+  }
+
   /* --- SVG text roles --- */
   .hf :global(text) { font-family: var(--font-sans); }
   .hf :global(.eyebrow) {
@@ -310,7 +470,7 @@ const punchline = punchlines[slug];
   .hf :global(.lbl) { font-size: 14px; font-weight: 600; fill: var(--ink); }
   .hf :global(.mini) { font-size: 12.5px; font-weight: 600; fill: var(--ink); }
   .hf :global(.small) { font-size: 13px; fill: var(--ink-2); }
-  .hf :global(.tiny) { font-size: 10.5px; }
+  .hf :global(.tiny) { font-size: 10.5px; font-weight: 400; }
   .hf :global(.mono) { font-family: var(--font-mono); }
   .hf :global(.muted) { fill: var(--ink-3); }
   .hf :global(.big-num) { font-family: var(--font-mono); font-size: 30px; letter-spacing: -0.02em; fill: var(--ink); }
@@ -321,34 +481,39 @@ const punchline = punchlines[slug];
   .hf :global(.fill-raised) { fill: var(--paper-raised); }
   .hf :global(.fill-recessed) { fill: var(--paper-recessed); }
   .hf :global(.fill-signal) { fill: var(--signal); }
+  .hf :global(.fill-swash) { fill: var(--signal-wash); }
   .hf :global(.fill-vwash) { fill: var(--verified-wash); }
+  .hf :global(.fill-verified) { fill: var(--verified); }
+  .hf :global(.fill-bad) { fill: var(--alert); }
+  .hf :global(.fill-awash) { fill: var(--alert-wash); }
   .hf :global(.fill-ink) { fill: var(--ink); }
   .hf :global(.fill-none) { fill: none; }
+  .hf :global(.fill-hairS) { fill: var(--hairline-strong); }
   .hf :global(.stroke-ink) { stroke: var(--ink); }
+  .hf :global(.stroke-raised) { stroke: var(--paper-raised); }
   .hf :global(.stroke-hair) { stroke: var(--hairline); }
   .hf :global(.stroke-hairS) { stroke: var(--hairline-strong); }
   .hf :global(.stroke-signal) { stroke: var(--signal); }
   .hf :global(.stroke-signalDeep) { stroke: var(--signal-deep); }
   .hf :global(.stroke-verified) { stroke: var(--verified); }
-  .hf :global(.stroke-bad) { stroke: #b3421c; }
+  .hf :global(.stroke-bad) { stroke: var(--alert); }
   .hf :global(.fill-signal-t) { fill: var(--signal); }
   .hf :global(.fill-signalDeep-t) { fill: var(--signal-deep); }
   .hf :global(.fill-verified-t) { fill: var(--verified); }
-  .hf :global(.fill-bad-t) { fill: #b3421c; }
+  .hf :global(.fill-bad-t) { fill: var(--alert); }
   .hf :global(.fill-paper-t) { fill: var(--paper); }
-  .hf :global(.fill-hairS) { fill: var(--hairline-strong); }
 
   .hf :global(.arrow) { stroke: var(--hairline-strong); stroke-width: 1.5; fill: none; }
-  .hf :global(.arrow-thin) { stroke-width: 1.5; }
 
-  .hf :global(.sev) { }
-  .hf :global(.sev-bad) { fill: #b3421c; }
+  .hf :global(.cell) { fill: var(--paper-recessed); stroke: var(--hairline-strong); stroke-width: 0.6; }
+  .hf :global(.cell-open) { fill: var(--paper-raised); stroke: var(--signal); stroke-width: 1.5; }
+  .hf :global(.cell-on) { fill: var(--signal); }
+  .hf :global(.cell-bad) { fill: var(--alert); }
+
+  .hf :global(.sev-bad) { fill: var(--alert); }
   .hf :global(.sev-warn) { fill: var(--signal); }
-  .hf :global(.sev-warnb) { fill: #a16207; }
+  .hf :global(.sev-mild) { fill: var(--ink-3); }
   .hf :global(.sev-info) { fill: var(--hairline-strong); }
-
-  .hf :global(.poly-good) { fill: color-mix(in srgb, var(--ink) 12%, transparent); stroke: var(--ink); stroke-width: 1.5; }
-  .hf :global(.poly-bad) { fill: color-mix(in srgb, #b3421c 22%, transparent); stroke: #b3421c; stroke-width: 2; }
 
   .hf :global(.dist-fill) { fill: var(--signal-wash); }
   .hf :global(.dist-pen) { fill: color-mix(in srgb, var(--signal) 26%, transparent); }

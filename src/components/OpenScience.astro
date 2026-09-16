@@ -8,18 +8,20 @@ import { openScience } from "../data/research";
     One reproducible <em>ecosystem</em>
   </h2>
   <p class="os-lead" data-reveal>
-    The research ships as usable infrastructure: every manuscript regenerates its
-    numbers from result files, and the datasets, benchmarks, and audit libraries
-    are public, documented, and built for other people to reuse.
+    The research ships as usable infrastructure. Where a paper’s code is public,
+    it regenerates the reported numbers from committed result files, and the
+    datasets, benchmarks and audit libraries below are documented for other
+    people to reuse.
   </p>
 
   <ul class="os-grid">
     {
       openScience.map((item) => (
-        <li class="os-card" data-reveal>
+        <li class:list={["os-card", { "os-card--wide": item.wide }]} data-reveal>
           <span class="label-mono os-kind">{item.kind}</span>
-          <h3 class="os-name">{item.name}</h3>
+          <h3 class="os-name" translate="no">{item.name}</h3>
           <p class="os-text">{item.text}</p>
+          {item.identifier && <code class="os-id" translate="no">{item.identifier}</code>}
           <div class="os-links ui-sans">
             {item.links.map((l) => (
               <a href={l.href}>{l.label} ↗</a>
@@ -79,6 +81,12 @@ import { openScience } from "../data/research";
     transition: box-shadow var(--dur-med) var(--ease-out), border-color var(--dur-med) var(--ease-out);
   }
 
+  /* three columns on wide screens; two wide cards keep every row full */
+  @media (min-width: 1024px) {
+    .os-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .os-card--wide { grid-column: span 2; }
+  }
+
   .os-card:hover {
     box-shadow: var(--shadow-2);
     border-color: var(--signal);
@@ -96,6 +104,17 @@ import { openScience } from "../data/research";
     color: var(--ink-2);
     font-size: var(--text-sm);
     line-height: 1.55;
+  }
+
+  .os-id {
+    justify-self: start;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--ink-2);
+    background: var(--paper-recessed);
+    border-radius: var(--radius-1);
   }
 
   .os-links {

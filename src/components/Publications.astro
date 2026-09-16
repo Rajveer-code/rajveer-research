@@ -1,19 +1,45 @@
 ---
-import { publications, THEME_LABELS } from "../data/research";
+import { publications, THEME_LABELS, STATUS_LABELS, type StatusKind } from "../data/research";
 
 const sorted = [...publications].sort((a, b) => a.order - b.order);
+
+const kinds = (Object.keys(STATUS_LABELS) as StatusKind[])
+  .map((kind) => ({
+    kind,
+    label: STATUS_LABELS[kind],
+    count: sorted.filter((p) => p.statusKind === kind).length,
+  }))
+  .filter((k) => k.count > 0);
 ---
 
 <section class="pubs container" id="publications">
   <p class="label-mono section-eyebrow" data-reveal>Publications & manuscripts</p>
   <h2 class="section-title" data-reveal>
-    Eight studies, one <em>argument</em>
+    Twelve studies, one <em>argument</em>
   </h2>
+
+  <div class="pub-filter" data-reveal data-pub-filter hidden>
+    <div class="filter-buttons ui-sans" role="group" aria-label="Filter by status">
+      <button type="button" aria-pressed="true" data-filter="all">
+        All <span class="filter-count">{sorted.length}</span>
+      </button>
+      {
+        kinds.map((k) => (
+          <button type="button" aria-pressed="false" data-filter={k.kind}>
+            {k.label} <span class="filter-count">{k.count}</span>
+          </button>
+        ))
+      }
+    </div>
+    <p class="label-mono filter-readout" aria-live="polite" data-filter-readout>
+      Showing all {sorted.length}
+    </p>
+  </div>
 
   <ol class="pub-list">
     {
       sorted.map((p) => (
-        <li class="pub" data-reveal>
+        <li class="pub" data-reveal data-status={p.statusKind}>
           <div class="pub-meta">
             <span class={`status status--${p.statusKind}`}>{p.status}</span>
             <span class="label-mono pub-year">{p.year}</span>
@@ -42,6 +68,44 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
   </ol>
 </section>
 
+<script>
+  function initPubFilter() {
+    const bar = document.querySelector<HTMLElement>("[data-pub-filter]");
+    if (!bar || bar.dataset.wired) return;
+    bar.dataset.wired = "1";
+    bar.hidden = false; // the filter only exists when script runs; no-JS readers see the full list
+
+    const buttons = [...bar.querySelectorAll<HTMLButtonElement>("[data-filter]")];
+    const readout = bar.querySelector<HTMLElement>("[data-filter-readout]")!;
+    const items = [...document.querySelectorAll<HTMLElement>(".pub[data-status]")];
+
+    const apply = (filter: string) => {
+      let shown = 0;
+      items.forEach((item) => {
+        const match = filter === "all" || item.dataset.status === filter;
+        item.hidden = !match;
+        if (match) {
+          shown += 1;
+          // a filtered list must never leave a row waiting on its scroll reveal
+          item.style.opacity = "1";
+          item.style.transform = "none";
+        }
+      });
+      buttons.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.filter === filter)));
+      const label = buttons.find((b) => b.dataset.filter === filter)?.firstChild?.textContent?.trim();
+      readout.textContent =
+        filter === "all" ? `Showing all ${items.length}` : `Showing ${shown} of ${items.length}: ${label}`;
+      // positions below the list moved: let scroll-linked motion re-measure
+      window.dispatchEvent(new Event("resize"));
+    };
+
+    buttons.forEach((b) => b.addEventListener("click", () => apply(b.dataset.filter ?? "all")));
+  }
+
+  initPubFilter();
+  document.addEventListener("astro:page-load", initPubFilter);
+</script>
+
 <style>
   .pubs {
     padding-block: var(--space-section);
@@ -56,7 +120,7 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
 
   .section-title {
     font-weight: 460;
-    margin-bottom: var(--space-24);
+    margin-bottom: var(--space-16);
   }
 
   .section-title em {
@@ -64,6 +128,58 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
     color: var(--signal);
   }
 
+  /* ---- status filter ---- */
+  .pub-filter {
+    display: grid;
+    gap: var(--space-3);
+    margin-bottom: var(--space-12);
+  }
+
+  .pub-filter[hidden] { display: none; }
+
+  .filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .filter-buttons button {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    min-height: 2.5rem;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-2);
+    background: var(--paper-raised);
+    color: var(--ink-2);
+    touch-action: manipulation;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .filter-buttons button:hover {
+    border-color: var(--signal);
+    color: var(--signal);
+  }
+
+  .filter-buttons button[aria-pressed="true"] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .filter-count {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    opacity: 0.75;
+  }
+
+  .filter-readout { color: var(--ink-3); }
+
+  /* ---- list ---- */
   .pub-list {
     list-style: none;
     padding: 0;
@@ -80,6 +196,8 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
     transition: background var(--dur-med) var(--ease-out);
   }
 
+  .pub[hidden] { display: none; }
+
   .pub:hover {
     background: linear-gradient(90deg, var(--signal-wash), transparent 65%);
   }
@@ -92,19 +210,6 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
     justify-content: space-between;
     gap: var(--space-4);
   }
-
-  .status {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-1);
-  }
-
-  .status--presented { background: var(--verified-wash); color: var(--verified); }
-  .status--review { background: var(--signal-wash); color: var(--signal-deep); }
-  .status--working { background: var(--paper-recessed); color: var(--ink-2); }
 
   .pub-year { color: var(--ink-3); }
 
@@ -140,7 +245,8 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
   .pub-themes {
     list-style: none;
     display: flex;
-    gap: var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
     padding: 0;
     margin: 0;
   }
@@ -161,6 +267,6 @@ const sorted = [...publications].sort((a, b) => a.order - b.order);
 
   @media (max-width: 720px) {
     .pub-foot { flex-direction: column; align-items: flex-start; gap: var(--space-3); }
-    .pub-links { flex-wrap: wrap; gap: var(--space-4); }
+    .pub-links { flex-wrap: wrap; gap: var(--space-2) var(--space-4); justify-content: flex-start; }
   }
 </style>

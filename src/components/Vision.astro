@@ -1,9 +1,9 @@
 ---
 const axes = [
+  { term: "Identification", note: "can this ranking be separated at all?" },
+  { term: "Scoring rules", note: "who decided the answer was wrong?" },
+  { term: "Decision thresholds", note: "does the fairness metric match the decision?" },
   { term: "External validity", note: "does it survive a new population?" },
-  { term: "Subgroup fairness", note: "who pays for the average?" },
-  { term: "Calibration", note: "are the probabilities honest?" },
-  { term: "Shift diagnosis", note: "which failure, before labels arrive?" },
   { term: "Deployment discipline", note: "when should the gate stay closed?" },
 ];
 ---
@@ -12,9 +12,10 @@ const axes = [
   <p class="label-mono section-eyebrow">Research vision</p>
   <div class="vision-grid">
     <p class="vision-statement">
-      A model can be accurate, and the decision it drives can still be <em>unfair, miscalibrated, and invalid</em> for the people it meets in
-      deployment. My research asks the question benchmarks skip: not <span class="q">“is it accurate?”</span> but <span class="q">“does the decision remain fair, calibrated, externally
-      valid, private, and economically deployable — under real constraints?”</span>
+      A model can top a benchmark, pass validation and clear a fairness audit,
+      and the number can still <em>fail to mean what it claims</em>. My research
+      asks the question evaluation skips: not <span class="q">“is the score high?”</span>{" "}but{" "}<span class="q">“what does the evidence identify, and does the decision
+      hold for the people it reaches?”</span>
     </p>
     <ul class="vision-axes">
       {

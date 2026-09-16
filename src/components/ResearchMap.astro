@@ -11,26 +11,39 @@ interface Node {
 const CX = 450;
 const CY = 260;
 
-const nodes: Node[] = [
-  { theme: "healthcare", label: THEME_LABELS["healthcare"], x: 150, y: 90 },
-  { theme: "fairness", label: THEME_LABELS["fairness"], x: 450, y: 56 },
-  { theme: "nlp-llm", label: THEME_LABELS["nlp-llm"], x: 750, y: 90 },
-  { theme: "causal", label: THEME_LABELS["causal"], x: 108, y: 260 },
-  { theme: "deployment", label: THEME_LABELS["deployment"], x: 792, y: 260 },
-  { theme: "privacy", label: THEME_LABELS["privacy"], x: 150, y: 430 },
-  { theme: "finance", label: THEME_LABELS["finance"], x: 450, y: 464 },
-  { theme: "trustworthy-ml", label: "Audit & Evaluation", x: 750, y: 430 },
+// Nine themes on an ellipse (rx 342, ry 204) around the question, clockwise
+// from the top, neighbours chosen so shared papers sit next to each other.
+const ring: Theme[] = [
+  "evaluation",
+  "nlp-llm",
+  "finance",
+  "security",
+  "deployment",
+  "healthcare",
+  "privacy",
+  "fairness",
+  "causal",
 ];
+
+const nodes: Node[] = ring.map((theme, k) => {
+  const angle = ((-90 + (360 / ring.length) * k) * Math.PI) / 180;
+  return {
+    theme,
+    label: THEME_LABELS[theme],
+    x: Math.round(CX + 342 * Math.cos(angle)),
+    y: Math.round(CY + 204 * Math.sin(angle)),
+  };
+});
 
 const countFor = (theme: Theme) =>
   publications.filter((p) => p.themes.includes(theme)).length;
 
 const cross: [number, number][] = [
-  [0, 5], // healthcare – privacy
-  [1, 2], // fairness – nlp
-  [3, 1], // causal – fairness
-  [4, 6], // deployment – finance
-  [2, 4], // nlp – deployment
+  [2, 4], // finance and deployment: the deployment gate
+  [3, 5], // security and healthcare: TrustShift
+  [5, 7], // healthcare and fairness: external validation, screening
+  [7, 0], // fairness and evaluation: what a metric identifies
+  [8, 2], // causal inference and finance: lending
 ];
 
 // Papers per theme — drives the interactive detail panel.
@@ -53,7 +66,7 @@ const papersByTheme = Object.fromEntries(
     </h2>
 
     <p class="map-hint label-mono" data-reveal>
-      Hover or tap a theme — TrustShift binds them all
+      Hover or tap a theme to see its papers
     </p>
     <figure class="map-figure" data-reveal data-map-root>
       <svg
@@ -64,9 +77,10 @@ const papersByTheme = Object.fromEntries(
         data-map
       >
         <desc id="map-desc">
-          Network map: trustworthy machine learning at the center, connected to
-          healthcare AI, fairness, NLP and LLMs, causal inference, deployment
-          shift, privacy and federated learning, financial ML, and audit tooling.
+          Network map: one research question at the center, whether reported
+          results mean what they claim, connected to benchmark evaluation, NLP
+          and LLMs, financial ML, network security, deployment shift, healthcare
+          AI, privacy and federated learning, fairness, and causal inference.
         </desc>
 
         {/* edges: center → nodes */}
@@ -107,7 +121,7 @@ const papersByTheme = Object.fromEntries(
               data-theme={n.theme}
               tabindex="0"
               role="button"
-              aria-label={`${n.label} — ${n.theme ? countFor(n.theme) : 0} works`}
+              aria-label={`${n.label}: ${n.theme ? countFor(n.theme) : 0} works`}
             >
               <circle cx={n.x} cy={n.y} r="16" class="node-hit" />
               <circle cx={n.x} cy={n.y} r="7" class="node-dot" />
@@ -123,32 +137,50 @@ const papersByTheme = Object.fromEntries(
           ))
         }
 
-        {/* center — the thesis; links to the flagship */}
-        <a class="center" data-node href="/research/trustshift/" aria-label="TrustShift — the binding thesis">
-          <circle cx={CX} cy={CY} r="72" class="center-pulse" />
-          <circle cx={CX} cy={CY} r="72" class="center-ring" />
-          <text x={CX} y={CY - 12} class="center-thesis" text-anchor="middle">
-            Trust<tspan class="center-thesis--em">Shift</tspan>
+        {/* center: the question; links to the flagship */}
+        <a class="center" data-node href="#flagship" aria-label="The question that binds every theme: see the flagship result">
+          <circle cx={CX} cy={CY} r="80" class="center-pulse" />
+          <circle cx={CX} cy={CY} r="80" class="center-ring" />
+          <text x={CX} y={CY - 26} class="center-thesis" text-anchor="middle">
+            Does the result
           </text>
-          <text x={CX} y={CY + 14} class="center-sub" text-anchor="middle">
-            the thesis that
+          <text x={CX} y={CY - 2} class="center-thesis" text-anchor="middle">
+            <tspan class="center-thesis--em">mean</tspan> what
           </text>
-          <text x={CX} y={CY + 32} class="center-sub" text-anchor="middle">
-            binds every theme →
+          <text x={CX} y={CY + 22} class="center-thesis" text-anchor="middle">
+            it claims?
+          </text>
+          <text x={CX} y={CY + 46} class="center-sub" text-anchor="middle">
+            see the flagship →
           </text>
         </a>
       </svg>
 
+      {/* phones: the same themes as a list, since the map's labels would be too small to read */}
+      <ul class="map-chips" aria-label="Research themes">
+        {
+          nodes.map((n) => (
+            <li>
+              <button type="button" class="map-chip ui-sans" data-theme={n.theme} aria-pressed="false">
+                <span>{n.label}</span>
+                <span class="label-mono map-chip-count">{n.theme ? countFor(n.theme) : 0}</span>
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+
       <aside class="map-panel" data-map-panel aria-live="polite">
         <div class="panel-view" data-panel-default>
-          <span class="label-mono panel-eyebrow">The thesis</span>
-          <h3 class="panel-title">TrustShift binds the program</h3>
+          <span class="label-mono panel-eyebrow">The question</span>
+          <h3 class="panel-title">One question binds the program</h3>
           <p class="panel-text">
-            One pre-registered audit shows the <em>type</em> of deployment shift —
-            not its magnitude — decides which axis of trustworthiness fails. Every
-            theme around it is evidence that led here. Hover a node to see its work.
+            Every theme around it asks whether a reported number, be it a
+            benchmark score, a subgroup AUC, a validation result or a
+            backtest,{" "}<em>supports the decision</em>{" "}made with it. Hover or
+            tap a theme to see its papers.
           </p>
-          <a class="panel-cta ui-sans" href="/research/trustshift/">Open TrustShift →</a>
+          <a class="panel-cta ui-sans" href="#flagship">See the flagship result →</a>
         </div>
         {
           themeKeys.map((t) => (
@@ -199,6 +231,9 @@ const papersByTheme = Object.fromEntries(
       node.addEventListener("click", () => {
         locked = locked === theme ? null : theme;
         show(locked);
+        nodes.forEach((n) => {
+          if (n.tagName === "BUTTON") n.setAttribute("aria-pressed", String(n.dataset.theme === locked));
+        });
       });
       node.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -269,7 +304,7 @@ const papersByTheme = Object.fromEntries(
 
   .center-thesis {
     font-family: var(--font-serif);
-    font-size: 26px;
+    font-size: 19px;
     fill: var(--signal-deep);
     font-weight: 500;
   }
@@ -416,9 +451,44 @@ const papersByTheme = Object.fromEntries(
     max-width: 60ch;
   }
 
+  /* phone list of themes (the SVG map is hidden below 640px) */
+  .map-chips {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 2px solid var(--ink);
+  }
+
+  .map-chip {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-4);
+    min-height: 2.75rem;
+    padding: var(--space-3) var(--space-2);
+    border: 0;
+    border-bottom: var(--rule);
+    background: transparent;
+    color: var(--ink);
+    text-align: left;
+    touch-action: manipulation;
+    transition:
+      background var(--dur-fast) var(--ease-out),
+      color var(--dur-fast) var(--ease-out);
+  }
+
+  .map-chip[aria-pressed="true"] {
+    background: var(--signal-wash);
+    color: var(--signal-deep);
+  }
+
+  .map-chip-count { color: var(--signal); }
+
   @media (max-width: 640px) {
-    .node-label { font-size: 19px; }
-    .node-count { font-size: 14px; }
-    .center-label { font-size: 22px; }
+    .map-svg { display: none; }
+    .map-chips { display: block; }
+    .map-panel { margin-top: var(--space-6); padding: var(--space-6); }
   }
 </style>

@@ -1,20 +1,23 @@
 /**
  * Single source of truth for all research content.
- * Every number and status traces to the application handoff dossier
- * (see CLAUDE.md → PATHS). Statuses are verified-safe wording — never upgrade.
+ * Every number and status traces to the paper’s own current source file or the
+ * application dossier (see CLAUDE.md, PATHS); the source is named above each
+ * paper. Status words follow a strict vocabulary and are never upgraded. The
+ * venue of a double-blind submission under review is not named.
  */
 
 export type Theme =
-  | "trustworthy-ml"
+  | "evaluation"
   | "healthcare"
   | "fairness"
   | "nlp-llm"
   | "causal"
   | "deployment"
   | "privacy"
-  | "finance";
+  | "finance"
+  | "security";
 
-export type StatusKind = "presented" | "review" | "working";
+export type StatusKind = "published" | "review" | "working" | "manuscript" | "preparation";
 
 export interface KeyResult {
   value: string;
@@ -29,7 +32,7 @@ export interface FlowStep {
 export interface FigureBar {
   label: string;
   value: number; // bar length (abs), zero-based scale
-  display: string; // printed verbatim — may be a range
+  display: string; // printed verbatim
   accent?: boolean; // ultramarine emphasis; others render neutral gray
 }
 
@@ -40,7 +43,7 @@ export interface Figure {
   bars: FigureBar[];
 }
 
-/** A real figure from the paper's repo (src/assets/figures/<slug>/<file>). */
+/** A real figure from the paper’s repo (src/assets/figures/<slug>/<file>). */
 export interface PaperFigure {
   file: string;
   caption: string;
@@ -49,7 +52,6 @@ export interface PaperFigure {
 export interface Publication {
   slug: string;
   order: number;
-  flagship?: boolean;
   title: string;
   shortTitle: string;
   authors: string;
@@ -69,10 +71,12 @@ export interface Publication {
   results: KeyResult[];
   links: { label: string; href: string }[];
   caveat?: string;
+  absent?: string; // what is not public yet, and why
+  citation?: string; // formal reference, published work only
 }
 
 export const THEME_LABELS: Record<Theme, string> = {
-  "trustworthy-ml": "Trustworthy ML",
+  evaluation: "Benchmark Evaluation",
   healthcare: "Healthcare AI",
   fairness: "Fairness",
   "nlp-llm": "NLP · LLMs",
@@ -80,312 +84,502 @@ export const THEME_LABELS: Record<Theme, string> = {
   deployment: "Deployment Shift",
   privacy: "Privacy · Federated",
   finance: "Financial ML",
+  security: "Network Security",
+};
+
+export const STATUS_LABELS: Record<StatusKind, string> = {
+  published: "Published",
+  review: "Under review",
+  working: "Working papers",
+  manuscript: "Manuscripts",
+  preparation: "In preparation",
+};
+
+export const STATUS_CITATION_NOTE: Record<StatusKind, string> = {
+  published: "Published work. Use the citation above.",
+  review: "Manuscript under review. The citation will be posted on acceptance.",
+  working: "Working paper. The public version is linked above.",
+  manuscript: "Manuscript. A draft is available on request.",
+  preparation: "Manuscript in preparation.",
+};
+
+/** The discovery each paper's one-figure summary states (see HeroFigure). No entry, no figure. */
+export const DISCOVERY: Partial<Record<string, string>> = {
+  "benchmark-accuracy-not-identified":
+    "Count the responses the scorer could not read, and 357 of 378 orderings on a published leaderboard can no longer be separated.",
+  "subgroup-fairness-reversal":
+    "The fairness audit improves while the screening decision it is meant to justify gets worse for Black respondents.",
+  "could-it-read-the-answer": "Only the scoring rule changed, and one model’s MMLU score moved from 0.013 to 0.938.",
+  indiafinbench: "Change only the scoring rule and the leaderboard reorders: the last-ranked model ties for first.",
+  "diabetes-external-validation":
+    "Deployment reveals a hidden, age-shaped failure that internal validation cannot see.",
+  trustshift:
+    "Shift size alone does not say which part of a model breaks, so the audit measures every axis and can answer inconclusive.",
+  "confidently-wrong":
+    "Many cross-network detectors do not fall to chance. They pass through it and rank attacks below benign traffic.",
+  "scorer-partial-identification":
+    "What is not known about the scorer, not sampling error, sets the width of a benchmark comparison.",
+  "mortgage-disparities": "The disparity is concentrated inside institutions, and widens at their boundaries.",
+  "cate-hmda": "The average hides the distribution: the underwriting channel decides who bears the penalty.",
+  icgdf: "A well-calibrated model with no measurable skill. The correct decision is not to deploy.",
 };
 
 export const publications: Publication[] = [
+  // Source: knowledgeshift/paper/tmlr.tex abstract (2026-09-11); board data from the public
+  // flipbudget-results dataset (scripts/build-leaderboard.mjs). Under review, double-blind.
   {
-    slug: "trustshift",
+    slug: "benchmark-accuracy-not-identified",
     order: 1,
-    flagship: true,
-    title:
-      "TrustShift: Shift Type, Not Shift Magnitude, Determines Machine-Learning Failure Modes",
-    shortTitle: "TrustShift",
+    title: "Benchmark Accuracy Is Not an Identified Quantity",
+    shortTitle: "Benchmark Accuracy Is Not Identified",
     authors: "Rajveer Singh Pall",
-    status: "Under review — Applied Intelligence",
+    status: "Under review",
     statusKind: "review",
     year: "2026",
-    themes: ["trustworthy-ml", "deployment", "healthcare", "nlp-llm", "fairness"],
+    themes: ["evaluation", "nlp-llm", "deployment"],
     oneLiner:
-      "One pre-registered audit across four dissimilar domains: the type of distribution shift — not its magnitude — determines which axis of trustworthiness fails at deployment.",
+      "Most orderings on a published MATH-Hard leaderboard cannot be separated once the responses a scorer could not read are counted.",
     plain:
-      "A machine-learning model is trained on yesterday's data and then released into a world that keeps changing. Everyone knows performance can drop — but not all drops are alike. Sometimes the model still ranks people correctly but its probability estimates become dishonest; sometimes it fails one demographic group; sometimes it collapses entirely. This paper studies four completely different fields at once — medicine, social-media language, mortgage lending, and network attacks — under one identical audit, and finds that the kind of change in the world, not the amount of change, decides what breaks. Better still, the kind is detectable in advance, from unlabeled data, so the right repair can be chosen before anyone is harmed.",
+      "A benchmark score is produced by two things: the model, and a scoring rule that decides what answer the model’s text contains. When the scorer cannot read a response, it quietly marks it wrong and throws the count away. This paper shows that the published accuracy is then consistent with a whole range of true accuracies, and on a real 28-model leaderboard most of the rankings people quote do not survive that range.",
     flow: [
-      { label: "Deployment shift", note: "one trained model per domain meets a changed population" },
-      { label: "Three label-free probes", note: "prevalence shift · domain-classifier AUC · reweighting residual" },
-      { label: "Shift-type diagnosis", note: "label, covariate, or concept shift — before outcomes arrive" },
-      { label: "Failure taxonomy", note: "which axis breaks: discrimination, calibration, or subgroups" },
-      { label: "Matched remediation", note: "recalibrate · reweight · retrain — chosen by diagnosis" },
-    ],
-    figures: [],
-    paperFigures: [
-      {
-        file: "fig2_shift_bars.png",
-        caption:
-          "The audit, domain by domain: discrimination, calibration, and subgroup reliability measured under each deployment shift.",
-      },
-      {
-        file: "fig3_headline_scatter.png",
-        caption:
-          "The headline result: deployment damage organised by shift type rather than shift magnitude across the shift points.",
-      },
-      {
-        file: "fig5_remediation.png",
-        caption:
-          "The remediation ladder: label-cheap recalibration repairs calibration everywhere; discrimination requires more.",
-      },
-    ],
-    problem:
-      "ML systems are audited domain by domain, and deployment failures are usually attributed to how large the distribution shift is. Whether the kind of shift predicts the kind of failure had not been tested across domains under one protocol.",
-    approach:
-      "A single pre-registered audit protocol applied to four real-world domains — clinical risk (NHANES→BRFSS), mental-health NLP (Kaggle→Reddit/Twitter), mortgage lending (42M HMDA applications), and network security (CIC-DDoS2019→CICIDS2017). Discrimination, calibration, and subgroup reliability are measured with DeLong and bootstrap confidence intervals (N = 2000) and Benjamini–Hochberg FDR control, then explained by three cheap, label-free shift probes: prevalence shift, domain-classifier AUC, and importance-reweighting residual.",
-    findings:
-      "Shift type, not shift magnitude, predicts which trustworthiness axis degrades — and the responsible shift type is diagnosable in advance from unlabeled data, mapping each diagnosis to the appropriate remediation: recalibration, reweighting, or retraining.",
-    matters:
-      "It converts post-hoc deployment surprises into a pre-deployment diagnostic: an auditor can anticipate the failure axis before labels arrive, and it binds clinical, NLP, lending, and security evidence into one reproducible benchmark.",
-    results: [
-      { value: "4", label: "domains, one pre-registered protocol" },
-      { value: "3", label: "label-free shift probes" },
-      { value: "N=2000", label: "bootstrap CIs, BH-FDR controlled" },
-      { value: "exit 0", label: "full pipeline re-run, byte-identical tables" },
-    ],
-    links: [
-      { label: "GitHub", href: "https://github.com/Rajveer-code/trustshift" },
-      {
-        label: "Hugging Face dataset",
-        href: "https://huggingface.co/datasets/Rajveer-code/trustshift",
-      },
-    ],
-  },
-  {
-    slug: "diabetes-external-validation",
-    order: 6,
-    title:
-      "Comprehensive Evaluation of Machine Learning for Type 2 Diabetes Risk Prediction: Large-Scale External Validation and Fairness Analysis",
-    shortTitle: "Diabetes External Validation",
-    authors:
-      "Rajveer Singh Pall, Sameer Yadav, Siddharth Bhalerao, Sourabh Sahu, Ritu Ahluwalia, Bhaskar Awadhiya",
-    status: "Published — IEEE Xplore (CIPHER-2026)",
-    statusKind: "presented",
-    year: "2026",
-    themes: ["healthcare", "fairness", "deployment"],
-    oneLiner:
-      "Internally validated diabetes models lose discrimination and fairness when externally validated on 1.28M records — age subgroups suffer most.",
-    plain:
-      "A disease-risk model that shines on its home dataset can still mislead in the real world. We trained a standard diabetes risk model the careful way — strict cross-validation, tuned hyperparameters — and then did what most papers skip: tested it on 1.28 million people from a completely different national survey. Overall accuracy dropped about ten percent. Worse, the drop was not shared equally: for people over 60 the model degrades far more than for the young — a fairness failure that the single headline number completely hides.",
-    flow: [
-      { label: "Develop carefully", note: "NHANES cohort (15,685) · nested cross-validation · Bayesian tuning" },
-      { label: "Explain", note: "SHAP attribution over eight non-laboratory predictors" },
-      { label: "Externally validate", note: "BRFSS, 1,285,783 records — different survey, different population" },
-      { label: "Audit subgroups", note: "age, sex, BMI — with DeLong confidence intervals" },
-      { label: "Report to standard", note: "TRIPOD-AI checklist" },
+      { label: "Separate the two halves", note: "the model’s answer, and whether the scorer could read it" },
+      { label: "Bound the true accuracy", note: "published score, unreadable count, two measured error margins" },
+      { label: "Measure the margins", note: "400-item human audit frozen before labelling, plus independent LLM adjudication" },
+      { label: "Test every ordering", note: "all 378 pairs on a 28-model MATH-Hard leaderboard" },
+      { label: "Check the ecosystem", note: "lm-evaluation-harness and OpenCompass scoring configurations" },
     ],
     figures: [
       {
-        title: "AUC — where the model quietly fails",
-        max: 1,
-        note: "External validation costs ~10% overall; adults over 60 lose far more (gap 0.135, p < 0.001).",
+        title: "Share of MATH-Hard orderings that are not identified",
+        max: 100,
+        note: "Out of 378 model pairs. Even with the most favourable assumption, most rankings cannot be separated.",
         bars: [
-          { label: "Internal (NHANES)", value: 0.794, display: "0.794" },
-          { label: "External (BRFSS)", value: 0.717, display: "0.717" },
-          { label: "External, age 18–39", value: 0.742, display: "0.742" },
-          { label: "External, age ≥60", value: 0.607, display: "0.607", accent: true },
+          { label: "Human-audited margins", value: 94.4, display: "94.4%", accent: true },
+          { label: "LLM-adjudicated margins", value: 90.2, display: "90.2%" },
+          { label: "Zero scorer error assumed", value: 87.8, display: "87.8%" },
+          { label: "Learned extractor, zero error", value: 80.2, display: "80.2%" },
+        ],
+      },
+    ],
+    problem:
+      "If only the model’s half of a benchmark score is reported, is the resulting leaderboard ordering statistically meaningful?",
+    approach:
+      "Reported accuracy is formalised as a partially identified quantity, bounded by the scorer’s own count of unparseable responses and two error margins. Both margins are measured on the same extractor and benchmark: a 400-item human audit specified and frozen before labelling, and an independent LLM adjudication of the same items cross-checked against two further vendors. The practice is then audited across lm-evaluation-harness and OpenCompass.",
+    findings:
+      "357 of 378 pairwise orderings (94.4%) are not identified with human-audited margins, and 87.8% are not identified even when the extractor is granted zero error. 64.9% of generative tasks in lm-evaluation-harness and 43.3% of readable OpenCompass scoring configurations coerce an unreadable response into a wrong answer. A purpose-built learned extractor still leaves 80.2% of orderings unidentified.",
+    matters:
+      "A leaderboard gap is only meaningful if it is larger than what the scorer cannot see. The paper proposes a five-field Scorer Card and a tested upstream patch that reports the one number the scorer already computes and throws away.",
+    results: [
+      { value: "357 / 378", label: "MATH-Hard orderings not identified (human-audited margins)" },
+      { value: "87.8%", label: "not identified even at zero scorer error" },
+      { value: "64.9%", label: "of lm-evaluation-harness generative tasks turn unreadable into wrong" },
+    ],
+    links: [{ label: "Leaderboard data", href: "https://huggingface.co/datasets/Rajveer-code/flipbudget-results" }],
+    caveat:
+      "Each measured margin is applied as a single bound shared across every model on the board, an assumption the paper states and tests as far as the data allow.",
+    absent: "The paper and its code are withheld while the manuscript is under double-blind review.",
+  },
+
+  // Source: P06b main.tex abstract (submitted 2026-09-09) + Federated-Diabetes README. Under review, double-blind.
+  {
+    slug: "subgroup-fairness-reversal",
+    order: 2,
+    title:
+      "Higher AUC, Fewer Cases Flagged: Subgroup Fairness Metrics Can Reverse at the Decision Threshold in Federated Diabetes Screening",
+    shortTitle: "Higher AUC, Fewer Cases Flagged",
+    authors: "Rajveer Singh Pall",
+    status: "Under review",
+    statusKind: "review",
+    year: "2026",
+    themes: ["fairness", "healthcare", "privacy", "deployment"],
+    oneLiner:
+      "Federated training narrows the White-Black AUC gap while a race-blind screening policy flags fewer Black respondents.",
+    plain:
+      "Fairness in clinical prediction is usually checked by comparing AUC across groups. A screening programme, though, ranks patients and flags as many as it has capacity for. On more than a million external records, federated training makes the subgroup AUC audit look better while the screening decision it is supposed to justify gets worse for Black respondents. The paper shows exactly why the two readings disagree.",
+    flow: [
+      { label: "Train five federated strategies", note: "against a composition-matched centralised control, ten seeds" },
+      { label: "Validate externally", note: "BRFSS, 1,282,897 respondents, 819,294 with race recorded" },
+      { label: "Audit two ways", note: "within-group AUC, and who is flagged at a fixed screening capacity" },
+      { label: "Decompose pooled AUC", note: "within-group terms versus the cross-group terms a threshold acts on" },
+    ],
+    figures: [
+      {
+        title: "White-Black gap, centralised control to FedAvg",
+        max: 0.04,
+        note: "The AUC gap shrinks while the sensitivity gap at fixed capacity widens: the same model, judged two ways.",
+        bars: [
+          { label: "AUC gap, centralised", value: 0.0075, display: "0.0075" },
+          { label: "AUC gap, FedAvg", value: 0.0005, display: "0.0005" },
+          { label: "Sensitivity gap, centralised", value: 0.009, display: "0.009" },
+          { label: "Sensitivity gap, FedAvg", value: 0.034, display: "0.034", accent: true },
         ],
       },
     ],
     paperFigures: [
       {
-        file: "01_centralised_roc.png",
+        file: "fig_auc_vs_tpr.png",
         caption:
-          "ROC curves for the centralized model — the discrimination that external validation then puts to the test.",
+          "The same federated model judged two ways against the composition-matched centralised control, over ten seeds: within-group AUC rises for Black, Hispanic and Asian respondents while sensitivity at 20% screening capacity falls.",
       },
+    ],
+    problem:
+      "Does a subgroup AUC audit tell you what happens when a model is used at a fixed screening capacity?",
+    approach:
+      "Five federated strategies for diabetes risk prediction are compared with a composition-matched centralised control over ten seeds, with external validation on BRFSS (n = 1,282,897; 819,294 with race recorded). An exact decomposition of pooled AUC separates within-group ranking terms from the cross-group terms a shared threshold acts on.",
+    findings:
+      "FedAvg narrows the White-Black AUC gap from 0.0075 to 0.0005, yet under a race-blind top-q screening policy the White-Black sensitivity gap widens from 0.009 to 0.034, which is 542 fewer reference-positive Black respondents flagged per 100,000. The reversal holds at every capacity from 1% to 50%, for all five strategies.",
+    matters:
+      "A subgroup audit reads the within-group terms while a shared threshold depends on the cross-group terms, and here the two move in opposite directions. Subgroup AUC alone can report an equity improvement while missing the allocation effect on the group it is meant to protect.",
+    results: [
+      { value: "0.0075 → 0.0005", label: "White-Black AUC gap narrows" },
+      { value: "0.009 → 0.034", label: "White-Black sensitivity gap widens at fixed capacity" },
+      { value: "542", label: "fewer Black respondents flagged per 100,000" },
+    ],
+    links: [{ label: "Code and corrected results", href: "https://github.com/Rajveer-code/Federated-Diabetes" }],
+    caveat:
+      "The AUC gains are small in magnitude. An earlier version of this pipeline had implementation defects; the repository documents them and the findings they retired.",
+  },
+
+  // Source: knowledgeshift/paper/main.tex abstract (2026-09-06). Under review, double-blind workshop.
+  {
+    slug: "could-it-read-the-answer",
+    order: 3,
+    title: "Benchmarks Do Not Report Whether They Could Read the Answer",
+    shortTitle: "Could It Read the Answer?",
+    authors: "Rajveer Singh Pall",
+    status: "Under review",
+    statusKind: "review",
+    year: "2026",
+    themes: ["evaluation", "nlp-llm"],
+    oneLiner:
+      "Two answer extractors shipped in the same evaluation harness disagree by 88.5 points on the same 400 MMLU responses.",
+    plain:
+      "Whether a model gets credit on a benchmark depends partly on whether the scoring code can find its answer, and that half of the score is normally invisible. Auditing every task in a widely used evaluation harness shows that most generative tasks match an assumed output format, count a mismatch as wrong, and never report how often that happened.",
+    flow: [
+      { label: "Resolve every task", note: "all 13,668 configurations in lm-evaluation-harness" },
+      { label: "Score the same text twice", note: "a task’s strict pipeline versus a robust reading, 400 MMLU responses" },
+      { label: "Check the checker", note: "a third-vendor judge blind to the gold answer, three human labellers" },
+      { label: "Rescore published results", note: "leaderboard generations for 28 models" },
+    ],
+    figures: [
       {
-        file: "02_centralised_fairness_age.png",
+        title: "One frontier model on MMLU, same 400 responses",
+        max: 1,
+        note: "Only the scoring rule changed. The model ordering inverts, significant after Holm-Bonferroni correction.",
+        bars: [
+          { label: "Task’s strict pipeline", value: 0.013, display: "0.013" },
+          { label: "Answer read wherever it appears", value: 0.938, display: "0.938", accent: true },
+        ],
+      },
+    ],
+    problem:
+      "Does the unreported half of a benchmark score, whether the scorer could read the answer, change what the benchmark says?",
+    approach:
+      "All 13,668 task configurations in lm-evaluation-harness are resolved with the framework’s own loader. On MMLU, 400 responses are scored under a task’s strict pipeline and under a robust reading, checked by a third-vendor judge blind to the gold answer and by three human labellers. Published leaderboard generations for 28 models are then rescored the same way.",
+    findings:
+      "2,936 of 4,524 generative tasks (64.9%) record a format mismatch as a wrong answer, 81.0% of them report a single number with no second pipeline, and none report how often the extractor failed. A frontier model scores 0.013 under a task’s strict pipeline and 0.938 when the answer is read wherever it appears. Across 28 models' published generations the hidden parse-failure rate spans 4% to 99.9%, and one published score of 0.000 is entirely an extraction artefact.",
+    matters:
+      "The fix costs one extra reported number per task, and it is already implemented in the newest evaluation code of one audited repository.",
+    results: [
+      { value: "88.5 pts", label: "disagreement between two extractors in one harness" },
+      { value: "2,936 / 4,524", label: "generative tasks score a format mismatch as wrong" },
+      { value: "97 / 99", label: "recovered answers confirmed by a judge blind to the gold answer" },
+    ],
+    links: [],
+    absent: "The paper and its code are withheld while the submission is under double-blind review.",
+  },
+
+  // Source: IndiaFinBench/paper/tmlr/draft_01_abstract_only.tex (2026-09-03), built into tmlr_submission/main.pdf (2026-09-04).
+  {
+    slug: "indiafinbench",
+    order: 4,
+    title: "Scoring-Rule Sensitivity in LLM Evaluation: Evidence from Indian Financial Regulatory Text",
+    shortTitle: "IndiaFinBench",
+    authors: "Rajveer Singh Pall",
+    status: "Under review",
+    statusKind: "review",
+    year: "2026",
+    themes: ["evaluation", "nlp-llm", "finance"],
+    oneLiner:
+      "Changing only the scoring rule reorders twelve LLMs on a new Indian financial-regulation benchmark, and no model keeps its rank.",
+    plain:
+      "IndiaFinBench is a 406-question benchmark written from Indian financial regulation issued by SEBI and RBI, text that Western financial benchmarks rarely cover. Twelve LLMs were scored on the same answers in two ways: strict string matching, and a judge model from an unrelated family. The two leaderboards show no positive rank agreement, so a strict leaderboard says little about which model actually answers regulatory questions best.",
+    flow: [
+      { label: "Build the benchmark", note: "406 expert-annotated items over SEBI and RBI regulatory text" },
+      { label: "Four reasoning types", note: "interpretation · numerical · contradiction · temporal" },
+      { label: "Score the same answers twice", note: "strict four-stage matching and a cross-family judge" },
+      { label: "Compare the leaderboards", note: "rank correlation, rank moves, item-level discrimination" },
+    ],
+    figures: [],
+    paperFigures: [
+      {
+        file: "figure_regime_shift.png",
         caption:
-          "The age-fairness audit: performance split by age group, where the headline number hides the failure.",
+          "The same predictions ranked three ways. DeepSeek-R1-Distill-Llama-70B moves from last under strict matching to tied first under the composite regime.",
+      },
+    ],
+    problem: "What changes on an LLM leaderboard when only the scoring rule changes?",
+    approach:
+      "406 expert-annotated items over SEBI and RBI regulatory text cover regulatory interpretation, numerical reasoning, contradiction detection and temporal reasoning. Twelve contemporary LLMs are evaluated zero-shot and scored by strict four-stage string matching, by a judge that shares no model family with any evaluated system, and by a composite of the two.",
+    findings:
+      "Strict and judge-only accuracy show no positive rank correspondence (Spearman ρ = −0.273, p = 0.39), and no model holds its rank across all three regimes. Strict accuracy spans 75.12% to 89.66% and judge-only accuracy 87.19% to 94.83%, with a different leader and trailer. DeepSeek-R1-Distill-Llama-70B ranks last under strict scoring and ties for first under the composite, because the judge reclassifies 93.9% of its strict errors as correct. 148 of 406 items are answered identically by all twelve models.",
+    matters:
+      "The tempting explanation, output verbosity, does not survive adjustment for task and model composition, and the paper reports that negative result as such. Benchmarks should report the scoring rule’s effect, not only the score.",
+    results: [
+      { value: "ρ = −0.273", label: "strict vs judge-only rank correlation (p = 0.39)" },
+      { value: "93.9%", label: "of one model’s strict errors reclassified by the judge" },
+      { value: "406", label: "expert-annotated regulatory questions" },
+    ],
+    links: [
+      { label: "Earlier version, arXiv 2604.19298", href: "https://arxiv.org/abs/2604.19298" },
+      { label: "Dataset", href: "https://huggingface.co/datasets/Rajveer-code/IndiaFinBench" },
+      { label: "Live demo", href: "https://huggingface.co/spaces/Rajveer-code/IndiaFinBench" },
+      { label: "Code", href: "https://github.com/Rajveer-code/IndiaFinBench" },
+      { label: "Zenodo DOI", href: "https://doi.org/10.5281/zenodo.21739533" },
+    ],
+    caveat:
+      "The human reference is one non-specialist evaluator on 60 medium and hard items (80.0%, 95% Wilson CI 68.2 to 88.2), a reference point rather than a population estimate.",
+  },
+
+  // Source: application dossier §3 P9; IEEE Xplore page (date added 21 May 2026). Published.
+  {
+    slug: "diabetes-external-validation",
+    order: 5,
+    title:
+      "Comprehensive Evaluation of Machine Learning for Type 2 Diabetes Risk Prediction: Large-Scale External Validation and Fairness Analysis",
+    shortTitle: "Diabetes External Validation",
+    authors: "Rajveer Singh Pall, Sameer Yadav, Siddharth Bhalerao, Sourabh Sahu, Ritu Ahluwalia, Bhaskar Awadhiya",
+    status: "Published · IEEE Xplore (CIPHER-2026)",
+    statusKind: "published",
+    year: "2026",
+    themes: ["healthcare", "fairness", "deployment"],
+    oneLiner:
+      "Internally validated diabetes models lose discrimination on 1.28M external records, and adults over 60 lose the most.",
+    plain:
+      "A disease-risk model that shines on its home dataset can still mislead in the real world. We trained a standard diabetes risk model the careful way, with strict cross-validation and tuned hyperparameters, and then did what most papers skip: tested it on 1.28 million people from a completely different national survey. Overall accuracy dropped about ten percent, and the drop was not shared equally. For people over 60 the model degrades far more than for the young, a fairness failure that the single headline number hides.",
+    flow: [
+      { label: "Develop carefully", note: "NHANES cohort (15,685) · nested cross-validation · Bayesian tuning" },
+      { label: "Explain", note: "SHAP attribution over eight non-laboratory predictors" },
+      { label: "Externally validate", note: "BRFSS, 1,285,783 records: different survey, different population" },
+      { label: "Audit subgroups", note: "age, sex, BMI, with DeLong confidence intervals" },
+      { label: "Report to standard", note: "TRIPOD-AI checklist" },
+    ],
+    figures: [
+      {
+        title: "AUC: where the model quietly fails",
+        max: 1,
+        note: "External validation costs about 10% overall; adults over 60 lose far more (gap 0.135, p < 0.001).",
+        bars: [
+          { label: "Internal (NHANES)", value: 0.794, display: "0.794" },
+          { label: "External (BRFSS)", value: 0.717, display: "0.717" },
+          { label: "External, age 18-39", value: 0.742, display: "0.742" },
+          { label: "External, age 60+", value: 0.607, display: "0.607", accent: true },
+        ],
       },
     ],
     problem:
       "Clinical risk models are usually reported with internal validation only. Do the numbers survive a different population, survey instrument, and label definition?",
     approach:
-      "XGBoost and baselines developed on NHANES (n = 15,685) under strict nested cross-validation, then externally validated on BRFSS (n = 1,285,783) with DeLong CIs, calibration analysis, SHAP interpretability, and subgroup fairness audit. TRIPOD-AI reporting.",
+      "XGBoost and baselines developed on NHANES (n = 15,685) under strict nested cross-validation, then externally validated on BRFSS (n = 1,285,783) with DeLong CIs, calibration analysis, SHAP interpretability, and a subgroup fairness audit. TRIPOD-AI reporting.",
     findings:
-      "External AUC drops from 0.794 to 0.717 (−9.7%). The elderly subgroup degrades far more than the young (AUC 0.607 vs 0.742, gap 0.135) — aggregate accuracy hides an age-fairness failure.",
+      "External AUC drops from 0.794 (95% CI 0.788 to 0.800) to 0.717, a 9.7% relative decline. The elderly subgroup degrades far more than the young (AUC 0.607 vs 0.742, gap 0.135): aggregate accuracy hides an age-fairness failure. The Brier score is 0.123, with risk overestimated at high thresholds.",
     matters:
       "The foundation result of the research program: benchmark performance is not deployment performance, and the failure is structured, not random.",
     results: [
       { value: "0.794 → 0.717", label: "internal → external AUC (−9.7%)" },
-      { value: "0.135", label: "age-group AUC gap (18–39 vs ≥60)" },
+      { value: "0.135", label: "age-group AUC gap (18-39 vs 60+)" },
       { value: "1,285,783", label: "external validation records" },
     ],
     links: [
-      {
-        label: "Code",
-        href: "https://github.com/Rajveer-code",
-      },
+      { label: "IEEE Xplore", href: "https://doi.org/10.1109/CIPHER70417.2026.11523789" },
+      { label: "arXiv 2607.16253", href: "https://arxiv.org/abs/2607.16253" },
     ],
     caveat:
-      "Published in IEEE Xplore, DOI 10.1109/CIPHER70417.2026.11523789.",
+      "The model uses eight non-laboratory predictors. Diabetes is defined from laboratory measures, self-report and medication in NHANES, but from self-reported diagnosis in BRFSS.",
+    citation:
+      "Pall, R. S., Yadav, S., Bhalerao, S., Sahu, S., Ahluwalia, R., & Awadhiya, B. (2026). Comprehensive evaluation of machine learning for type 2 diabetes risk prediction: Large-scale external validation and fairness analysis. CIPHER-2026. IEEE. https://doi.org/10.1109/CIPHER70417.2026.11523789",
   },
+
+  // Source: trustshift/paper/main.tex abstract + README (frozen Phase-4 evidence, 2026-09-04). Manuscript.
   {
-    slug: "federated-diabetes",
-    order: 5,
-    title:
-      "Privacy-Preserving Federated Learning for Diabetes Risk Prediction Across Demographically Heterogeneous Hospital Nodes",
-    shortTitle: "Federated Diabetes",
+    slug: "trustshift",
+    order: 6,
+    title: "TrustShift: A Mechanism-Aware Audit of Machine-Learning Deployment Shift",
+    shortTitle: "TrustShift",
     authors: "Rajveer Singh Pall",
-    status: "Under review — Computer Methods and Programs in Biomedicine",
-    statusKind: "review",
+    status: "Manuscript",
+    statusKind: "manuscript",
     year: "2026",
-    themes: ["healthcare", "privacy", "fairness", "deployment"],
+    themes: ["deployment", "healthcare", "nlp-llm", "security", "fairness"],
     oneLiner:
-      "Federated diabetes screening audited on four deployability axes at once — generalisation, fairness, calibration, and privacy — not just accuracy.",
+      "Across four real deployment shifts, shift magnitude alone does not consistently explain which trustworthiness axis fails.",
     plain:
-      "Hospitals cannot share patient records, so how do they train one model together? Federated learning sends the model to the data instead of the data to a server. This paper checks what federated papers usually don't: whether the jointly trained model still works on a different population of 1.28 million people, whether it treats the elderly fairly, whether its probabilities are honest, and whether formal privacy protection actually holds. Three of the four go surprisingly well — the federated model beats the centralized one externally. The fourth is an honest negative: differential privacy destroys the model at realistic settings, and the paper says so plainly.",
+      "Deployment evaluation often assumes that a bigger change in the data means more risk. TrustShift applies one identical audit to four very different deployments: medicine, social-media language, mortgage lending, and network attacks. It finds that this assumption does not hold uniformly. A lending model under a large measured shift ranks applicants better, while a mental-health text model at a comparable shift magnitude loses up to 0.39 AUC. Cheap, largely label-free probes diagnose some shifts, and report the rest as inconclusive rather than forcing a label.",
     flow: [
-      { label: "Split realistically", note: "three demographically unequal simulated hospital nodes" },
-      { label: "Train federated", note: "FedAvg · FedProx · FedNova · SCAFFOLD vs centralized controls" },
-      { label: "Validate externally", note: "1.28M BRFSS records — a population no node ever saw" },
-      { label: "Audit fairness + calibration", note: "elderly–young gap · ECE with recalibration ladder" },
-      { label: "Stress privacy", note: "DP-SGD ε-sweep — where utility survives, and where it collapses" },
+      { label: "Deployment shift", note: "one trained model per domain meets a changed population" },
+      { label: "Screen without labels", note: "prevalence change and a domain classifier" },
+      { label: "Probe the mechanism", note: "an importance-reweighting check where labels and overlap allow" },
+      { label: "Audit four axes jointly", note: "discrimination · operating point · calibration · subgroup reliability" },
+      { label: "Remediate or escalate", note: "recalibration where it helps; inconclusive is a first-class outcome" },
     ],
-    figures: [
-      {
-        title: "External AUC on 1.28M unseen records",
-        max: 1,
-        note: "The federated model generalises better than both centralized controls.",
-        bars: [
-          { label: "FedAvg (federated)", value: 0.757, display: "0.757", accent: true },
-          { label: "Centralized, same architecture", value: 0.749, display: "0.749" },
-          { label: "Centralized XGBoost", value: 0.7, display: "0.700" },
-        ],
-      },
-    ],
+    figures: [],
     paperFigures: [
       {
-        file: "10_external_validation_roc.png",
+        file: "fig1_taxonomy.png",
         caption:
-          "External validation on 1.28M BRFSS records: federated and centralized models compared where it counts.",
-      },
-      {
-        file: "06_fairness_age_comparison.png",
-        caption:
-          "Elderly–young fairness across training strategies — the axis most clinical papers never report.",
-      },
-      {
-        file: "05_dp_tradeoff.png",
-        caption:
-          "The privacy–utility trade-off: DP-SGD across the ε sweep, including the collapse the paper reports plainly.",
+          "The TrustShift audit flow. Screening and probes either support a mechanism hypothesis or return inconclusive as a first-class outcome; discrimination, operating point, calibration and subgroup reliability are audited jointly.",
       },
     ],
     problem:
-      "Federated learning is sold on privacy. But does a federated clinical model also generalise externally, treat age groups fairly, and stay calibrated — simultaneously?",
+      "Does the magnitude of a distribution shift tell you which axis of trustworthiness will fail at deployment?",
     approach:
-      "Three demographically heterogeneous simulated hospital nodes over NHANES; FedAvg / FedProx / FedNova / SCAFFOLD vs centralized controls; external validation on 1.28M BRFSS records; isotonic/Platt/temperature recalibration; DP-SGD ε-sweep with Opacus. A 4-page distillation is prepared for the ML4H 2026 Findings track.",
+      "One protocol measures discrimination, calibration, subgroup reliability and operating-point performance on clinical risk prediction (NHANES to BRFSS), mental-health text classification (Kaggle to Reddit and Twitter), mortgage approval (temporal and cross-state shift over 42 million loan records) and network intrusion detection (CIC-DDoS2019 to CICIDS2017). Prevalence change, a domain classifier and an importance-reweighting check probe the shift mechanism.",
     findings:
-      "FedAvg reaches external AUC 0.757 [0.756–0.758], beats centralized XGBoost (0.700), shows a 40% smaller internal–external gap than the matched centralized model (0.031 vs 0.052 — partly explained by data composition, stated openly), narrows the elderly–young fairness gap by 21.7%, and recalibrates from ECE 0.276 to 0.001. DP-SGD collapses utility at ε ≤ 5: current per-node sizes give no free privacy guarantee.",
+      "A lending model under measured covariate shift (domain-classifier AUC up to 0.80) improves in ranking while macro operating-point performance stays within 0.02, even as positive-class F1 falls by up to 0.078. A mental-health model at comparable magnitude loses up to 0.39 AUC. An intrusion detector holds 0.998 AUC in-domain and falls to 0.68 on traffic whose attack mechanisms were absent from training. Post-hoc recalibration cuts calibration error by one to two orders of magnitude in every domain but leaves discrimination and subgroup reliability unrestored.",
     matters:
-      "Moves FL evaluation beyond 'privacy by architecture' toward audit-first deployment evidence — including the honest negative on differential privacy.",
+      "Reporting one metric, or trusting shift size, can hide which part of a model breaks. The contribution is a protocol, a four-domain benchmark, and a release in which every reported number traces to a committed result file.",
     results: [
-      { value: "0.757", label: "FedAvg external AUC [0.756–0.758]" },
-      { value: "−21.7%", label: "elderly–young fairness gap reduction" },
-      { value: "0.276 → 0.001", label: "ECE after isotonic recalibration" },
-      { value: "ε ≤ 5", label: "DP-SGD utility collapse point" },
+      { value: "4", label: "real deployment domains, one protocol" },
+      { value: "0.39", label: "AUC lost by the text model at comparable shift" },
+      { value: "0.998 → 0.68", label: "intrusion-detector AUC on unseen attack mechanisms" },
     ],
     links: [
-      {
-        label: "Code",
-        href: "https://github.com/Rajveer-code",
-      },
+      { label: "GitHub", href: "https://github.com/Rajveer-code/trustshift" },
+      { label: "Hugging Face dataset", href: "https://huggingface.co/datasets/Rajveer-code/trustshift" },
+      { label: "Zenodo DOI", href: "https://doi.org/10.5281/zenodo.21739501" },
     ],
+    caveat:
+      "Whether the shift mechanism carries more information than its magnitude is tested directly and not established by the current evidence.",
   },
+
+  // Source: ddos_xdomain_paper/paper/manuscript.tex abstract (2026-08-22). Manuscript.
   {
-    slug: "cpfe",
+    slug: "confidently-wrong",
     order: 7,
-    title:
-      "Cross-Platform Generalisation Failure in Mental Health NLP: A Five-Axis Fairness Audit of Transformer Models on Social Media",
-    shortTitle: "CPFE — Mental-Health NLP",
-    authors: "Rajveer Singh Pall, Sameer Yadav",
-    status: "In preparation",
-    statusKind: "review",
+    title: "Confidently Wrong: Ranking Inversion in Cross-Network Denial-of-Service Detection",
+    shortTitle: "Confidently Wrong",
+    authors: "Rajveer Singh Pall",
+    status: "Manuscript",
+    statusKind: "manuscript",
     year: "2026",
-    themes: ["nlp-llm", "fairness", "healthcare", "deployment"],
+    themes: ["security", "deployment"],
     oneLiner:
-      "Mental-health classifiers that look near-perfect in-platform collapse across platforms — on discrimination, calibration, equity, and even their explanations.",
+      "On a new network, DoS detectors do not decay toward chance: many pass through it and score attacks below benign traffic.",
     plain:
-      "Software that scans social-media posts for signs of depression or anxiety is usually trained and tested on a single platform, where it looks near-perfect. We took such models — AUC above 0.98 — and simply moved them to Reddit and Twitter. Accuracy collapsed by a third. Their confidence scores became badly dishonest. Fairness metrics failed for exactly the classes that matter clinically. And the words the models relied on changed almost completely from platform to platform — the model was never reading what its developers thought it was reading.",
+      "Flow-based denial-of-service detectors report accuracy above 99%, then lose most of that skill on a different network. This paper looks at the character of that loss. Where the ordering of scores survives the move, choosing a new threshold repairs it. Where the ordering has inverted, no threshold can, and the scoring function itself has to change.",
     flow: [
-      { label: "Train in-platform", note: "transformer classifiers, 35,556 posts, five seeds" },
-      { label: "Audit on five axes", note: "discrimination · calibration · significance · equity · attribution" },
-      { label: "Cross platforms", note: "same models, Reddit and Twitter language" },
-      { label: "Attempt repair", note: "temperature scaling fixes calibration only; fine-tuning recovers more" },
+      { label: "Four testbeds", note: "independently captured, one published common feature set" },
+      { label: "Four model families", note: "trained on each testbed" },
+      { label: "Every ordered pair", note: "12 cross-network transfers, five seeds, 240 evaluations" },
+      { label: "Diagnose the failure", note: "ranking loss versus threshold loss, then test remedies" },
     ],
-    figures: [
-      {
-        title: "Calibration error (ECE) as the platform changes",
-        max: 0.55,
-        note: "Bars drawn at the lower bound of each reported range — the conservative reading.",
-        bars: [
-          { label: "Home platform", value: 0.056, display: "0.056–0.060" },
-          { label: "Reddit", value: 0.196, display: "0.196–0.229" },
-          { label: "Twitter", value: 0.499, display: "0.499–0.542", accent: true },
-        ],
-      },
-    ],
+    figures: [],
     paperFigures: [
       {
-        file: "figure1_forest_plot.png",
+        file: "fig3_failure_decomposition.png",
         caption:
-          "Forest plot of cross-platform AUC with DeLong confidence intervals across models and platforms.",
-      },
-      {
-        file: "figure2_platform_degradation.png",
-        caption:
-          "Degradation by platform: what a near-perfect in-platform model loses on Reddit and Twitter.",
-      },
-      {
-        file: "figure3_calibration_curves.png",
-        caption:
-          "Calibration curves in-domain versus cross-platform — confidence becomes dishonest under shift.",
+          "How each testbed pair fails. Only one of twelve pairs sits in the threshold-limited region where recalibration can help; the rest lose their ranking.",
       },
     ],
     problem:
-      "Mental-health NLP models report AUCs near 0.99 on one platform. What survives when the same model meets Reddit or Twitter language?",
+      "When a DoS detector moves to a new network, does it fail at the threshold or at the ranking, and which remedies can work?",
     approach:
-      "CPFE: a five-axis cross-platform audit — discrimination, calibration, statistical significance, prediction equity, attribution stability — across BERT/RoBERTa variants, five seeds, with DeLong CIs, bootstrap ECE, Bonferroni-corrected tests, and gradient-saliency Jaccard analysis.",
+      "Four model families are trained on four independently captured testbeds under a published common feature set, and every ordered pair of testbeds is evaluated over five seeds.",
     findings:
-      "Within-platform AUC of 0.983–0.987 degrades 30–40% cross-platform; ECE inflates up to 0.54; equity metrics fail for clinical proxy classes; attribution overlap falls to Jaccard ≈ 0 in 13 of 16 model–class pairs. Temperature scaling repairs calibration (−88% ECE) but not discrimination; target-domain fine-tuning recovers far more.",
+      "Transfer does not decay toward chance; it passes through chance. 108 of 240 run-level evaluations score below ROC-AUC 0.5, and the worst reaches 0.0697, where negating the score would give 0.9303. Eleven of twelve testbed pairs fail at the ranking rather than the threshold. Retraining on ten balanced labelled target flows reaches median macro-F1 0.7253, against 0.3919 without adaptation.",
     matters:
-      "Fairness itself is shown to be a deployment-shift casualty: every trustworthiness axis can fail while the benchmark number stays excellent.",
+      "Cross-network evaluation has to separate ranking failure from threshold failure, because the two admit different fixes.",
     results: [
-      { value: "0.983 → ~0.65", label: "AUC under platform shift (−30–40%)" },
-      { value: "≈ 0", label: "attribution Jaccard in 13/16 pairs" },
-      { value: "−88%", label: "ECE after temperature scaling" },
+      { value: "108 / 240", label: "evaluations below ROC-AUC 0.5" },
+      { value: "0.0697", label: "worst ROC-AUC (0.9303 if negated)" },
+      { value: "11 / 12", label: "testbed pairs fail at the ranking" },
     ],
-    links: [
+    links: [],
+    absent: "Code is not public yet.",
+  },
+
+  // Source: flipbudget/manuscript/MANUSCRIPT_DRAFT.md abstract + FINAL_STATUS.md (2026-09-15). In preparation.
+  {
+    slug: "scorer-partial-identification",
+    order: 8,
+    title: "Scorer-Induced Partial Identification of Benchmark Comparisons: An Audit-Design Approach",
+    shortTitle: "Auditing the Scorer",
+    authors: "Rajveer Singh Pall",
+    status: "In preparation",
+    statusKind: "preparation",
+    year: "2026",
+    themes: ["evaluation", "nlp-llm"],
+    oneLiner:
+      "Once a scorer’s error rate is audited rather than assumed, audit uncertainty outweighs sampling uncertainty in all 120 well-defined comparisons.",
+    plain:
+      "An automated verifier grades every free-text answer on a math benchmark, and it can disagree with a careful human reader. Using a real human audit of that verifier, this work derives the range of true accuracies consistent with a reported score. It shows that how little we know about the verifier’s own error matters more than the sampling error that leaderboards usually report.",
+    flow: [
+      { label: "Audit the scorer", note: "400 items submitted, 350 usable across 27 models" },
+      { label: "Bound true accuracy", note: "classical misclassification bounds adapted to benchmarks" },
+      { label: "Compare widths", note: "identification width against sampling width, pair by pair" },
+      { label: "Design the next audit", note: "where extra human labels help most" },
+    ],
+    figures: [
       {
-        label: "Code",
-        href: "https://github.com/Rajveer-code",
+        title: "Identification width ÷ sampling width",
+        max: 7,
+        note: "Across 120 well-defined comparisons among 17 qualifying models. Every ratio is above 1.",
+        bars: [
+          { label: "Median ratio", value: 6.1, display: "6.10×", accent: true },
+          { label: "Self-consistency check", value: 5.74, display: "5.74×" },
+          { label: "Smallest ratio", value: 2.15, display: "2.15×" },
+        ],
       },
     ],
-    caveat: "Labels are clinical proxies from emotion mappings, not diagnoses.",
+    problem:
+      "Given a benchmark’s observed accuracy and an audited estimate of its scorer’s false-credit and false-miss rates, what can still be concluded about a comparison between two models?",
+    approach:
+      "Classical misclassification bounds are adapted to benchmark comparison and applied to MATH-Hard, using a human audit of the standard boxed-answer comparator (400 items submitted, 350 usable across 27 models). The work then formalises how further audit budget should be allocated and tests the textbook allocation rule on the real, sparse audit data.",
+    findings:
+      "The median ratio of identification width to sampling width is 6.10×, dominant in all 120 comparable pairs; a self-consistency check gives 5.74×, and the smallest ratio is 2.15×. The harness’s two live scorers disagree on 3.63% of responses (95% CI 3.39% to 3.88%, n = 22,508). The textbook Neyman allocation of audit effort, in its plug-in form, is dominated by uniform allocation on this sparse real data.",
+    matters:
+      "Before arguing that one model beats another, a benchmark should measure its own scorer. The work documents a failure mode of standard audit design and tests a correction.",
+    results: [
+      { value: "6.10×", label: "median identification-to-sampling width ratio" },
+      { value: "120 / 120", label: "comparable pairs where audit uncertainty dominates" },
+      { value: "3.63%", label: "responses where two live scorers disagree" },
+    ],
+    links: [
+      { label: "Code", href: "https://github.com/Rajveer-code/flipbudget" },
+      { label: "Results dataset", href: "https://huggingface.co/datasets/Rajveer-code/flipbudget-results" },
+      { label: "Leaderboard", href: "https://huggingface.co/spaces/Rajveer-code/flipbudget-leaderboard" },
+    ],
+    caveat:
+      "One analysis waits on a pre-registered 458-row human audit of the harness’s second scorer; the manuscript marks every number that depends on it as pending instead of estimating it.",
   },
+
+  // Source: application dossier §3 P2. Under review (Journal of Housing Economics); public SSRN version.
   {
     slug: "mortgage-disparities",
-    order: 3,
-    title:
-      "Persistent Racial Disparities in U.S. Mortgage Approval: Evidence from 42 Million Applications, 2020–2024",
+    order: 9,
+    title: "Persistent Racial Disparities in U.S. Mortgage Approval: Evidence from 42 Million Applications, 2020-2024",
     shortTitle: "Mortgage Disparities",
     authors: "Rajveer Singh Pall",
-    status: "Under review — Journal of Housing Economics",
+    status: "Under review · Journal of Housing Economics",
     statusKind: "review",
     year: "2026",
-    themes: ["fairness", "causal", "deployment"],
+    themes: ["fairness", "causal"],
     oneLiner:
-      "The public-data Black–White mortgage approval gap at national scale: how large, where it lives, and how it responds to institutional boundaries.",
+      "The public-data Black-White mortgage approval gap at national scale: how large, where it lives, and how it responds to institutional boundaries.",
     plain:
-      "Every U.S. mortgage application leaves a public record. Reading all 42 million of them from 2020–2024, Black applicants are approved about 15 percentage points less often than White applicants. This paper measures that gap carefully: most of it (68%) cannot be explained by anything visible in the public data, and three-quarters of it lives inside individual lenders rather than between them. Two natural experiments — an insurance-driven threshold at 80% loan-to-value, and the Federal Reserve's 2022 tightening — each widen the gap further. The paper never claims to prove intent; it maps the scale and the structure.",
+      "Every U.S. mortgage application leaves a public record. Reading all 42 million of them from 2020 to 2024, Black applicants are approved about 15 percentage points less often than White applicants. This paper measures that gap carefully: most of it (68%) cannot be explained by anything visible in the public data, and three quarters of it lives inside individual lenders rather than between them. Two natural experiments, an insurance-driven threshold at 80% loan-to-value and the Federal Reserve’s 2022 tightening, each widen the gap further. The paper never claims to prove intent; it maps the scale and the structure.",
     flow: [
-      { label: "Assemble", note: "42,323,519 applications, 5,500+ lenders, 2020–2024" },
-      { label: "Reweight", note: "DiNardo–Fortin–Lemieux: compare statistically similar applicants" },
-      { label: "Look within lenders", note: "fixed effects — is it between institutions, or inside them?" },
-      { label: "Natural experiments", note: "RDD at the 80% LTV insurance boundary · DiD around 2022 tightening" },
+      { label: "Assemble", note: "42,323,519 applications, 2020-2024" },
+      { label: "Reweight", note: "DiNardo-Fortin-Lemieux: compare statistically similar applicants" },
+      { label: "Look within lenders", note: "fixed effects: between institutions, or inside them?" },
+      { label: "Natural experiments", note: "RDD at the 80% LTV boundary · DiD around the 2022 tightening" },
       { label: "Bound the unknown", note: "partial identification calibrated to consumer-finance data" },
     ],
     figures: [
       {
-        title: "Black–White approval gap in percentage points",
+        title: "Black-White approval gap in percentage points",
         max: 17,
-        note: "74.6% of the national gap sits within individual lenders; scale ≈ 126,000 fewer approvals per year.",
+        note: "74.6% of the national gap sits within individual lenders; scale is about 126,000 fewer approvals a year.",
         bars: [
           { label: "National raw gap", value: 14.95, display: "14.95 pp", accent: true },
           { label: "Midwest regional mean", value: 16.1, display: "16.1 pp" },
@@ -396,47 +590,51 @@ export const publications: Publication[] = [
     problem:
       "How large is the observable racial approval gap in U.S. mortgage lending, how much sits within lenders, and what do quasi-experimental boundaries reveal about its structure?",
     approach:
-      "42,323,519 HMDA applications, 2020–2024. DFL reweighting, within-lender fixed effects, regression discontinuity at the 80% LTV / PMI boundary, difference-in-differences around the 2022 tightening, HonestDiD sensitivity, Manski partial-identification bounds, permutation tests.",
+      "42,323,519 HMDA applications, 2020-2024. DFL reweighting, within-lender fixed effects, regression discontinuity at the 80% LTV / PMI boundary, difference-in-differences around the 2022 tightening with HonestDiD sensitivity, Manski partial-identification bounds, and permutation tests.",
     findings:
-      "Raw gap 14.95 pp; 68% unexplained by public observables; 74.6% of the gap is within-lender; the RDD adds ≈ +2.0 pp above the 80% LTV threshold in purchase loans; scale ≈ 126,000 fewer approvals for Black applicants annually. Bounds keep ≥ 44–55% unexplained under conservative assumptions.",
+      "Raw gap 14.95 pp; 68% unexplained by public observables; 74.6% of the gap is within-lender, rising from 66.8% in 2020 to 78.3% in 2024. The approval differential rises by about 2.0 pp above the 80% LTV threshold in purchase loans and widens by about 1.5 pp within lenders after the 2022 tightening. Bounds keep at least 44% to 55% unexplained under conservative assumptions; scale is about 126,000 fewer approvals for Black applicants annually.",
     matters:
-      "Documents scale and institutional structure without overclaiming intent — the paper explicitly positions public-data estimates against confidential-data literature.",
+      "It documents scale and institutional structure without overclaiming intent, and positions public-data estimates explicitly against the confidential-data literature.",
     results: [
-      { value: "14.95 pp", label: "raw Black–White approval gap" },
-      { value: "74.6%", label: "of gap within-lender" },
+      { value: "14.95 pp", label: "raw Black-White approval gap" },
+      { value: "74.6%", label: "of the gap within lenders" },
       { value: "≈126,000", label: "fewer annual approvals at scale" },
     ],
-    links: [{ label: "SSRN preprint", href: "https://ssrn.com/abstract=6334459" }],
+    links: [
+      { label: "SSRN preprint", href: "https://ssrn.com/abstract=6334459" },
+      { label: "Replication code", href: "https://github.com/Rajveer-code/hmda-racial-disparities" },
+    ],
     caveat:
-      "HMDA lacks credit scores/assets; estimates framed as upper bounds on conditional differentials.",
+      "HMDA lacks credit scores, assets and reserves, so public-data estimates sit above the 1 to 2 point residual gaps found with confidential data (Bhutta, Hizmo and Ringo, 2025).",
   },
+
+  // Source: application dossier §3 P1. Working paper (public SSRN version).
   {
     slug: "cate-hmda",
-    order: 2,
+    order: 10,
     title:
       "Who Bears the Burden? Heterogeneous Racial Approval Differentials in U.S. Mortgage Lending: Causal Forest DML on 42 Million HMDA Applications",
-    shortTitle: "CATE — Mortgage Lending",
+    shortTitle: "Who Bears the Burden?",
     authors: "Rajveer Singh Pall",
-    status: "Under review — Journal of Financial Services Research",
-    statusKind: "review",
+    status: "Working paper · SSRN",
+    statusKind: "working",
     year: "2026",
-    themes: ["causal", "fairness", "trustworthy-ml"],
-    oneLiner:
-      "Not whether an average penalty exists, but who bears it — and through which underwriting channel.",
+    themes: ["causal", "fairness"],
+    oneLiner: "Not whether an average penalty exists, but who bears it, and through which underwriting channel.",
     plain:
-      "Knowing the average approval gap is not enough — averages hide who actually pays. Using methods from modern causal inference (the same family behind clinical-trial analysis), this paper estimates the approval penalty for each applicant profile across 42 million mortgage applications. The distribution is wide: nine in ten Black applicants face some estimated penalty, and the decisive factor is not the applicant but the process — applications handled by human underwriters carry more than double the penalty of those decided by automated systems. That points the fairness question at something a regulator can act on: how applications are routed.",
+      "Knowing the average approval gap is not enough, because averages hide who actually pays. Using methods from modern causal inference, the same family behind clinical-trial analysis, this paper estimates the approval penalty for each applicant profile across 42 million mortgage applications. The distribution is wide: nine in ten Black applicants face some estimated penalty, and the decisive factor is not the applicant but the process. Applications handled by human underwriters carry more than double the penalty of those decided by automated systems, which points the fairness question at something a regulator can act on.",
     flow: [
-      { label: "Engineer at scale", note: "42M HMDA applications → 2M/1.5M estimation samples" },
+      { label: "Engineer at scale", note: "42M HMDA applications → 2M / 1.5M estimation samples" },
       { label: "Isolate the differential", note: "double machine learning, LightGBM nuisances, 5-fold cross-fitting" },
       { label: "Map who bears it", note: "causal forest estimates the penalty per applicant profile" },
       { label: "Find the mechanism", note: "manual vs automated underwriting · same lender, same year" },
-      { label: "Attack the result", note: "placebo shuffles · Oster bounds · Cinelli–Hazlett sensitivity" },
+      { label: "Attack the result", note: "placebo shuffles · Oster bounds · Cinelli-Hazlett sensitivity" },
     ],
     figures: [
       {
         title: "Conditional approval penalty by underwriting channel",
         max: 15,
-        note: "Bar length = size of the estimated Black–White differential (all negative). The channel, not the applicant, is decisive.",
+        note: "Bar length = size of the estimated Black-White differential (all negative). The channel, not the applicant, is decisive.",
         bars: [
           { label: "Manual underwriting", value: 14.79, display: "−14.79 pp", accent: true },
           { label: "Pooled (all channels)", value: 9.39, display: "−9.39 pp" },
@@ -448,145 +646,54 @@ export const publications: Publication[] = [
     paperFigures: [
       {
         file: "fig2_dml_results.png",
-        caption:
-          "Double-machine-learning estimates of the conditional approval differential across specifications.",
+        caption: "Double-machine-learning estimates of the conditional approval differential across specifications.",
       },
       {
         file: "fig3_cate_distribution.png",
-        caption:
-          "The distribution of individual-level estimated effects: wide heterogeneity, overwhelmingly negative.",
-      },
-      {
-        file: "fig5_shap_attribution.png",
-        caption:
-          "SHAP attribution over the causal-forest estimates: what drives who bears the penalty.",
+        caption: "The distribution of individual-level estimated effects: wide heterogeneity, overwhelmingly negative.",
       },
     ],
     problem:
       "Average disparity estimates hide distribution: which applicant profiles carry the largest conditional racial approval penalty, and is the mechanism applicant- or lender-controlled?",
     approach:
-      "Partially linear Double Machine Learning with LightGBM nuisances and 5-fold cross-fitting; causal-forest CATE estimation with SHAP attribution; placebo, Oster, and Cinelli–Hazlett sensitivity analyses; within lender-year comparisons.",
+      "Partially linear double machine learning with LightGBM nuisances and 5-fold cross-fitting; causal-forest CATE estimation with SHAP attribution; placebo, Oster, and Cinelli-Hazlett sensitivity analyses; within lender-year comparisons.",
     findings:
-      "Pooled conditional differential −9.39 pp with wide heterogeneity (CATE SD 8.47 pp); 90.7% of Black applicants face a negative estimated effect. The channel is decisive: manual underwriting −14.79 pp vs automated −6.17 pp; −7.13 pp persists within the same lender and year.",
+      "Pooled conditional differential −9.39 pp with wide heterogeneity (CATE SD 8.47 pp); 90.7% of Black applicants face a negative estimated effect. The channel is decisive: manual underwriting −14.79 pp vs automated −6.17 pp, and 7.13 pp persists within the same lender and year.",
     matters:
-      "Points the fairness question at an actionable mechanism — lender-controlled routing and handling — rather than at applicant characteristics.",
+      "It points the fairness question at an actionable mechanism, lender-controlled routing and handling, rather than at applicant characteristics.",
     results: [
       { value: "−9.39 pp", label: "conditional differential (pooled DML)" },
       { value: "−14.79 vs −6.17", label: "manual vs automated underwriting (pp)" },
-      { value: "90.7%", label: "of Black applicants with negative effect" },
+      { value: "90.7%", label: "of Black applicants with a negative effect" },
     ],
     links: [
       { label: "SSRN preprint", href: "https://ssrn.com/abstract=6984959" },
-      {
-        label: "Code",
-        href: "https://github.com/Rajveer-code",
-      },
+      { label: "Code", href: "https://github.com/Rajveer-code/CATE-HMDA-Heterogeneous-Effects" },
     ],
     caveat:
-      "Level treated as an upper bound (no credit scores in HMDA); the channel contrast is the robust object.",
+      "The level is treated as an upper bound (no credit scores in HMDA); the channel contrast is the robust object.",
   },
-  {
-    slug: "indiafinbench",
-    order: 4,
-    title:
-      "IndiaFinBench: An Evaluation Benchmark for Large Language Model Performance on Indian Financial Regulatory Text",
-    shortTitle: "IndiaFinBench",
-    authors: "Rajveer Singh Pall",
-    status: "Under review (anonymous NLP venue)",
-    statusKind: "review",
-    year: "2026",
-    themes: ["nlp-llm", "trustworthy-ml", "finance"],
-    oneLiner:
-      "The first expert-annotated benchmark for LLM reasoning over Indian financial regulation — where numerical thresholds and amendment chains break strong models.",
-    plain:
-      "Large language models are increasingly asked legal and financial questions, but nearly all of their testing uses American and European text. This benchmark tests twelve leading models on India's actual financial rulebook — SEBI and RBI regulations spanning 1992 to 2026 — with 406 questions written and verified by hand. The questions require exactly what real compliance work requires: interpreting rules, calculating with legal thresholds, spotting contradictions, and tracking rules that changed over time. The clearest finding: numbers are the hardest. On numerical reasoning alone, model scores spread by 36 points.",
-    flow: [
-      { label: "Curate the corpus", note: "192 SEBI/RBI regulatory documents, 1992–2026" },
-      { label: "Write expert QA", note: "406 items: interpretation · numerical · contradiction · temporal" },
-      { label: "Validate annotations", note: "model-based and human cross-checks, agreement reported" },
-      { label: "Evaluate 12 LLMs", note: "strict scoring plus judge-corrected audit (format vs reasoning)" },
-      { label: "Ship it open", note: "public dataset, leaderboard, and live retrieval-augmented demo" },
-    ],
-    figures: [
-      {
-        title: "What the benchmark asks (items per task type)",
-        max: 174,
-        bars: [
-          { label: "Regulatory interpretation", value: 174, display: "174" },
-          { label: "Numerical reasoning", value: 92, display: "92", accent: true },
-          { label: "Temporal reasoning", value: 78, display: "78" },
-          { label: "Contradiction detection", value: 62, display: "62" },
-        ],
-      },
-      {
-        title: "Strict accuracy, selected models (%)",
-        max: 100,
-        note: "Numerical reasoning alone spreads models by 35.9 points.",
-        bars: [
-          { label: "Gemini 2.5 Flash", value: 89.7, display: "89.7", accent: true },
-          { label: "Qwen3-32B", value: 85.5, display: "85.5" },
-          { label: "LLaMA-3.3-70B", value: 83.7, display: "83.7" },
-          { label: "Llama 4 Scout 17B", value: 83.3, display: "83.3" },
-          { label: "Gemma 4 E4B", value: 70.4, display: "70.4" },
-        ],
-      },
-    ],
-    paperFigures: [
-      {
-        file: "difficulty_lineplot.png",
-        caption:
-          "Accuracy by item difficulty: where models separate as questions get harder.",
-      },
-      {
-        file: "heatmap.png",
-        caption:
-          "The model × task-type error landscape across regulatory interpretation, numerical, contradiction, and temporal reasoning.",
-      },
-      {
-        file: "inter_task_correlation.png",
-        caption:
-          "Inter-task correlations: strength on one regulatory skill does not guarantee another.",
-      },
-    ],
-    problem:
-      "Financial NLP benchmarks are Western-heavy. How do frontier LLMs handle SEBI/RBI regulatory text with dense amendment chains, jurisdiction-specific terminology, and numerical thresholds?",
-    approach:
-      "406 expert-annotated QA items over 192 SEBI/RBI documents (1992–2026) across regulatory interpretation, numerical reasoning, contradiction detection, and temporal reasoning; 12 contemporary LLMs; model-based and human annotation validation; a deployed hybrid-RAG open-book system with retrieval ablations.",
-    findings:
-      "Strict accuracy spans 70.4–89.7%. Numerical reasoning is the most discriminative axis (35.9 pp spread). Judge-corrected audits separate format non-compliance from true reasoning failure. Hybrid RRF retrieval lifts Recall@5 to 0.785 (+9.7 pp over dense-only).",
-    matters:
-      "Extends deployment-aware evaluation to LLMs and an underrepresented jurisdiction, with the dataset, leaderboard, and live demo all public.",
-    results: [
-      { value: "406", label: "expert QA items · 192 documents" },
-      { value: "35.9 pp", label: "numerical-reasoning spread across 12 LLMs" },
-      { value: "0.785", label: "Hybrid RRF Recall@5 (+9.7 pp)" },
-    ],
-    links: [
-      { label: "Dataset", href: "https://huggingface.co/datasets/Rajveer-code/IndiaFinBench" },
-      { label: "Live demo", href: "https://huggingface.co/spaces/Rajveer-code/IndiaFinBench" },
-      { label: "GitHub", href: "https://github.com/Rajveer-code" },
-    ],
-  },
+
+  // Source: application dossier §3 P3. Working paper (public SSRN version).
   {
     slug: "icgdf",
-    order: 8,
+    order: 11,
     title:
       "When the Gate Stays Closed: Empirical Evidence of Near-Zero Cross-Sectional Predictability in Large-Cap NASDAQ Equities Using an IC-Gated Machine Learning Framework",
     shortTitle: "The Gate Stays Closed",
     authors: "Rajveer Singh Pall",
-    status: "Under review — Computational Economics",
-    statusKind: "review",
+    status: "Working paper · SSRN",
+    statusKind: "working",
     year: "2026",
-    themes: ["finance", "deployment", "trustworthy-ml"],
-    oneLiner:
-      "A deployment gate for financial ML — and the discipline to report that it stayed closed.",
+    themes: ["finance", "deployment"],
+    oneLiner: "A deployment gate for financial ML, and the discipline to report that it stayed closed.",
     plain:
-      "Most trading-model papers report wins. This one builds the exam a model must pass before it is allowed to trade real money — and then reports that its own model failed that exam twelve times out of twelve. That is the contribution: a statistical gate that separates 'looks profitable in a backtest' from 'provable skill'. A naive statistical test would have green-lit a skill-less model 11.8% of the time; the full gate never did. One more twist: the model's probability estimates were nearly perfect even though it had zero predictive skill — proof that a well-calibrated model is not the same as a deployable one.",
+      "Most trading-model papers report wins. This one builds the exam a model must pass before it is allowed to trade real money, and then reports that its own model failed that exam twelve times out of twelve. That is the contribution: a statistical gate that separates “looks profitable in a backtest” from “provable skill”. A naive statistical test would have green-lit a skill-less model 11.8% of the time; the full gate never did. And the model’s probability estimates stayed well calibrated even though it had no predictive skill, which is the proof that a well-calibrated model is not the same as a deployable one.",
     flow: [
       { label: "Build honestly", note: "49 strictly causal features, 30 NASDAQ stocks, no lookahead" },
       { label: "Walk forward", note: "12 expanding-window folds, 1,512 out-of-sample days, 2-day embargo" },
-      { label: "Measure skill", note: "daily information coefficient → Newey–West HAC t-test" },
-      { label: "Confirm by permutation", note: "both stages must pass — either fails, no deployment" },
+      { label: "Measure skill", note: "daily information coefficient → Newey-West HAC t-test" },
+      { label: "Confirm by permutation", note: "both stages must pass: if either fails, no deployment" },
       { label: "Report the null", note: "gate closed 0/12; calibration excellent anyway (ECE < 0.025)" },
     ],
     figures: [
@@ -603,116 +710,163 @@ export const publications: Publication[] = [
     paperFigures: [
       {
         file: "fig03_fold_level_ic.png",
-        caption:
-          "Fold-level information coefficients across all 12 walk-forward folds: the gate never opens.",
+        caption: "Fold-level information coefficients across all 12 walk-forward folds: the gate never opens.",
       },
       {
         file: "fig06_permutation_ic.png",
-        caption:
-          "The permutation test: the observed IC sits squarely inside the no-skill distribution.",
+        caption: "The permutation test: the observed IC sits squarely inside the no-skill distribution.",
       },
       {
         file: "fig02_power_analysis.png",
         caption:
-          "Power analysis: the study could have detected a much smaller real signal than practitioners claim.",
+          "Power analysis over the full 1,512-day window: 80% power needs an information coefficient of 0.0138, and the observed value is 0.0005.",
       },
     ],
     problem:
-      "Can a financial ML model prove cross-sectional predictive skill before deployment — and what should happen when it cannot?",
+      "Can a financial ML model prove cross-sectional predictive skill before deployment, and what should happen when it cannot?",
     approach:
-      "IC-Gated Deployment Framework: a two-stage statistical gate (Newey–West HAC t-test on daily information coefficients plus permutation confirmation) over 12 expanding walk-forward folds, 1,512 out-of-sample days, with isotonic calibration and a momentum positive control.",
+      "IC-Gated Deployment Framework: a two-stage statistical gate (Newey-West HAC t-test on daily information coefficients plus permutation confirmation) over 12 expanding walk-forward folds and 1,512 out-of-sample days, with isotonic calibration, a momentum positive control and a Nifty 50 cross-market replication.",
     findings:
-      "Mean IC −0.0005; the gate opens in 0 of 12 folds. Calibration stays excellent (ECE < 0.025) despite zero discrimination — calibration quality is not deployment readiness. The naive t-test alternative false-positives 11.8% of the time; the full gate, 0.0%.",
+      "Mean IC −0.0005 (HAC t = −0.09, p = 0.536); the gate opens in 0 of 12 folds. Calibration stays excellent (ECE < 0.025) despite zero discrimination: calibration quality is not deployment readiness. The naive t-test alternative gives false positives 11.8% of the time, the full gate 0.0%. The Nifty 50 replication is also gate-closed.",
     matters:
       "An honest null result engineered as methodology: the same audit-first stance the program applies to healthcare and lending, applied to the temptation-rich domain of trading.",
     results: [
       { value: "0 / 12", label: "folds passing the deployment gate" },
-      { value: "< 0.025", label: "ECE while IC ≈ 0 — calibration ≠ readiness" },
+      { value: "< 0.025", label: "ECE while IC ≈ 0: calibration ≠ readiness" },
       { value: "11.8% → 0%", label: "false-positive rate, naive test → ICGDF" },
     ],
     links: [
       { label: "SSRN preprint", href: "https://ssrn.com/abstract=6742700" },
-      {
-        label: "Code",
-        href: "https://github.com/Rajveer-code",
-      },
+      { label: "Code", href: "https://github.com/Rajveer-code/when-the-gate-stays-closed" },
     ],
-  },];
+  },
 
-export const flagship = publications.find((p) => p.flagship)!;
+  // Source: mental-health-fairness-nlp/submission/jhir/main.tex title. Topic only, by the author’s decision.
+  {
+    slug: "cpfe",
+    order: 12,
+    title:
+      "Text Genre, Not Platform Identity, Predicts Transfer Failure in Mental Health Natural Language Processing: A Five-Axis Deployment Audit Across Five Corpora",
+    shortTitle: "Text Genre and Transfer Failure",
+    authors: "Rajveer Singh Pall, Sameer Yadav",
+    status: "Manuscript",
+    statusKind: "manuscript",
+    year: "2026",
+    themes: ["nlp-llm", "fairness", "healthcare", "deployment"],
+    oneLiner: "A five-axis pre-deployment audit of mental-health text classifiers moved across platforms and corpora.",
+    plain:
+      "Mental-health NLP models are almost always validated on the platform they were trained on. This work proposes a pre-deployment audit on five axes, discrimination, statistical significance, prediction equity, calibration and attribution stability, and asks what actually predicts transfer failure when those models meet new platforms and corpora.",
+    flow: [],
+    figures: [],
+    problem: "When a mental-health text classifier moves to new platforms and corpora, what predicts where it fails?",
+    approach: "",
+    findings: "",
+    matters: "",
+    results: [],
+    links: [],
+    absent: "Results and code are withheld while this manuscript is prepared for double-blind review.",
+  },
+];
 
 export const timeline = [
   {
-    period: "Early 2025",
+    period: "2025",
     question: "Does a model that passes internal validation survive a new population?",
     title: "Clinical ML meets external validation",
     theme: "Healthcare AI",
-    text: "Diabetes risk models built on NHANES are stress-tested on 1.28M BRFSS records. External AUC falls 9.7% — and the elderly lose the most. First evidence that the benchmark hides the failure.",
+    text: "Diabetes risk models built on NHANES are tested on 1.28M BRFSS records. External AUC falls 9.7%, and adults over 60 lose the most. First evidence that the benchmark hides the failure; published in IEEE Xplore in May 2026.",
     slug: "diabetes-external-validation",
   },
   {
     period: "2025",
-    question: "Can privacy-preserving training also be fair, calibrated, and generalisable?",
-    title: "Privacy joins the audit",
-    theme: "Federated Learning",
-    text: "The same clinical problem, restructured across heterogeneous hospital nodes. Federated training generalises better than centralized — but differential privacy collapses at realistic budgets. Four axes, audited together.",
-    slug: "federated-diabetes",
-  },
-  {
-    period: "2025",
-    question: "Does fairness itself survive when the deployment platform changes?",
-    title: "Fairness fails under platform shift",
+    question: "Does fairness survive when the deployment platform changes?",
+    title: "Reliability audited on five axes",
     theme: "NLP · Fairness",
-    text: "Mental-health classifiers at AUC 0.98 collapse on Reddit and Twitter — calibration, equity, and even the models' explanations degrade. The audit grows a fifth axis: attribution stability.",
+    text: "Mental-health text classifiers are followed across platforms and corpora and audited on five axes: discrimination, significance, equity, calibration and attribution.",
     slug: "cpfe",
   },
   {
-    period: "2025–2026",
-    question: "Who actually bears an average disparity — and through what mechanism?",
+    period: "2025-2026",
+    question: "Who actually bears an average disparity, and through what mechanism?",
     title: "Causal structure of a 42M-application gap",
     theme: "Causal Inference",
-    text: "Mortgage lending at national scale: the racial approval gap is quantified, bounded, and traced to a lender-controlled mechanism — manual underwriting more than doubles the penalty of automated systems.",
+    text: "Mortgage lending at national scale: the racial approval gap is quantified, bounded, and traced to a lender-controlled mechanism. Manual underwriting more than doubles the penalty of automated systems.",
     slug: "cate-hmda",
-  },
-  {
-    period: "2026",
-    question: "Can frontier LLMs reason over a non-Western regulatory rulebook?",
-    title: "LLMs meet an underrepresented jurisdiction",
-    theme: "LLM Evaluation",
-    text: "IndiaFinBench: 406 expert-annotated questions over SEBI/RBI regulation. Numerical reasoning splits frontier models by 36 points. Evaluation infrastructure becomes a public artifact.",
-    slug: "indiafinbench",
   },
   {
     period: "2026",
     question: "Should a model be deployed when it cannot prove predictive skill?",
     title: "The discipline to say no",
     theme: "Deployment Gates",
-    text: "A statistical deployment gate for financial ML stays closed across all 12 folds — published as a null result. The model stays near-perfectly calibrated with zero predictive skill — calibration is not deployment readiness.",
+    text: "A statistical deployment gate for financial ML stays closed across all 12 folds, reported as a null result. The model stays well calibrated with zero predictive skill: calibration is not deployment readiness.",
     slug: "icgdf",
   },
   {
     period: "Mid 2026",
-    question: "Is deployment failure predictable before it happens?",
-    title: "TrustShift — the program becomes a theory",
-    theme: "Capstone",
-    text: "One pre-registered protocol across clinical, NLP, lending, and security domains: shift type, not shift magnitude, determines which trustworthiness axis fails — and cheap label-free probes can diagnose it in advance.",
+    question: "Does the size of a distribution shift predict which axis fails?",
+    title: "TrustShift: four domains, one audit",
+    theme: "Deployment Shift",
+    text: "One protocol across clinical, text, lending and network-security deployments. Shift magnitude alone does not consistently explain what breaks, and the audit reports inconclusive when the evidence does not support a firm diagnosis.",
     slug: "trustshift",
   },
   {
+    period: "Aug 2026",
+    question: "When a detector fails on a new network, is the threshold or the ranking broken?",
+    title: "Confidently wrong detectors",
+    theme: "Network Security",
+    text: "108 of 240 cross-network evaluations score below chance. Eleven of twelve testbed pairs fail at the ranking, where recalibration cannot help.",
+    slug: "confidently-wrong",
+  },
+  {
+    period: "Sep 2026",
+    question: "Can a fairness metric improve while the decision it justifies gets worse?",
+    title: "Higher AUC, fewer cases flagged",
+    theme: "Fairness",
+    text: "Federated screening narrows the White-Black AUC gap from 0.0075 to 0.0005 while the sensitivity gap at fixed capacity widens from 0.009 to 0.034. An exact decomposition shows why the two readings disagree.",
+    slug: "subgroup-fairness-reversal",
+  },
+  {
+    period: "Sep 2026",
+    question: "Does a reported benchmark number mean what it claims?",
+    title: "Benchmark accuracy is not an identified quantity",
+    theme: "Benchmark Evaluation",
+    text: "On a 28-model MATH-Hard leaderboard, 357 of 378 orderings cannot be separated once unreadable responses and measured scorer error are counted. The same question runs through IndiaFinBench, where the scoring rule alone reorders twelve LLMs.",
+    slug: "benchmark-accuracy-not-identified",
+  },
+  {
     period: "Next",
-    question: "Can evaluation itself become deployment infrastructure?",
-    title: "Audit infrastructure as a field",
+    question: "Can evaluation report its own uncertainty by default?",
+    title: "Evaluation as infrastructure",
     theme: "Future",
-    text: "Shift-type diagnosis before deployment, runtime audit for generative systems, and evaluation that treats fairness, calibration, and validity as one object — not three papers.",
+    text: "Scorer Cards, audit budgets and threshold-aware fairness checks that ship with the number, so a reported result carries the range the evidence supports.",
     slug: null,
   },
 ];
 
-export const openScience = [
+export const openScience: {
+  name: string;
+  kind: string;
+  text: string;
+  identifier?: string;
+  wide?: boolean; // spans two columns on wide screens so every row stays full
+  links: { label: string; href: string }[];
+}[] = [
+  {
+    name: "flipbudget",
+    kind: "Library · Results · Leaderboard",
+    wide: true,
+    text: "Corrected intervals and flip budgets for benchmark comparisons under an audited scorer, with the results behind the leaderboard on this site.",
+    links: [
+      { label: "GitHub", href: "https://github.com/Rajveer-code/flipbudget" },
+      { label: "Results", href: "https://huggingface.co/datasets/Rajveer-code/flipbudget-results" },
+      { label: "Leaderboard", href: "https://huggingface.co/spaces/Rajveer-code/flipbudget-leaderboard" },
+    ],
+  },
   {
     name: "trustshift",
     kind: "Benchmark · Reproduction",
-    text: "Cross-domain deployment-shift audit: full pipeline, prediction parquets, result JSONs. Fresh-clone reproduction verified byte-identical.",
+    identifier: "doi:10.5281/zenodo.21739501",
+    text: "Four real deployment shifts with committed prediction files, so every reported number regenerates without the raw third-party data.",
     links: [
       { label: "GitHub", href: "https://github.com/Rajveer-code/trustshift" },
       { label: "Dataset", href: "https://huggingface.co/datasets/Rajveer-code/trustshift" },
@@ -721,54 +875,114 @@ export const openScience = [
   {
     name: "IndiaFinBench",
     kind: "Dataset · Live demo",
-    text: "406 expert-annotated regulatory QA items, leaderboard for 12 LLMs, and a deployed hybrid-RAG open-book system.",
+    identifier: "doi:10.5281/zenodo.21739533",
+    text: "406 expert-annotated regulatory questions, per-item judge verdicts, model predictions, and a deployed retrieval demo.",
     links: [
       { label: "Dataset", href: "https://huggingface.co/datasets/Rajveer-code/IndiaFinBench" },
       { label: "Demo", href: "https://huggingface.co/spaces/Rajveer-code/IndiaFinBench" },
+      { label: "GitHub", href: "https://github.com/Rajveer-code/IndiaFinBench" },
     ],
   },
   {
     name: "fairscope",
-    kind: "Python library",
-    text: "Subgroup-stratified, calibration-aware fairness auditing: DeLong CIs per subgroup, subgroup ECE/MCE, gap significance testing, recalibration — with healthcare, NLP, federated, and lending modules.",
-    links: [{ label: "GitHub", href: "https://github.com/Rajveer-code" }],
-  },
-  {
-    name: "aria-audit",
-    kind: "Runtime audit · Dataset",
-    text: "Five-axis runtime fairness audit for locally deployed LLMs — calibration, faithfulness, consistency, equity, attribution — wrapping any model on consumer hardware.",
+    kind: "Python library · PyPI",
+    identifier: "pip install fairscope",
+    text: "Subgroup-stratified, calibration-aware fairness auditing: DeLong CIs per subgroup, subgroup ECE/MCE, gap significance testing, recalibration, with healthcare, NLP, federated and lending modules.",
     links: [
-      { label: "GitHub", href: "https://github.com/Rajveer-code" },
-      { label: "Benchmark", href: "https://huggingface.co/datasets/rajveerpall/aria-audit-bench" },
+      { label: "PyPI", href: "https://pypi.org/project/fairscope/" },
+      { label: "GitHub", href: "https://github.com/Rajveer-code/fairscope" },
     ],
   },
   {
-    name: "Reproducibility repos",
-    kind: "Research code",
-    text: "Every manuscript ships a pipeline that regenerates its numbers from result files — federated diabetes, CATE-HMDA, ICGDF and more.",
-    links: [{ label: "All repositories", href: "https://github.com/Rajveer-code" }],
+    name: "Federated-Diabetes",
+    kind: "Code · Corrected results",
+    text: "Ten-seed federated screening pipeline, with the defects found in an earlier version documented alongside the fixes.",
+    links: [{ label: "GitHub", href: "https://github.com/Rajveer-code/Federated-Diabetes" }],
+  },
+  {
+    name: "aria-audit",
+    kind: "Runtime audit",
+    text: "Five-axis runtime audit for locally deployed LLMs: calibration, faithfulness, consistency, equity, attribution, wrapping any model on consumer hardware.",
+    links: [{ label: "GitHub", href: "https://github.com/Rajveer-code/aria-audit" }],
+  },
+  {
+    name: "Replication code",
+    kind: "Lending · Markets",
+    wide: true,
+    text: "Pipelines that regenerate the mortgage-disparity, causal-forest and deployment-gate results from their result files.",
+    links: [
+      { label: "Disparities", href: "https://github.com/Rajveer-code/hmda-racial-disparities" },
+      { label: "Causal forest", href: "https://github.com/Rajveer-code/CATE-HMDA-Heterogeneous-Effects" },
+      { label: "Deployment gate", href: "https://github.com/Rajveer-code/when-the-gate-stays-closed" },
+    ],
   },
 ];
 
 export const impact = [
-  { value: "8", label: "research manuscripts — 1 presented, 7 under review or working" },
-  { value: "4", label: "domains bound by one audit protocol" },
+  { value: "12", label: "papers and manuscripts: 1 published, 5 under review" },
+  { value: "378", label: "leaderboard orderings audited for identification" },
   { value: "42M", label: "mortgage applications analysed" },
   { value: "1.28M", label: "records in external clinical validation" },
-  { value: "406", label: "expert-annotated benchmark items" },
+  { value: "406", label: "expert-annotated benchmark questions" },
   { value: "3", label: "public datasets on Hugging Face" },
 ];
 
 export const identity = {
   name: "Rajveer Singh Pall",
-  role: "AI Researcher — Trustworthy Machine Learning",
-  affiliation: "B.Tech Computer Science & Business Systems, GGITS, expected 2027",
+  role: "AI Researcher · Trustworthy Machine Learning",
+  degree: "B.Tech, Computer Science and Business Systems",
+  institution: "Gyan Ganga Institute of Technology and Sciences, Jabalpur, India",
+  expected: "Expected 2027",
+  goal: "Applying to MS programs in Computer Science and Machine Learning for Fall 2027",
   email: "rajveerpall04@gmail.com",
   links: [
+    { label: "Google Scholar", href: "https://scholar.google.com/citations?hl=en&user=47CvVCcAAAAJ" },
     { label: "GitHub", href: "https://github.com/Rajveer-code" },
     { label: "Hugging Face", href: "https://huggingface.co/Rajveer-code" },
-    { label: "Google Scholar", href: "https://scholar.google.com/citations?hl=en&user=47CvVCcAAAAJ" },
     { label: "ORCID", href: "https://orcid.org/0009-0001-6762-6134" },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/rajveer-singh-pall/" },
   ],
 };
+
+export const service = [{ role: "Reviewer", venue: "W-NUT 2026, the EMNLP 2026 workshop on noisy user-generated text" }];
+
+// Dated, verifiable events only. Month precision where the exact day is not on record.
+export const news: { date: string; text: string; href?: string }[] = [
+  {
+    date: "Sep 2026",
+    text: "Three papers entered review: benchmark identification, scoring-rule sensitivity on IndiaFinBench, and subgroup fairness reversal in federated screening.",
+  },
+  {
+    date: "Sep 2026",
+    text: "Released the flipbudget results dataset and leaderboard on Hugging Face.",
+    href: "https://huggingface.co/spaces/Rajveer-code/flipbudget-leaderboard",
+  },
+  { date: "Aug 2026", text: "Reviewed for W-NUT 2026, the EMNLP 2026 workshop on noisy user-generated text." },
+  { date: "Aug 2026", text: "Submitted the extraction-failure audit of evaluation harnesses for peer review." },
+  {
+    date: "Jul 2026",
+    text: "Released the TrustShift benchmark and code on GitHub and Hugging Face.",
+    href: "https://github.com/Rajveer-code/trustshift",
+  },
+  { date: "Jun 2026", text: "Released fairscope 0.3.0 on PyPI.", href: "https://pypi.org/project/fairscope/" },
+  {
+    date: "May 2026",
+    text: "Diabetes external-validation paper published in IEEE Xplore.",
+    href: "https://doi.org/10.1109/CIPHER70417.2026.11523789",
+  },
+  {
+    date: "Apr 2026",
+    text: "Posted IndiaFinBench on arXiv and released the dataset.",
+    href: "https://arxiv.org/abs/2604.19298",
+  },
+  { date: "Feb 2026", text: "Presented the diabetes external-validation paper at CIPHER-2026, NIT Jalandhar." },
+];
+
+export const flagship = publications.find((p) => p.slug === "benchmark-accuracy-not-identified")!;
+
+/** Papers that share the flagship's measurement question, in reading order. */
+export const flagshipStrand = [
+  "could-it-read-the-answer",
+  "scorer-partial-identification",
+  "indiafinbench",
+].map((slug) => publications.find((p) => p.slug === slug)!);

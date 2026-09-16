@@ -5,28 +5,59 @@ import MethodFlow from "../../components/MethodFlow.astro";
 import FigureBars from "../../components/FigureBars.astro";
 import PaperFigures from "../../components/PaperFigures.astro";
 import HeroFigure from "../../components/HeroFigure.astro";
-import { publications, THEME_LABELS } from "../../data/research";
+import {
+  publications,
+  THEME_LABELS,
+  STATUS_CITATION_NOTE,
+  DISCOVERY,
+  type Publication,
+} from "../../data/research";
 
 export function getStaticPaths() {
-  // trustshift has a dedicated extended page (trustshift.astro)
-  return publications
-    .filter((p) => p.slug !== "trustshift")
-    .map((p) => ({ params: { slug: p.slug }, props: { pub: p } }));
+  return publications.map((p) => ({ params: { slug: p.slug }, props: { pub: p } }));
+}
+
+interface Props {
+  pub: Publication;
 }
 
 const { pub } = Astro.props;
 
+const discovery = DISCOVERY[pub.slug];
+const hasMethod = Boolean(pub.approach) || pub.flow.length > 0;
+const hasResults = Boolean(pub.findings) || pub.figures.length > 0 || pub.results.length > 0;
+const hasFigures = (pub.paperFigures?.length ?? 0) > 0;
+
+const jump = [
+  discovery && { href: "#figure", label: "Discovery" },
+  { href: "#summary", label: "5 minutes" },
+  { href: "#question", label: "Question" },
+  hasMethod && { href: "#method", label: "Method" },
+  hasResults && { href: "#results", label: "Results" },
+  pub.matters && { href: "#takeaways", label: "Takeaways" },
+  { href: "#resources", label: "Resources" },
+].filter(Boolean) as { href: string; label: string }[];
+
+// Related work: most shared themes first, then reading order.
+const shared = (p: Publication) => p.themes.filter((t) => pub.themes.includes(t)).length;
 const related = publications
-  .filter((p) => p.slug !== pub.slug && p.themes.some((t) => pub.themes.includes(t)))
-  .sort((a, b) => a.order - b.order)
+  .filter((p) => p.slug !== pub.slug && shared(p) > 0)
+  .sort((a, b) => shared(b) - shared(a) || a.order - b.order)
   .slice(0, 3);
 
-const citationAuthors = pub.authors.split(", ");
+// Scholar-style citation tags only for work that is public in its final or working form.
+const citable = pub.statusKind === "published" || pub.statusKind === "working";
 ---
 
-<Base title={`${pub.shortTitle} — Rajveer Singh Pall`} description={pub.oneLiner} citationTitle={pub.title} citationAuthors={citationAuthors} citationDate={pub.year}>
+<Base
+  title={`${pub.shortTitle} · Rajveer Singh Pall`}
+  description={pub.oneLiner}
+  citationTitle={citable ? pub.title : undefined}
+  citationAuthors={citable ? pub.authors.split(", ") : undefined}
+  citationDate={citable ? pub.year : undefined}
+>
   <Nav />
-  <main>
+  <main id="main" tabindex="-1">
     <article>
       <header class="paper-head container">
         <p class="label-mono breadcrumb">
@@ -54,22 +85,21 @@ const citationAuthors = pub.authors.split(", ");
 
       <nav class="paper-jump" aria-label="On this page" data-paper-jump>
         <div class="container paper-jump-inner ui-sans">
-          <a href="#figure">Discovery</a>
-          <a href="#summary">5 minutes</a>
-          <a href="#question">Question</a>
-          <a href="#method">Method</a>
-          <a href="#results">Results</a>
-          <a href="#takeaways">Takeaways</a>
+          {jump.map((j) => <a href={j.href}>{j.label}</a>)}
         </div>
       </nav>
 
       {/* 2 · Discovery in one image */}
-      <section class="onefig container" id="figure" aria-label="The discovery in one figure">
-        <p class="label-mono section-eyebrow" data-reveal>The discovery in one figure</p>
-        <div data-reveal>
-          <HeroFigure slug={pub.slug} />
-        </div>
-      </section>
+      {
+        discovery && (
+          <section class="onefig container" id="figure" aria-label="The discovery in one figure">
+            <p class="label-mono section-eyebrow" data-reveal>The discovery in one figure</p>
+            <div data-reveal>
+              <HeroFigure slug={pub.slug} caption={discovery} />
+            </div>
+          </section>
+        )
+      }
 
       {/* 3 · Read in five minutes */}
       <section class="fivemin container" id="summary" aria-label="The paper in five minutes">
@@ -84,88 +114,105 @@ const citationAuthors = pub.authors.split(", ");
       </section>
 
       {/* 5 · Methodology */}
-      <section class="method container" id="method" aria-label="How it works">
-        <p class="label-mono section-eyebrow" data-reveal>How it works</p>
-        <div class="method-grid" data-reveal>
-          <p class="body-text method-lead">{pub.approach}</p>
-          <MethodFlow steps={pub.flow} />
-        </div>
-      </section>
-
-      {/* 6 · Experimental results (evidence: data + real figures + metrics) */}
-      <section class="results container" id="results" aria-label="Experimental results">
-        <p class="label-mono section-eyebrow" data-reveal>Experimental results</p>
-        <p class="body-text" data-reveal>{pub.findings}</p>
-        {
-          pub.figures.length > 0 && (
-            <div class="result-figs" data-reveal>
-              {pub.figures.map((f) => (
-                <FigureBars figure={f} />
-              ))}
-            </div>
-          )
-        }
-        <ul class="results-grid" data-reveal>
-          {
-            pub.results.map((r) => (
-              <li>
-                <span class="result-value">{r.value}</span>
-                <span class="result-label">{r.label}</span>
-              </li>
-            ))
-          }
-        </ul>
-        {pub.caveat && (
-          <p class="caveat" data-reveal>
-            <span class="label-mono caveat-tag">Stated honestly</span>
-            {pub.caveat}
-          </p>
-        )}
-      </section>
-
       {
-        pub.paperFigures && pub.paperFigures.length > 0 && (
-          <PaperFigures slug={pub.slug} figures={pub.paperFigures} />
+        hasMethod && (
+          <section class="method container" id="method" aria-label="How it works">
+            <p class="label-mono section-eyebrow" data-reveal>How it works</p>
+            <div class="method-grid" data-reveal>
+              {pub.approach && <p class="body-text method-lead">{pub.approach}</p>}
+              {pub.flow.length > 0 && <MethodFlow steps={pub.flow} />}
+            </div>
+          </section>
         )
       }
 
+      {/* 6 · Experimental results (evidence: data + metrics) */}
+      {
+        hasResults && (
+          <section class="results container" id="results" aria-label="Experimental results">
+            <p class="label-mono section-eyebrow" data-reveal>Experimental results</p>
+            {pub.findings && <p class="body-text" data-reveal>{pub.findings}</p>}
+            {pub.figures.length > 0 && (
+              <div class="result-figs" data-reveal>
+                {pub.figures.map((f) => (
+                  <FigureBars figure={f} />
+                ))}
+              </div>
+            )}
+            {pub.results.length > 0 && (
+              <ul class="results-grid" data-reveal>
+                {pub.results.map((r) => (
+                  <li>
+                    <span class="result-value">{r.value}</span>
+                    <span class="result-label">{r.label}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {pub.caveat && (
+              <p class="caveat" data-reveal>
+                <span class="label-mono caveat-tag">Stated honestly</span>
+                {pub.caveat}
+              </p>
+            )}
+          </section>
+        )
+      }
+
+      {hasFigures && <PaperFigures slug={pub.slug} figures={pub.paperFigures!} />}
+
       {/* 7 · What this changes */}
-      <section class="takeaways container" id="takeaways" aria-label="What this changes">
-        <p class="label-mono section-eyebrow" data-reveal>What this changes</p>
-        <p class="lead-text" data-reveal>{pub.matters}</p>
-      </section>
+      {
+        pub.matters && (
+          <section class="takeaways container" id="takeaways" aria-label="What this changes">
+            <p class="label-mono section-eyebrow" data-reveal>What this changes</p>
+            <p class="lead-text" data-reveal>{pub.matters}</p>
+          </section>
+        )
+      }
 
       {/* 8 · Resources & citation */}
-      <section class="resources container" data-reveal aria-label="Resources and citation">
+      <section class="resources container" id="resources" data-reveal aria-label="Resources and citation">
         <div class="cite-grid">
           <div>
             <p class="label-mono section-eyebrow">Resources</p>
             {
-              pub.links.length > 0 ? (
+              pub.links.length > 0 && (
                 <div class="resource-links ui-sans">
                   {pub.links.map((l) => (
                     <a class="btn" href={l.href}>{l.label} ↗</a>
                   ))}
                 </div>
-              ) : (
-                <p class="cite-note">Code and data available on request.</p>
               )
             }
-            <ul class="theme-list">
+            {
+              pub.absent && (
+                <p class="absent">
+                  <span class="label-mono absent-tag">Not public yet</span>
+                  {pub.absent}
+                </p>
+              )
+            }
+            <ul class="theme-list" aria-label="Themes">
               {pub.themes.map((t) => <li class="label-mono">{THEME_LABELS[t]}</li>)}
             </ul>
           </div>
           <div>
             <p class="label-mono section-eyebrow">Citation</p>
+            {
+              pub.citation && (
+                <div class="cite-block" data-cite>
+                  <p class="cite-text" data-cite-text>{pub.citation}</p>
+                  <button type="button" class="cite-copy ui-sans" data-cite-copy>
+                    Copy citation
+                  </button>
+                  <span class="label-mono cite-status" aria-live="polite" data-cite-status></span>
+                </div>
+              )
+            }
             <p class="cite-note">
-              {
-                pub.statusKind === "presented"
-                  ? "Presented work — formal citation available on request. "
-                  : pub.statusKind === "working"
-                    ? "Working paper — draft and citation available on request. "
-                    : "Manuscript under review — citation will be posted on acceptance. "
-              }
-              Reach me at <a href="mailto:rajveerpall04@gmail.com">rajveerpall04@gmail.com</a>.
+              {STATUS_CITATION_NOTE[pub.statusKind]} Reach me at{" "}
+              <a href="mailto:rajveerpall04@gmail.com" translate="no">rajveerpall04@gmail.com</a>.
             </p>
           </div>
         </div>
@@ -181,7 +228,7 @@ const citationAuthors = pub.authors.split(", ");
                 <li>
                   <a href={`/research/${r.slug}/`} class="related-link">
                     <span class="related-title">{r.shortTitle}</span>
-                    <span class="ui-sans related-status">{r.status}</span>
+                    <span class={`status status--${r.statusKind}`}>{r.status}</span>
                   </a>
                 </li>
               ))}
@@ -225,11 +272,37 @@ const citationAuthors = pub.authors.split(", ");
     );
     sections.forEach((s) => io.observe(s));
   }
-  document.addEventListener("astro:page-load", initPaperJump);
+
+  function initCiteCopy() {
+    document.querySelectorAll<HTMLElement>("[data-cite]").forEach((block) => {
+      if (block.dataset.wired) return;
+      block.dataset.wired = "1";
+      const button = block.querySelector<HTMLButtonElement>("[data-cite-copy]")!;
+      const status = block.querySelector<HTMLElement>("[data-cite-status]")!;
+      const text = block.querySelector<HTMLElement>("[data-cite-text]")!.textContent ?? "";
+      if (!navigator.clipboard) {
+        button.hidden = true; // text stays selectable
+        return;
+      }
+      button.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(text.trim());
+          status.textContent = "Copied";
+        } catch {
+          status.textContent = "Select the text to copy it";
+        }
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", () => {
+    initPaperJump();
+    initCiteCopy();
+  });
 </script>
 
 <style>
-  /* sticky in-page jump nav — helps professors skim */
+  /* sticky in-page jump nav: helps professors skim */
   .paper-jump {
     position: sticky;
     top: 0;
@@ -244,6 +317,7 @@ const citationAuthors = pub.authors.split(", ");
     padding-block: var(--space-3);
     overflow-x: auto;
     scrollbar-width: none;
+    overscroll-behavior-x: contain;
   }
   .paper-jump-inner::-webkit-scrollbar { display: none; }
   .paper-jump a {
@@ -257,7 +331,7 @@ const citationAuthors = pub.authors.split(", ");
   .paper-jump a.is-active { color: var(--signal); font-weight: 600; }
 
   /* anchor targets clear both sticky bars */
-  #figure, #summary, #question, #method, #results, #takeaways { scroll-margin-top: 6rem; }
+  #figure, #summary, #question, #method, #results, #takeaways, #resources { scroll-margin-top: 6rem; }
 
   .paper-head {
     padding-block: var(--space-24) var(--space-16);
@@ -270,23 +344,11 @@ const citationAuthors = pub.authors.split(", ");
 
   .paper-meta {
     display: flex;
+    flex-wrap: wrap;
     gap: var(--space-4);
     align-items: baseline;
     margin-bottom: var(--space-6);
   }
-
-  .status {
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    letter-spacing: var(--tracking-label);
-    text-transform: uppercase;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-1);
-  }
-
-  .status--presented { background: var(--verified-wash); color: var(--verified); }
-  .status--review { background: var(--signal-wash); color: var(--signal-deep); }
-  .status--working { background: var(--paper-recessed); color: var(--ink-2); }
 
   .paper-title {
     font-size: var(--text-xl);
@@ -312,12 +374,15 @@ const citationAuthors = pub.authors.split(", ");
   }
 
   .btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
     padding: var(--space-3) var(--space-6);
     border: 1px solid var(--hairline-strong);
     border-radius: var(--radius-2);
     color: var(--ink);
     text-decoration: none;
+    touch-action: manipulation;
     transition:
       color var(--dur-fast) var(--ease-out),
       border-color var(--dur-fast) var(--ease-out);
@@ -331,7 +396,7 @@ const citationAuthors = pub.authors.split(", ");
     margin-bottom: var(--space-8);
   }
 
-  /* shared reading text — sized for a 13–15" laptop at ~1m */
+  /* shared reading text, sized for a 13 to 15 inch laptop at about 1 m */
   .lead-text {
     font-size: var(--text-md);
     line-height: 1.5;
@@ -353,7 +418,7 @@ const citationAuthors = pub.authors.split(", ");
 
   .onefig > div { max-width: 62rem; }
 
-  /* 3 · five minutes — highlighted panel */
+  /* 3 · five minutes: highlighted panel */
   .fivemin { padding-block: var(--space-24); border-bottom: var(--rule); }
 
   .fivemin .lead-text {
@@ -396,6 +461,17 @@ const citationAuthors = pub.authors.split(", ");
     margin-bottom: var(--space-8);
   }
 
+  .absent {
+    margin-bottom: var(--space-8);
+    padding: var(--space-4) var(--space-6);
+    background: var(--paper-recessed);
+    border-left: 2px solid var(--hairline-strong);
+    color: var(--ink-2);
+    max-width: 52ch;
+  }
+
+  .absent-tag { display: block; margin-bottom: var(--space-2); }
+
   .results { padding-block: var(--space-24); border-bottom: var(--rule); }
 
   .results .body-text { margin-bottom: var(--space-12); }
@@ -417,6 +493,7 @@ const citationAuthors = pub.authors.split(", ");
 
   .results-grid li {
     display: grid;
+    align-content: start;
     gap: var(--space-2);
     padding: var(--space-6);
     border: var(--rule-strong);
@@ -448,8 +525,6 @@ const citationAuthors = pub.authors.split(", ");
 
   .caveat-tag { display: block; margin-bottom: var(--space-2); }
 
-  .cite { padding-block: var(--space-24); border-bottom: var(--rule); }
-
   .cite-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -462,8 +537,44 @@ const citationAuthors = pub.authors.split(", ");
     margin: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-4);
+    gap: var(--space-2) var(--space-4);
   }
+
+  .cite-block {
+    display: grid;
+    justify-items: start;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
+    padding: var(--space-6);
+    background: var(--paper-raised);
+    border: var(--rule-strong);
+    border-radius: var(--radius-2);
+  }
+
+  .cite-text {
+    font-size: var(--text-sm);
+    line-height: 1.55;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+
+  .cite-copy {
+    min-height: 2.5rem;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--hairline-strong);
+    border-radius: var(--radius-2);
+    background: transparent;
+    color: var(--ink);
+    touch-action: manipulation;
+    transition:
+      color var(--dur-fast) var(--ease-out),
+      border-color var(--dur-fast) var(--ease-out);
+  }
+
+  .cite-copy:hover { border-color: var(--signal); color: var(--signal); }
+
+  .cite-status { color: var(--verified); min-height: 1.4em; }
 
   .cite-note { color: var(--ink-2); }
 
@@ -494,9 +605,13 @@ const citationAuthors = pub.authors.split(", ");
     transition: color var(--dur-fast) var(--ease-out);
   }
 
-  .related-status { color: var(--ink-3); }
+  .related-link .status { flex-shrink: 0; }
 
-  .footer { border-top: var(--rule); background: var(--paper-recessed); }
+  .footer {
+    border-top: var(--rule);
+    background: var(--paper-recessed);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
 
   .footer-inner {
     display: flex;
@@ -508,7 +623,7 @@ const citationAuthors = pub.authors.split(", ");
   .back { color: var(--signal); text-decoration: none; }
 
   @media (max-width: 720px) {
-    .five-list { grid-template-columns: 1fr; }
     .cite-grid { grid-template-columns: 1fr; gap: var(--space-12); }
+    .related-link { flex-direction: column; gap: var(--space-2); }
   }
 </style>

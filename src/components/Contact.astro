@@ -1,5 +1,7 @@
 ---
-import { identity } from "../data/research";
+import { identity, publications, service } from "../data/research";
+
+const count = (kind: string) => publications.filter((p) => p.statusKind === kind).length;
 ---
 
 <section class="contact container" id="contact">
@@ -7,12 +9,30 @@ import { identity } from "../data/research";
     <div data-reveal>
       <p class="label-mono section-eyebrow">About</p>
       <p class="about-text">
-        I am <strong>{identity.name}</strong>, an AI researcher studying
-        trustworthy machine learning under real-world deployment.
-        {` ${identity.affiliation}. `} Current work: cross-domain deployment-shift
-        auditing (TrustShift) and runtime audit infrastructure for locally
-        deployed LLMs. I am applying to graduate research programs for Fall 2027.
+        I am <strong>{identity.name}</strong>, an AI researcher studying whether
+        machine learning results mean what they claim, from scoring rules in LLM
+        benchmarks to fairness at the decision threshold and clinical external
+        validation.{` ${publications.length} papers and manuscripts so far: ${count("published")} published, ${count("review")} under review. `}I
+        am applying to MS programs in Computer Science and Machine Learning for
+        Fall 2027.
       </p>
+      <dl class="about-facts ui-sans">
+        <div>
+          <dt class="label-mono">Education</dt>
+          <dd>
+            {identity.degree}<br />
+            {identity.institution} · {identity.expected}
+          </dd>
+        </div>
+        <div>
+          <dt class="label-mono">Service</dt>
+          <dd>
+            {service.map((s) => (
+              <span class="fact-line">{s.role}, {s.venue}</span>
+            ))}
+          </dd>
+        </div>
+      </dl>
     </div>
     <div data-reveal>
       <p class="label-mono section-eyebrow">Contact</p>
@@ -20,7 +40,7 @@ import { identity } from "../data/research";
         <li>
           <a href={`mailto:${identity.email}`} class="contact-link">
             <span class="label-mono">Email</span>
-            <span class="ui-sans">{identity.email}</span>
+            <span class="ui-sans contact-email" translate="no">{identity.email}</span>
           </a>
         </li>
         {
@@ -28,13 +48,13 @@ import { identity } from "../data/research";
             <li>
               <a href={l.href} class="contact-link">
                 <span class="label-mono">{l.label}</span>
-                <span class="ui-sans contact-arrow">↗</span>
+                <span class="ui-sans contact-arrow" aria-hidden="true">↗</span>
               </a>
             </li>
           ))
         }
       </ul>
-        <a class="portfolio-btn ui-sans" href="https://rajveer-code.github.io/">
+      <a class="portfolio-btn ui-sans" href="https://rajveer-code.github.io/">
         Engineering portfolio ↗
       </a>
     </div>
@@ -82,6 +102,30 @@ import { identity } from "../data/research";
     font-weight: 500;
   }
 
+  .about-facts {
+    display: grid;
+    gap: var(--space-6);
+    margin: var(--space-12) 0 0;
+    padding-top: var(--space-6);
+    border-top: var(--rule);
+    max-width: 46ch;
+  }
+
+  .about-facts div {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .about-facts dt { color: var(--signal); }
+
+  .about-facts dd {
+    margin: 0;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  .fact-line { display: block; }
+
   .contact-links {
     list-style: none;
     padding: 0;
@@ -94,6 +138,7 @@ import { identity } from "../data/research";
     justify-content: space-between;
     align-items: baseline;
     gap: var(--space-4);
+    min-height: 2.75rem;
     padding-block: var(--space-4);
     border-bottom: var(--rule);
     text-decoration: none;
@@ -103,6 +148,8 @@ import { identity } from "../data/research";
 
   .contact-link:hover { color: var(--signal); }
   .contact-link:hover .label-mono { color: var(--signal); }
+
+  .contact-email { overflow-wrap: anywhere; text-align: right; }
 
   .contact-arrow { color: var(--ink-3); }
 
@@ -129,6 +176,7 @@ import { identity } from "../data/research";
     border-top: var(--rule);
     background: var(--paper-recessed);
     overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .footer-wordmark-wrap {

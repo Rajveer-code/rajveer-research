@@ -1,11 +1,13 @@
 ---
-import { flagship } from "../data/research";
+import Board from "./Board.astro";
+import data from "../data/leaderboard.json";
+import { flagship, flagshipStrand } from "../data/research";
 
 const stages = [
-  { id: "deploy", label: "Deployment", note: "model meets a shifted world" },
-  { id: "probe", label: "Diagnosis", note: "3 label-free shift probes" },
-  { id: "taxonomy", label: "Failure taxonomy", note: "which axis breaks, and why" },
-  { id: "audit", label: "Audit → remediation", note: "recalibrate · reweight · retrain" },
+  { label: "Published score", note: "the number a leaderboard reports" },
+  { label: "Unreadable responses", note: "counted by the scorer, then discarded" },
+  { label: "Measured margins", note: "a 400-item human audit, frozen before labelling" },
+  { label: "Identified range", note: "the orderings that survive it" },
 ];
 ---
 
@@ -15,13 +17,17 @@ const stages = [
       Flagship research · {flagship.status}
     </p>
     <h2 class="flagship-title" data-reveal>
-      Trust<em>Shift</em>
+      Benchmark accuracy is not <em>identified</em>
     </h2>
     <p class="flagship-thesis" data-reveal>
       {flagship.oneLiner}
     </p>
 
-    <figure class="pipeline" data-reveal aria-label="TrustShift audit pipeline">
+    <div class="flagship-board" data-reveal>
+      <Board />
+    </div>
+
+    <figure class="pipeline" data-reveal aria-label="How the identified range is built">
       <ol class="pipeline-track">
         {
           stages.map((s, i) => (
@@ -40,8 +46,8 @@ const stages = [
         }
       </ol>
       <figcaption class="label-mono pipeline-caption">
-        Four domains — clinical · mental-health NLP · lending · network security —
-        one pre-registered protocol
+        {data.models.length} published models · {data.counts.pairs} pairwise orderings ·
+        two error margins measured by a human audit
       </figcaption>
     </figure>
 
@@ -74,6 +80,23 @@ const stages = [
         ))
       }
     </div>
+
+    <div class="strand" data-reveal>
+      <p class="label-mono strand-eyebrow">The same question, three more ways</p>
+      <ul class="strand-list">
+        {
+          flagshipStrand.map((p) => (
+            <li>
+              <a class="strand-link" href={`/research/${p.slug}/`}>
+                <span class={`status status--${p.statusKind}`}>{p.status}</span>
+                <span class="strand-title">{p.shortTitle}</span>
+                <span class="strand-line">{p.oneLiner}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </div>
 </section>
 
@@ -97,6 +120,7 @@ const stages = [
     line-height: var(--leading-display);
     letter-spacing: var(--tracking-display);
     font-weight: 460;
+    max-width: 14ch;
   }
 
   .flagship-title em {
@@ -112,9 +136,13 @@ const stages = [
     margin-top: var(--space-6);
   }
 
+  .flagship-board {
+    margin-top: var(--space-16);
+  }
+
   /* ---- pipeline ---- */
   .pipeline {
-    margin: var(--space-16) 0;
+    margin: var(--space-12) 0 var(--space-16);
     padding: var(--space-8);
     background: var(--paper-raised);
     border: var(--rule-strong);
@@ -196,14 +224,15 @@ const stages = [
     padding: 0;
     margin: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-6);
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    align-content: start;
   }
 
   .flagship-results li {
     display: grid;
     gap: var(--space-1);
-    padding: var(--space-4);
+    padding: var(--space-4) var(--space-6);
     background: var(--paper-raised);
     border: var(--rule);
     border-radius: var(--radius-2);
@@ -229,13 +258,16 @@ const stages = [
   }
 
   .btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
     padding: var(--space-3) var(--space-6);
     border: 1px solid var(--hairline-strong);
     border-radius: var(--radius-2);
     color: var(--ink);
     background: var(--paper-raised);
     text-decoration: none;
+    touch-action: manipulation;
     transition:
       background var(--dur-fast) var(--ease-out),
       color var(--dur-fast) var(--ease-out),
@@ -259,14 +291,70 @@ const stages = [
     color: var(--paper);
   }
 
+  /* ---- the strand: sibling papers on the same question ---- */
+  .strand {
+    margin-top: var(--space-16);
+    padding-top: var(--space-8);
+    border-top: 2px solid var(--ink);
+  }
+
+  .strand-eyebrow {
+    display: block;
+    margin-bottom: var(--space-6);
+    color: var(--signal);
+  }
+
+  .strand-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  .strand-link {
+    display: grid;
+    justify-items: start;
+    align-content: start;
+    gap: var(--space-3);
+    height: 100%;
+    padding: var(--space-6);
+    background: var(--paper-raised);
+    border: var(--rule);
+    border-radius: var(--radius-2);
+    color: var(--ink);
+    text-decoration: none;
+    transition:
+      border-color var(--dur-med) var(--ease-out),
+      box-shadow var(--dur-med) var(--ease-out);
+  }
+
+  .strand-link:hover {
+    border-color: var(--signal);
+    box-shadow: var(--shadow-1);
+  }
+
+  .strand-title {
+    font-size: var(--text-md);
+    line-height: var(--leading-tight);
+    font-weight: 500;
+    transition: color var(--dur-fast) var(--ease-out);
+  }
+
+  .strand-link:hover .strand-title { color: var(--signal); }
+
+  .strand-line {
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
   @media (max-width: 900px) {
     .pipeline-track { flex-direction: column; gap: var(--space-6); }
     .stage { grid-template-areas: "index" "label" "note"; grid-template-columns: 1fr; }
     .stage-arrow { display: none; }
     .flagship-grid { grid-template-columns: 1fr; gap: var(--space-8); }
-  }
-
-  @media (max-width: 520px) {
-    .flagship-results { grid-template-columns: 1fr; }
+    .strand-list { grid-template-columns: 1fr; }
   }
 </style>

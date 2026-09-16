@@ -1,0 +1,94 @@
+---
+import { news } from "../data/research";
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+// "Sep 2026" -> "2026-09", a valid month string for <time datetime>
+const machineDate = (d: string) => {
+  const [mon, year] = d.split(" ");
+  return `${year}-${String(MONTHS.indexOf(mon) + 1).padStart(2, "0")}`;
+};
+---
+
+<section class="news container" id="news" aria-labelledby="news-title">
+  <p class="label-mono section-eyebrow" data-reveal>News</p>
+  <h2 class="section-title" id="news-title" data-reveal>
+    Where the work <em>stands</em>
+  </h2>
+
+  <ol class="news-list">
+    {
+      news.map((n) => (
+        <li class="news-item" data-reveal>
+          <time class="label-mono news-date" datetime={machineDate(n.date)}>{n.date}</time>
+          <p class="news-text">
+            {n.href ? <a href={n.href}>{n.text}</a> : n.text}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .news {
+    padding-block: var(--space-section);
+    border-bottom: var(--rule);
+  }
+
+  .section-eyebrow {
+    color: var(--signal);
+    display: block;
+    margin-bottom: var(--space-8);
+  }
+
+  .section-title {
+    font-weight: 460;
+    margin-bottom: var(--space-16);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--signal);
+  }
+
+  .news-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 52rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .news-item {
+    display: grid;
+    grid-template-columns: 7rem minmax(0, 1fr);
+    gap: var(--space-6);
+    align-items: baseline;
+    padding-block: var(--space-4);
+    border-bottom: var(--rule);
+  }
+
+  .news-date {
+    color: var(--signal);
+    white-space: nowrap;
+  }
+
+  .news-text {
+    color: var(--ink-2);
+    max-width: 62ch;
+  }
+
+  .news-text a {
+    color: var(--ink);
+    text-decoration-color: var(--hairline-strong);
+  }
+
+  .news-text a:hover {
+    color: var(--signal);
+    text-decoration-color: currentColor;
+  }
+
+  @media (max-width: 560px) {
+    .news-item { grid-template-columns: 1fr; gap: var(--space-1); }
+  }
+</style>

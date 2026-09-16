@@ -10,6 +10,7 @@ import "../styles/base.css";
 interface Props {
   title: string;
   description?: string;
+  noindex?: boolean;
   citationTitle?: string;
   citationAuthors?: string[];
   citationDate?: string;
@@ -17,10 +18,11 @@ interface Props {
 
 const {
   title,
+  noindex = false,
   citationTitle,
   citationAuthors,
   citationDate,
-  description = "Rajveer Singh Pall — AI researcher studying trustworthy machine learning under real-world deployment: fairness, calibration, external validation, and deployment-shift auditing.",
+  description = "Rajveer Singh Pall studies whether machine learning results mean what they claim: benchmark identification, scoring rules for LLM evaluation, fairness at the decision threshold, and external validation.",
 } = Astro.props;
 
 // Absolute URLs for crawlers/social; fall back to relative if `site` is unset.
@@ -35,7 +37,18 @@ const personLd = {
   name: "Rajveer Singh Pall",
   jobTitle: "AI Researcher",
   description:
-    "Researcher in trustworthy machine learning under real-world deployment.",
+    "Researcher in trustworthy machine learning: benchmark evaluation, fairness at the decision threshold, and external validation.",
+  affiliation: {
+    "@type": "CollegeOrUniversity",
+    name: "Gyan Ganga Institute of Technology and Sciences",
+  },
+  knowsAbout: [
+    "Machine learning evaluation",
+    "Partial identification",
+    "Algorithmic fairness",
+    "External validation",
+    "Distribution shift",
+  ],
   email: "mailto:rajveerpall04@gmail.com",
   sameAs: [
     "https://github.com/Rajveer-code",
@@ -54,13 +67,17 @@ const personLd = {
       document.documentElement.classList.add("js");
     </script>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="google-site-verification" content="rXaFWWr31Bx8XONqpWOKwkLsFHxPo53jyEosuBKAXqQ" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content="Rajveer Singh Pall" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#fbfaf7" />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="canonical" href={canonical} />
     {citationTitle && <meta name="citation_title" content={citationTitle} />}
     {citationAuthors && citationAuthors.map((a) => <meta name="citation_author" content={a} />)}
@@ -70,7 +87,7 @@ const personLd = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:site_name" content="Rajveer Singh Pall — AI Research" />
+    <meta property="og:site_name" content="Rajveer Singh Pall · AI Research" />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -80,6 +97,7 @@ const personLd = {
     <ClientRouter />
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <canvas class="site-field" id="site-field" aria-hidden="true" transition:persist
     ></canvas>
     <slot />

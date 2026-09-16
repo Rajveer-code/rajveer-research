@@ -30,6 +30,10 @@
   --verified: #2f6b4f;       /* 6.0:1 on paper */
   --verified-wash: #ebf2ee;
 
+  /* ---- Color: alert (reserved: failure marks inside discovery figures) ---- */
+  --alert: #b3421c;          /* 5.4:1 on paper */
+  --alert-wash: #f8ece6;
+
   /* ---- Typography: families (self-hosted) ---- */
   --font-serif: "Newsreader Variable", "Newsreader", Georgia, "Times New Roman", serif;
   --font-sans: "Instrument Sans Variable", "Instrument Sans", "Helvetica Neue", Arial, sans-serif;

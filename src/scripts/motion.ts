@@ -359,9 +359,11 @@ function navBehavior(): void {
 
 /** Same-page anchor clicks glide via Lenis instead of jumping. */
 function smoothAnchors(): void {
-  document.querySelectorAll<HTMLAnchorElement>('a[href*="#"]').forEach((a) => {
+  // SVG <a> elements match too; their .href is not a string, so read the attribute.
+  document.querySelectorAll<Element>('a[href*="#"]').forEach((a) => {
+    if (a.classList.contains("skip-link")) return; // native jump moves keyboard focus
     a.addEventListener("click", (e) => {
-      const url = new URL(a.href);
+      const url = new URL(a.getAttribute("href") ?? "", window.location.href);
       if (url.pathname !== window.location.pathname || !url.hash) return;
       const target = document.querySelector(url.hash);
       if (!target || !lenis) return;
