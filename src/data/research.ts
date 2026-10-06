@@ -118,7 +118,7 @@ export const DISCOVERY: Partial<Record<string, string>> = {
   "confidently-wrong":
     "Many cross-network detectors do not fall to chance. They pass through it and rank attacks below benign traffic.",
   "scorer-partial-identification":
-    "What is not known about the scorer, not sampling error, sets the width of a benchmark comparison.",
+    "Let the leaderboard change its verifier and 15.9% of the model pairs it orders strictly reverse.",
   "mortgage-disparities": "The disparity is concentrated inside institutions, and widens at their boundaries.",
   "who-bears-the-burden": "The average hides the distribution: the underwriting channel decides who bears the penalty.",
   "when-the-gate-stays-closed": "A well-calibrated model with no measurable skill. The correct decision is not to deploy.",
@@ -176,7 +176,7 @@ export const publications: Publication[] = [
     ],
     links: [{ label: "Leaderboard data", href: "https://huggingface.co/datasets/Rajveer-code/flipbudget-results" }],
     caveat:
-      "Each measured margin is applied as a single bound shared across every model on the board, an assumption the paper states and tests as far as the data allow.",
+      "Each measured margin is applied as a single bound shared across every model on the board, an assumption the paper states and tests as far as the data allow. This page describes the earlier version; a revised manuscript, “Which Leaderboard Orderings Survive a Human Reader?”, reanalyses 27 models and 351 orderings with a different method, and its numbers differ.",
     absent: "The paper and its code are withheld while the manuscript is revised for resubmission.",
   },
 
@@ -458,7 +458,7 @@ export const publications: Publication[] = [
     order: 7,
     title: "Confidently Wrong: Ranking Inversion in Cross-Network Denial-of-Service Detection",
     shortTitle: "Confidently Wrong",
-    authors: "Rajveer Singh Pall",
+    authors: "Rajveer Singh Pall, Sameer Yadav",
     status: "Manuscript",
     statusKind: "manuscript",
     year: "2026",
@@ -498,51 +498,60 @@ export const publications: Publication[] = [
     absent: "Code is not public yet.",
   },
 
-  // Source: flipbudget/manuscript/MANUSCRIPT_DRAFT.md abstract + FINAL_STATUS.md (2026-09-15). In preparation.
+  // Source: flipbudget/manuscript/tmlr/main.tex abstract and macros.tex, flipbudget/README.md (2026-10-04). Manuscript; journal resubmission in preparation.
   {
     slug: "scorer-partial-identification",
     order: 8,
-    title: "Scorer-Induced Partial Identification of Benchmark Comparisons: An Audit-Design Approach",
-    shortTitle: "Auditing the Scorer",
+    title: "Which Leaderboard Orderings Survive a Human Reader?",
+    shortTitle: "Which Orderings Survive?",
     authors: "Rajveer Singh Pall",
-    status: "In preparation",
-    statusKind: "preparation",
+    status: "Manuscript",
+    statusKind: "manuscript",
     year: "2026",
     themes: ["evaluation", "nlp-llm"],
     oneLiner:
-      "Once a scorer’s error rate is audited rather than assumed, audit uncertainty outweighs sampling uncertainty in all 120 well-defined comparisons.",
+      "A 400-item human audit certifies 174 of 351 pairwise orderings among 27 models under one stated assumption, and none without it.",
     plain:
-      "An automated verifier grades every free-text answer on a math benchmark, and it can disagree with a careful human reader. Using a real human audit of that verifier, this work derives the range of true accuracies consistent with a reported score. It shows that how little we know about the verifier’s own error matters more than the sampling error that leaderboards usually report.",
+      "A leaderboard score comes from two things: the model, and a verifier, the program that finds the answer in a response and decides whether it is right. Leaderboards name the model but not the verifier, and verifiers disagree. This work asks which rankings still hold when a person reads the responses instead.",
     flow: [
-      { label: "Audit the scorer", note: "400 items submitted, 350 usable across 27 models" },
-      { label: "Bound true accuracy", note: "classical misclassification bounds adapted to benchmarks" },
-      { label: "Compare widths", note: "identification width against sampling width, pair by pair" },
-      { label: "Design the next audit", note: "where extra human labels help most" },
+      { label: "Read every response three ways", note: "three verifiers, 35,748 published responses, 27 models" },
+      { label: "Audit a sample by hand", note: "400 items read by a human" },
+      { label: "Bound each pairwise gap", note: "one stated assumption, reported as a curve" },
+      { label: "Certify orderings", note: "all 351 pairs at once, exact in finite samples" },
     ],
     figures: [
       {
-        title: "Identification width ÷ sampling width",
-        max: 7,
-        note: "Across 120 well-defined comparisons among 17 qualifying models. Every ratio is above 1.",
+        title: "Orderings certified, out of 351",
+        max: 351,
+        note: "Simultaneous over all 351 pairs. The reference tolerance was set after the audit’s labels existed; the curve between the two ends is the result.",
         bars: [
-          { label: "Median ratio", value: 6.1, display: "6.10×", accent: true },
-          { label: "Self-consistency check", value: 5.74, display: "5.74×" },
-          { label: "Smallest ratio", value: 2.15, display: "2.15×" },
+          { label: "Exact homogeneity (ε = 0)", value: 208, display: "208" },
+          { label: "Reference tolerance (ε = 0.01)", value: 174, display: "174", accent: true },
+          { label: "Without the pooling assumption", value: 0, display: "0" },
+        ],
+      },
+      {
+        title: "Where the three verifiers disagree",
+        max: 1000,
+        note: "1,159 of 35,748 responses.",
+        bars: [
+          { label: "A no-credit verifier found no answer to read", value: 891, display: "891", accent: true },
+          { label: "Every verifier found an answer and they still disagree", value: 268, display: "268" },
         ],
       },
     ],
     problem:
-      "Given a benchmark’s observed accuracy and an audited estimate of its scorer’s false-credit and false-miss rates, what can still be concluded about a comparison between two models?",
+      "Scores on benchmarks graded from generated text come from a verifier, and leaderboards report the model but not the verifier. Which orderings in a published ranking survive when a human reader decides what each response says?",
     approach:
-      "Classical misclassification bounds are adapted to benchmark comparison and applied to MATH-Hard, using a human audit of the standard boxed-answer comparator (400 items submitted, 350 usable across 27 models). The work then formalises how further audit budget should be allocated and tests the textbook allocation rule on the real, sparse audit data.",
+      "On the archived MATH-Hard board of the Open LLM Leaderboard, three verifiers read all 35,748 published responses of 27 models. A human audit of 400 items bounds the accuracy gap between each pair of models under one stated assumption: where all three verifiers agree, the rate at which a reader overrules them differs across models by at most ε. Orderings are certified for all 351 pairs at once, exactly in finite samples, and the result is reported as a curve over ε rather than at one value.",
     findings:
-      "The median ratio of identification width to sampling width is 6.10×, dominant in all 120 comparable pairs; a self-consistency check gives 5.74×, and the smallest ratio is 2.15×. The harness’s two live scorers disagree on 3.63% of responses (95% CI 3.39% to 3.88%, n = 22,508). The textbook Neyman allocation of audit effort, in its plug-in form, is dominated by uniform allocation on this sparse real data.",
+      "The verifiers disagree on 1,159 responses, and on 891 of them a verifier that gave no credit had found no answer it could read. The audit certifies 174 of 351 orderings at ε = 0.01, 208 at ε = 0, and none without the assumption. When the leaderboard itself changed verifier in February 2025, 15.9% of the model pairs that both scores order strictly reversed (3,366 models, each compared on its own results file before and after, so on the same responses).",
     matters:
-      "Before arguing that one model beats another, a benchmark should measure its own scorer. The work documents a failure mode of standard audit design and tests a correction.",
+      "A published ranking should state the verifier that produced it and how many responses that verifier could not read.",
     results: [
-      { value: "6.10×", label: "median identification-to-sampling width ratio" },
-      { value: "120 / 120", label: "comparable pairs where audit uncertainty dominates" },
-      { value: "3.63%", label: "responses where two live scorers disagree" },
+      { value: "174 / 351", label: "orderings certified at the reference tolerance (ε = 0.01)" },
+      { value: "1,159", label: "of 35,748 responses where the three verifiers disagree" },
+      { value: "15.9%", label: "of strictly ordered model pairs reversed when the leaderboard changed verifier" },
     ],
     links: [
       { label: "Code", href: "https://github.com/Rajveer-code/flipbudget" },
@@ -550,7 +559,8 @@ export const publications: Publication[] = [
       { label: "Leaderboard", href: "https://huggingface.co/spaces/Rajveer-code/flipbudget-leaderboard" },
     ],
     caveat:
-      "One analysis waits on a pre-registered 458-row human audit of the harness’s second scorer; the manuscript marks every number that depends on it as pending instead of estimating it.",
+      "The reference tolerance ε = 0.01 is a judgement made after the audit’s labels existed, not a registered value, so the paper reports the whole curve. The audit covers 27 of the 3,751 models on the board.",
+    absent: "The manuscript is withheld while it is prepared for journal resubmission.",
   },
 
   // Source: application dossier §3 P2. Under review (Journal of Housing Economics); public SSRN version.
