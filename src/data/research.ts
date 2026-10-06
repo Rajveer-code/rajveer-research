@@ -126,15 +126,15 @@ export const DISCOVERY: Partial<Record<string, string>> = {
 
 export const publications: Publication[] = [
   // Source: knowledgeshift/paper/tmlr.tex abstract (2026-09-11); board data from the public
-  // flipbudget-results dataset (scripts/build-leaderboard.mjs). Under review, double-blind.
+  // flipbudget-results dataset (scripts/build-leaderboard.mjs). Desk-rejected at a journal 2026-09; manuscript.
   {
     slug: "benchmark-accuracy-not-identified",
     order: 1,
     title: "Benchmark Accuracy Is Not an Identified Quantity",
     shortTitle: "Benchmark Accuracy Is Not Identified",
     authors: "Rajveer Singh Pall",
-    status: "Under review",
-    statusKind: "review",
+    status: "Manuscript",
+    statusKind: "manuscript",
     year: "2026",
     themes: ["evaluation", "nlp-llm", "deployment"],
     oneLiner:
@@ -177,7 +177,7 @@ export const publications: Publication[] = [
     links: [{ label: "Leaderboard data", href: "https://huggingface.co/datasets/Rajveer-code/flipbudget-results" }],
     caveat:
       "Each measured margin is applied as a single bound shared across every model on the board, an assumption the paper states and tests as far as the data allow.",
-    absent: "The paper and its code are withheld while the manuscript is under double-blind review.",
+    absent: "The paper and its code are withheld while the manuscript is revised for resubmission.",
   },
 
   // Source: P06b main.tex abstract (submitted 2026-09-09) + Federated-Diabetes README. Under review, double-blind.
@@ -240,15 +240,15 @@ export const publications: Publication[] = [
       "The AUC gains are small in magnitude. An earlier version of this pipeline had implementation defects; the repository documents them and the findings they retired.",
   },
 
-  // Source: knowledgeshift/paper/main.tex abstract (2026-09-06). Under review, double-blind workshop.
+  // Source: knowledgeshift/paper/main.tex abstract (2026-09-06). Rejected at a workshop 2026-09; manuscript.
   {
     slug: "could-it-read-the-answer",
     order: 3,
     title: "Benchmarks Do Not Report Whether They Could Read the Answer",
     shortTitle: "Could It Read the Answer?",
     authors: "Rajveer Singh Pall",
-    status: "Under review",
-    statusKind: "review",
+    status: "Manuscript",
+    statusKind: "manuscript",
     year: "2026",
     themes: ["evaluation", "nlp-llm"],
     oneLiner:
@@ -286,18 +286,18 @@ export const publications: Publication[] = [
       { value: "97 / 99", label: "recovered answers confirmed by a judge blind to the gold answer" },
     ],
     links: [],
-    absent: "The paper and its code are withheld while the submission is under double-blind review.",
+    absent: "The paper and its code are withheld while the manuscript is revised.",
   },
 
-  // Source: IndiaFinBench/paper/tmlr/draft_01_abstract_only.tex (2026-09-03), built into tmlr_submission/main.pdf (2026-09-04).
+  // Source: IndiaFinBench/paper/tmlr/draft_01_abstract_only.tex (2026-09-03), built into tmlr_submission/main.pdf (2026-09-04). No record that it has been submitted; manuscript.
   {
     slug: "indiafinbench",
     order: 4,
     title: "Scoring-Rule Sensitivity in LLM Evaluation: Evidence from Indian Financial Regulatory Text",
     shortTitle: "IndiaFinBench",
     authors: "Rajveer Singh Pall",
-    status: "Under review",
-    statusKind: "review",
+    status: "Manuscript",
+    statusKind: "manuscript",
     year: "2026",
     themes: ["evaluation", "nlp-llm", "finance"],
     oneLiner:
@@ -919,7 +919,7 @@ export const openScience: {
 ];
 
 export const impact = [
-  { value: "12", label: "papers and manuscripts: 1 published, 5 under review" },
+  { value: "12", label: "papers and manuscripts: 1 published, 2 under review" },
   { value: "378", label: "leaderboard orderings audited for identification" },
   { value: "42M", label: "mortgage applications analysed" },
   { value: "1.28M", label: "records in external clinical validation" },
@@ -950,7 +950,7 @@ export const service = [{ role: "Reviewer", venue: "W-NUT 2026, the EMNLP 2026 w
 export const news: { date: string; text: string; href?: string }[] = [
   {
     date: "Sep 2026",
-    text: "Three papers entered review: benchmark identification, scoring-rule sensitivity on IndiaFinBench, and subgroup fairness reversal in federated screening.",
+    text: "Submitted the subgroup fairness reversal paper (federated diabetes screening) for peer review.",
   },
   {
     date: "Sep 2026",
