@@ -498,15 +498,15 @@ export const publications: Publication[] = [
     absent: "Code is not public yet.",
   },
 
-  // Source: flipbudget/manuscript/tmlr/main.tex abstract and macros.tex, flipbudget/README.md (2026-10-04). Manuscript; journal resubmission in preparation.
+  // Source: flipbudget/manuscript/tmlr/main.tex abstract and macros.tex, flipbudget/README.md (2026-10-04). Submitted to a journal 2026-10; under double-blind review.
   {
     slug: "scorer-partial-identification",
     order: 8,
     title: "Which Leaderboard Orderings Survive a Human Reader?",
     shortTitle: "Which Orderings Survive?",
     authors: "Rajveer Singh Pall",
-    status: "Manuscript",
-    statusKind: "manuscript",
+    status: "Under review",
+    statusKind: "review",
     year: "2026",
     themes: ["evaluation", "nlp-llm"],
     oneLiner:
@@ -560,7 +560,7 @@ export const publications: Publication[] = [
     ],
     caveat:
       "The reference tolerance ε = 0.01 is a judgement made after the audit’s labels existed, not a registered value, so the paper reports the whole curve. The audit covers 27 of the 3,751 models on the board.",
-    absent: "The manuscript is withheld while it is prepared for journal resubmission.",
+    absent: "The manuscript is withheld while it is under double-blind review.",
   },
 
   // Source: application dossier §3 P2. Under review (Journal of Housing Economics); public SSRN version.
@@ -929,7 +929,7 @@ export const openScience: {
 ];
 
 export const impact = [
-  { value: "12", label: "papers and manuscripts: 1 published, 2 under review" },
+  { value: "12", label: "papers and manuscripts: 1 published, 3 under review" },
   { value: "378", label: "leaderboard orderings audited for identification" },
   { value: "42M", label: "mortgage applications analysed" },
   { value: "1.28M", label: "records in external clinical validation" },

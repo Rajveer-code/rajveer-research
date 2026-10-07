@@ -2,7 +2,7 @@
 
 The research homepage of an AI researcher asking one question across machine
 learning evaluation: **do reported results mean what they claim?** Twelve papers
-and manuscripts (one published, two under review) are framed as one program,
+and manuscripts (one published, three under review) are framed as one program,
 with benchmark identification as the flagship result.
 
 Live: https://rajveer-research.vercel.app
